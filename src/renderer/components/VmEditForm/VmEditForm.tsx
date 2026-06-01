@@ -10,13 +10,22 @@ const AUTH_OPTIONS: SelectOption<AuthMethod>[] = [
   { value: 'key+password', label: 'Key + Password', description: 'Try key first, fall back to password' },
 ];
 
+const NEW_FOLDER_VALUE = '__new__';
+
 interface Props {
   initial: Vm | null;
   onClose: () => void;
 }
 
 export function VmEditForm({ initial, onClose }: Props) {
-  const { create, update } = useVmsStore();
+  const { create, update, folders, createFolder } = useVmsStore();
+  const defaultFolderId =
+    initial?.folderId ?? folders.find((f) => f.name === 'Default')?.id ?? folders[0]?.id ?? null;
+
+  const [folderId, setFolderId] = useState<number | null>(defaultFolderId);
+  const [creatingFolder, setCreatingFolder] = useState(false);
+  const [newFolderName, setNewFolderName] = useState('');
+
   const [label, setLabel] = useState(initial?.label ?? '');
   const [host, setHost] = useState(initial?.host ?? '');
   const [port, setPort] = useState(initial?.port ?? 22);
@@ -27,10 +36,35 @@ export function VmEditForm({ initial, onClose }: Props) {
   const [sudoPassword, setSudoPassword] = useState('');
   const [keyPassphrase, setKeyPassphrase] = useState('');
 
+  const workspaceOptions: SelectOption<string>[] = [
+    ...folders.map((f) => ({ value: String(f.id), label: f.name })),
+    { value: NEW_FOLDER_VALUE, label: '+ Create new workspace…' },
+  ];
+
+  function onWorkspaceChange(v: string) {
+    if (v === NEW_FOLDER_VALUE) {
+      setCreatingFolder(true);
+    } else {
+      setFolderId(Number(v));
+    }
+  }
+
+  async function commitNewFolder() {
+    const trimmed = newFolderName.trim();
+    if (!trimmed) {
+      setCreatingFolder(false);
+      return;
+    }
+    const created = await createFolder(trimmed);
+    setFolderId(created.id);
+    setNewFolderName('');
+    setCreatingFolder(false);
+  }
+
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     const input: VmInput = {
-      folderId: initial?.folderId ?? null,
+      folderId,
       label, host, port, username, authMethod,
       keyPath: authMethod === 'password' ? null : (keyPath || null),
     };
@@ -48,6 +82,27 @@ export function VmEditForm({ initial, onClose }: Props) {
     <div className="modal-backdrop" onClick={onClose}>
       <form className="vm-form" onClick={(e) => e.stopPropagation()} onSubmit={submit}>
         <h2>{initial ? 'Edit VM' : 'New VM'}</h2>
+        <label>
+          Workspace
+          <Select<string>
+            value={folderId !== null ? String(folderId) : ''}
+            options={workspaceOptions}
+            onChange={onWorkspaceChange}
+          />
+        </label>
+        {creatingFolder && (
+          <input
+            placeholder="New workspace name"
+            value={newFolderName}
+            autoFocus
+            onChange={(e) => setNewFolderName(e.target.value)}
+            onBlur={commitNewFolder}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') { e.preventDefault(); void commitNewFolder(); }
+              else if (e.key === 'Escape') { setCreatingFolder(false); setNewFolderName(''); }
+            }}
+          />
+        )}
         <label>Label <input value={label} onChange={(e) => setLabel(e.target.value)} required /></label>
         <label>Host  <input value={host} onChange={(e) => setHost(e.target.value)} required /></label>
         <label>Port  <input type="number" value={port} onChange={(e) => setPort(Number(e.target.value))} /></label>
