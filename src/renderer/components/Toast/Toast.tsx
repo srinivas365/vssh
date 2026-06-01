@@ -26,9 +26,10 @@ export function ToastOverlay() {
   return (
     <div className="toast">
       <div className="toast-title">
-        🔑 {toast.hasSecret ? `${label[toast.promptType]} copied` : `No saved ${label[toast.promptType].toLowerCase()} for this VM`}
+        <span className="toast-icon">🔑</span>
+        {toast.hasSecret ? `${label[toast.promptType]} copied` : `No saved ${label[toast.promptType].toLowerCase()} for this host`}
       </div>
-      {toast.hasSecret && <div className="toast-sub">Press ⌘V to paste</div>}
+      {toast.hasSecret && <div className="toast-sub">Press ⌘V to paste into the terminal</div>}
       <div className="toast-actions">
         <button onClick={() => dismissToast(toast.sessionId)}>Dismiss</button>
       </div>

@@ -56,8 +56,8 @@ test('create vault, save VM, connect, see password-detected toast', async () => 
   await pwInputs.nth(1).fill('a-very-long-master-pw');
   await page.getByRole('button', { name: /create vault/i }).click();
 
-  // 2. Main screen — open the "+ New VM" modal.
-  const newVmBtn = page.getByRole('button', { name: /\+ New VM/i });
+  // 2. Main screen — open the "+ New host" modal.
+  const newVmBtn = page.getByRole('button', { name: /\+ New host/i }).first();
   await expect(newVmBtn).toBeVisible({ timeout: 30_000 });
   await newVmBtn.click();
 

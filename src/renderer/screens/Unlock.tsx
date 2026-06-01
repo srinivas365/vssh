@@ -36,38 +36,120 @@ export function Unlock() {
   }
 
   return (
-    <div style={{ display: 'grid', placeItems: 'center', height: '100vh', fontFamily: 'system-ui', background: '#f5f5f5', color: '#1a1a1a' }}>
-      <form onSubmit={submit} style={{ width: 360, display: 'flex', flexDirection: 'column', gap: 12, background: '#ffffff', padding: 24, borderRadius: 8, border: '1px solid #e5e5e5', boxShadow: '0 4px 16px rgba(0,0,0,0.06)' }}>
-        <h1 style={{ margin: 0, fontSize: 20 }}>{isInit ? 'Create master password' : 'Unlock'}</h1>
-        {isInit && (
-          <p style={{ margin: 0, fontSize: 13, color: '#6b7280' }}>
-            This password encrypts your saved VM credentials. There is no recovery — if you lose it, the vault is gone.
-          </p>
-        )}
+    <div className="unlock-shell">
+      <form onSubmit={submit} className="unlock-card">
+        <div className="unlock-brand">
+          <div className="unlock-brand-mark">▸</div>
+          <div className="unlock-brand-name">vssh</div>
+        </div>
+        <h1 className="unlock-title">{isInit ? 'Create master password' : 'Unlock vault'}</h1>
+        <p className="unlock-sub">
+          {isInit
+            ? 'This password encrypts your saved host credentials. There is no recovery — if you lose it, the vault is gone.'
+            : 'Enter your master password to access saved hosts.'}
+        </p>
         <input
           type="password"
           value={pw}
           autoFocus
-          placeholder="master password"
+          placeholder="Master password"
           onChange={(e) => setPw(e.target.value)}
           disabled={busy}
-          style={{ padding: 8, fontSize: 14, background: '#ffffff', color: '#1a1a1a', border: '1px solid #d4d4d4', borderRadius: 4 }}
+          className="unlock-input"
         />
         {isInit && (
           <input
             type="password"
             value={pw2}
-            placeholder="confirm"
+            placeholder="Confirm password"
             onChange={(e) => setPw2(e.target.value)}
             disabled={busy}
-            style={{ padding: 8, fontSize: 14, background: '#ffffff', color: '#1a1a1a', border: '1px solid #d4d4d4', borderRadius: 4 }}
+            className="unlock-input"
           />
         )}
-        {err && <div style={{ color: '#dc2626', fontSize: 13 }}>{err}</div>}
-        <button type="submit" disabled={busy || !pw} style={{ padding: 8, background: '#3b82f6', color: '#ffffff', border: 'none', borderRadius: 4, cursor: busy || !pw ? 'not-allowed' : 'pointer', opacity: busy || !pw ? 0.5 : 1 }}>
+        {err && <div className="unlock-err">{err}</div>}
+        <button type="submit" disabled={busy || !pw} className="unlock-btn">
           {isInit ? 'Create vault' : 'Unlock'}
         </button>
       </form>
+      <style>{`
+        .unlock-shell {
+          display: grid;
+          place-items: center;
+          height: 100vh;
+          background: linear-gradient(180deg, #f1f5f9 0%, #f8fafc 100%);
+          font-family: inherit;
+        }
+        .unlock-card {
+          width: 380px;
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+          background: #ffffff;
+          padding: 28px;
+          border-radius: 14px;
+          border: 1px solid var(--border);
+          box-shadow: 0 8px 32px rgba(15, 23, 42, 0.08);
+        }
+        .unlock-brand {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          margin-bottom: 8px;
+        }
+        .unlock-brand-mark {
+          width: 32px;
+          height: 32px;
+          background: var(--accent);
+          color: #fff;
+          border-radius: 8px;
+          display: grid;
+          place-items: center;
+          font-weight: 700;
+          font-size: 16px;
+        }
+        .unlock-brand-name { font-weight: 700; font-size: 18px; }
+        .unlock-title { margin: 0; font-size: 22px; font-weight: 600; }
+        .unlock-sub { margin: 0; color: var(--text-muted); font-size: 13px; line-height: 1.5; }
+        .unlock-input {
+          padding: 10px 12px;
+          font-size: 14px;
+          background: #ffffff;
+          color: var(--text);
+          border: 1px solid var(--border-strong);
+          border-radius: 6px;
+          font-family: inherit;
+          transition: border-color 0.1s, box-shadow 0.1s;
+        }
+        .unlock-input:focus {
+          outline: none;
+          border-color: var(--accent);
+          box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+        }
+        .unlock-err {
+          color: var(--danger);
+          font-size: 12px;
+          background: #fef2f2;
+          border: 1px solid #fecaca;
+          padding: 8px 10px;
+          border-radius: 6px;
+        }
+        .unlock-btn {
+          padding: 10px;
+          background: var(--accent);
+          color: #ffffff;
+          border: none;
+          border-radius: 6px;
+          font-size: 14px;
+          font-weight: 600;
+          cursor: pointer;
+          font-family: inherit;
+          margin-top: 4px;
+          transition: background 0.1s;
+        }
+        .unlock-btn:hover:not(:disabled) { background: var(--accent-hover); }
+        .unlock-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+      `}</style>
     </div>
   );
 }

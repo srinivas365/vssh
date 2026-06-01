@@ -69,5 +69,16 @@ export function Terminal({ sessionId, active }: Props) {
     }
   }, [active]);
 
-  return <div ref={ref} style={{ flex: 1, display: active ? 'block' : 'none' }} />;
+  return (
+    <div
+      ref={ref}
+      style={{
+        position: 'absolute',
+        inset: 0,
+        padding: 8,
+        background: '#ffffff',
+        display: active ? 'block' : 'none',
+      }}
+    />
+  );
 }

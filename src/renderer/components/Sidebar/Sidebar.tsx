@@ -41,44 +41,81 @@ export function Sidebar({ onNewVm, onEditVm }: Props) {
     addTab({ sessionId, vmId: vm.id, label: vm.label, state: 'connecting' });
   }
 
+  const uncategorized = grouped.get(null) ?? [];
+  const hasAny = vms.length > 0;
+
   return (
     <aside className="sidebar">
-      <input
-        className="sidebar-search"
-        placeholder="Search…"
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-      />
-      {folders.map((f) => (
-        <div key={f.id} className="sidebar-folder">
-          <div className="sidebar-folder-name">▼ {f.name}</div>
-          {(grouped.get(f.id) ?? []).map((vm) => (
-            <VmRow key={vm.id} vm={vm} onConnect={() => connect(vm)} onEdit={() => onEditVm(vm)} onDelete={() => remove(vm.id)} />
-          ))}
-        </div>
-      ))}
-      {(grouped.get(null) ?? []).length > 0 && (
-        <div className="sidebar-folder">
-          <div className="sidebar-folder-name">▼ Uncategorized</div>
-          {(grouped.get(null) ?? []).map((vm) => (
-            <VmRow key={vm.id} vm={vm} onConnect={() => connect(vm)} onEdit={() => onEditVm(vm)} onDelete={() => remove(vm.id)} />
-          ))}
-        </div>
-      )}
-      <button className="sidebar-new" onClick={onNewVm}>+ New VM</button>
+      <div className="sidebar-section-label">Hosts</div>
+      <div className="sidebar-search-wrap">
+        <span className="sidebar-search-icon">⌕</span>
+        <input
+          className="sidebar-search"
+          placeholder="Search hosts…"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+        />
+      </div>
+
+      <div className="sidebar-list">
+        {folders.map((f) => {
+          const items = grouped.get(f.id) ?? [];
+          if (items.length === 0) return null;
+          return (
+            <div key={f.id} className="sidebar-folder">
+              <div className="sidebar-folder-name">
+                <span className="sidebar-folder-chev">▾</span>
+                {f.name}
+                <span className="sidebar-folder-count">{items.length}</span>
+              </div>
+              {items.map((vm) => (
+                <VmRow key={vm.id} vm={vm} onConnect={() => connect(vm)} onEdit={() => onEditVm(vm)} onDelete={() => remove(vm.id)} />
+              ))}
+            </div>
+          );
+        })}
+        {uncategorized.length > 0 && (
+          <div className="sidebar-folder">
+            <div className="sidebar-folder-name">
+              <span className="sidebar-folder-chev">▾</span>
+              All hosts
+              <span className="sidebar-folder-count">{uncategorized.length}</span>
+            </div>
+            {uncategorized.map((vm) => (
+              <VmRow key={vm.id} vm={vm} onConnect={() => connect(vm)} onEdit={() => onEditVm(vm)} onDelete={() => remove(vm.id)} />
+            ))}
+          </div>
+        )}
+        {!hasAny && (
+          <div className="sidebar-empty">
+            <p>No saved hosts yet.</p>
+            <p>Add one to get started.</p>
+          </div>
+        )}
+      </div>
+
+      <button className="sidebar-new" onClick={onNewVm}>
+        <span className="sidebar-new-plus">+</span> New host
+      </button>
     </aside>
   );
 }
 
 function VmRow({ vm, onConnect, onEdit, onDelete }: { vm: Vm; onConnect: () => void; onEdit: () => void; onDelete: () => void }) {
   return (
-    <div className="vm-row" onDoubleClick={onConnect}>
-      <span className="vm-label">{vm.label}</span>
-      <span className="vm-actions">
+    <div className="vm-row" onDoubleClick={onConnect} title={`${vm.username}@${vm.host}:${vm.port}`}>
+      <div className="vm-row-main">
+        <span className="vm-row-icon">⊟</span>
+        <div className="vm-row-text">
+          <div className="vm-row-label">{vm.label}</div>
+          <div className="vm-row-host">{vm.username}@{vm.host}</div>
+        </div>
+      </div>
+      <div className="vm-actions">
         <button onClick={onConnect} title="Connect">▶</button>
         <button onClick={onEdit} title="Edit">✎</button>
         <button onClick={onDelete} title="Delete">✕</button>
-      </span>
+      </div>
     </div>
   );
 }

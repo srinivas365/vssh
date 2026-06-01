@@ -1,8 +1,63 @@
-.qc-backdrop { position: fixed; inset: 0; background: rgba(15,23,42,0.4); display: grid; place-items: start center; padding-top: 80px; z-index: 150; }
-.qc-panel { background: #ffffff; color: #1a1a1a; padding: 12px; border-radius: 8px; width: 480px; font-family: system-ui; box-shadow: 0 12px 32px rgba(0,0,0,0.18); border: 1px solid #e5e5e5; }
-.qc-panel input { width: 100%; padding: 8px; box-sizing: border-box; background: #ffffff; color: #1a1a1a; border: 1px solid #d4d4d4; border-radius: 4px; font-size: 14px; }
-.qc-panel input:focus { outline: none; border-color: #3b82f6; }
-.qc-panel ul { list-style: none; padding: 0; margin: 8px 0 0 0; }
-.qc-panel li { padding: 6px 8px; border-radius: 4px; cursor: pointer; }
-.qc-panel li.highlight, .qc-panel li:hover { background: #eef2ff; }
-.qc-host { color: #6b7280; font-size: 12px; margin-left: 8px; }
+.qc-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.4);
+  display: grid;
+  place-items: start center;
+  padding-top: 100px;
+  z-index: 150;
+  animation: backdrop-in 0.12s ease-out;
+}
+
+.qc-panel {
+  background: var(--bg-panel);
+  color: var(--text);
+  padding: 8px;
+  border-radius: var(--radius-lg);
+  width: 520px;
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.qc-panel input {
+  width: 100%;
+  padding: 12px 14px;
+  background: transparent;
+  color: var(--text);
+  border: none;
+  font-size: 15px;
+  outline: none;
+  font-family: inherit;
+}
+.qc-panel input::placeholder { color: var(--text-faint); }
+
+.qc-panel ul {
+  list-style: none;
+  padding: 4px 0 0 0;
+  margin: 4px 0 0 0;
+  border-top: 1px solid var(--border);
+  max-height: 360px;
+  overflow-y: auto;
+}
+.qc-panel li {
+  padding: 8px 12px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.qc-panel li.highlight,
+.qc-panel li:hover {
+  background: var(--bg-hover);
+}
+.qc-panel li.highlight { color: var(--accent); }
+
+.qc-host {
+  color: var(--text-faint);
+  font-size: 12px;
+  margin-left: auto;
+  font-family: ui-monospace, SFMono-Regular, monospace;
+}

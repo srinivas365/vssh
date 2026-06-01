@@ -11,7 +11,12 @@ export function TabBar() {
   }
 
   const stateColor = (s: string) =>
-    s === 'connected' ? '#5cb85c' : s === 'connecting' ? '#f0ad4e' : s === 'error' || s === 'closed' ? '#d9534f' : '#888';
+    s === 'connected' ? 'var(--success)' :
+    s === 'connecting' ? 'var(--warn)' :
+    s === 'error' || s === 'closed' ? 'var(--danger)' :
+    'var(--text-faint)';
+
+  if (tabs.length === 0) return null;
 
   return (
     <div className="tab-bar">

@@ -1,5 +1,5 @@
-appId: dev.local.termius-alt
-productName: Termius-Alt
+appId: dev.local.vssh
+productName: vssh
 directories:
   output: release
 files:
