@@ -34,8 +34,7 @@
   gap: 4px;
   color: var(--text-muted);
 }
-.vm-form input,
-.vm-form select {
+.vm-form input {
   padding: 8px 10px;
   background: var(--bg-panel);
   border: 1px solid var(--border-strong);
@@ -45,8 +44,7 @@
   font-family: inherit;
   transition: border-color 0.1s, box-shadow 0.1s;
 }
-.vm-form input:focus,
-.vm-form select:focus {
+.vm-form input:focus {
   outline: none;
   border-color: var(--accent);
   box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);

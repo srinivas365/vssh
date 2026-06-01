@@ -1,7 +1,14 @@
 import React, { useState } from 'react';
 import { Vm, VmInput, VaultEntry, AuthMethod } from '@shared/types';
 import { useVmsStore } from '../../state/vms-store';
+import { Select, SelectOption } from '../Select/Select';
 import './VmEditForm.css';
+
+const AUTH_OPTIONS: SelectOption<AuthMethod>[] = [
+  { value: 'password', label: 'Password', description: 'Login with a saved password' },
+  { value: 'key', label: 'Key', description: 'SSH key, optional passphrase' },
+  { value: 'key+password', label: 'Key + Password', description: 'Try key first, fall back to password' },
+];
 
 interface Props {
   initial: Vm | null;
@@ -45,12 +52,13 @@ export function VmEditForm({ initial, onClose }: Props) {
         <label>Host  <input value={host} onChange={(e) => setHost(e.target.value)} required /></label>
         <label>Port  <input type="number" value={port} onChange={(e) => setPort(Number(e.target.value))} /></label>
         <label>User  <input value={username} onChange={(e) => setUsername(e.target.value)} required /></label>
-        <label>Auth
-          <select value={authMethod} onChange={(e) => setAuthMethod(e.target.value as AuthMethod)}>
-            <option value="password">Password</option>
-            <option value="key">Key</option>
-            <option value="key+password">Key + Password</option>
-          </select>
+        <label>
+          Auth
+          <Select<AuthMethod>
+            value={authMethod}
+            options={AUTH_OPTIONS}
+            onChange={setAuthMethod}
+          />
         </label>
         {authMethod !== 'password' && (
           <>

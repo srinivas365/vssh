@@ -1,0 +1,88 @@
+.rselect {
+  position: relative;
+  font-family: inherit;
+}
+
+.rselect-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 8px 10px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-size: 13px;
+  font-family: inherit;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.1s, box-shadow 0.1s;
+}
+.rselect-trigger:hover { border-color: var(--accent); }
+.rselect-trigger:focus,
+.rselect-open .rselect-trigger {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+}
+
+.rselect-disabled .rselect-trigger {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.rselect-value { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rselect-placeholder { color: var(--text-faint); }
+
+.rselect-chev {
+  color: var(--text-muted);
+  font-size: 11px;
+  margin-left: 8px;
+  transition: transform 0.12s;
+}
+.rselect-open .rselect-chev { transform: rotate(180deg); color: var(--accent); }
+
+.rselect-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  list-style: none;
+  margin: 0;
+  padding: 4px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  max-height: 260px;
+  overflow-y: auto;
+  z-index: 300;
+  animation: rselect-pop 0.1s ease-out;
+}
+
+@keyframes rselect-pop {
+  from { opacity: 0; transform: translateY(-2px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.rselect-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 7px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--text);
+}
+.rselect-option-hl { background: var(--bg-hover); }
+.rselect-option-active { color: var(--accent); font-weight: 500; }
+.rselect-option-active.rselect-option-hl { background: var(--accent-soft); }
+
+.rselect-option-main { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
+.rselect-option-label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rselect-option-desc { font-size: 11px; color: var(--text-muted); font-weight: 400; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.rselect-option-check { color: var(--accent); font-size: 13px; flex-shrink: 0; }
