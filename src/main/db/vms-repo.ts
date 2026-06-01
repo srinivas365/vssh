@@ -108,6 +108,16 @@ export class VmsRepo {
     return { id: Number(info.lastInsertRowid), ...f };
   }
 
+  renameFolder(id: number, name: string): void {
+    this.db.prepare('UPDATE folders SET name = ? WHERE id = ?').run(name, id);
+  }
+
+  reassignVmsFromFolder(fromId: number, toId: number): void {
+    this.db
+      .prepare('UPDATE vms SET folder_id = ? WHERE folder_id = ?')
+      .run(toId, fromId);
+  }
+
   listFolders(): Folder[] {
     const rows = this.db
       .prepare('SELECT * FROM folders ORDER BY sort_order ASC, name ASC')

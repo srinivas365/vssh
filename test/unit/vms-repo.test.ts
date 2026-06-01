@@ -58,4 +58,24 @@ describe('VmsRepo', () => {
     repo.setAutoCopyDisabled(vm.id, true);
     expect(repo.getVm(vm.id)?.autoCopyDisabled).toBe(true);
   });
+
+  it('renames a folder', () => {
+    const f = repo.createFolder({ name: 'old-name', parentId: null, sortOrder: 0 });
+    repo.renameFolder(f.id, 'new-name');
+    expect(repo.listFolders().find((x) => x.id === f.id)?.name).toBe('new-name');
+  });
+
+  it('reassigns vms from one folder to another', () => {
+    const from = repo.createFolder({ name: 'from', parentId: null, sortOrder: 0 });
+    const to   = repo.createFolder({ name: 'to',   parentId: null, sortOrder: 0 });
+    const a = repo.createVm({ folderId: from.id, label: 'a', host: 'h', port: 22, username: 'u', authMethod: 'password', keyPath: null });
+    const b = repo.createVm({ folderId: from.id, label: 'b', host: 'h', port: 22, username: 'u', authMethod: 'password', keyPath: null });
+    const c = repo.createVm({ folderId: to.id,   label: 'c', host: 'h', port: 22, username: 'u', authMethod: 'password', keyPath: null });
+
+    repo.reassignVmsFromFolder(from.id, to.id);
+
+    expect(repo.getVm(a.id)?.folderId).toBe(to.id);
+    expect(repo.getVm(b.id)?.folderId).toBe(to.id);
+    expect(repo.getVm(c.id)?.folderId).toBe(to.id);
+  });
 });
