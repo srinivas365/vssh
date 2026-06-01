@@ -2,6 +2,7 @@ import { app, BrowserWindow, clipboard, powerMonitor, Menu, globalShortcut } fro
 import path from 'node:path';
 import Database from 'better-sqlite3';
 import { migrate } from './db/migrations';
+import { ensureDefaultWorkspace } from './startup-hygiene';
 import { VmsRepo } from './db/vms-repo';
 import { Vault } from './vault/vault';
 import { SessionManager } from './ssh/session-manager';
@@ -33,6 +34,7 @@ app.whenReady().then(() => {
   const db = new Database(path.join(userData, 'vms.db'));
   migrate(db);
   const repo = new VmsRepo(db);
+  ensureDefaultWorkspace(db, repo);
   const vault = new Vault(path.join(userData, 'vault.enc'));
   const sessions = new SessionManager();
   const clip = new ClipboardService({
