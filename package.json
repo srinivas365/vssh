@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "main": "dist/main/index.js",
   "scripts": {
-    "dev": "concurrently -k \"vite\" \"wait-on tcp:5173 && tsc -p tsconfig.main.json -w\" \"wait-on dist/main/index.js && electron .\"",
+    "dev": "concurrently -k \"vite\" \"tsc -p tsconfig.main.json -w\" \"tsc -p tsconfig.preload.json -w\" \"wait-on tcp:5173 dist/main/index.js dist/preload/preload.js && electron .\"",
     "build:main": "tsc -p tsconfig.main.json && tsc -p tsconfig.preload.json",
     "build:renderer": "vite build",
     "build": "npm run build:main && npm run build:renderer",
@@ -11,7 +11,7 @@
     "test:watch": "vitest",
     "e2e": "playwright test",
     "dist": "npm run build && electron-builder",
-    "typecheck": "tsc -p tsconfig.main.json --noEmit && tsc -p tsconfig.renderer.json --noEmit"
+    "typecheck": "tsc -p tsconfig.main.json --noEmit && tsc -p tsconfig.preload.json --noEmit && tsc -p tsconfig.renderer.json --noEmit"
   },
   "dependencies": {
     "argon2": "^0.31.2",
