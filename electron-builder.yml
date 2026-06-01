@@ -1,0 +1,10 @@
+appId: dev.local.termius-alt
+productName: Termius-Alt
+directories:
+  output: release
+files:
+  - dist/**/*
+  - package.json
+mac:
+  category: public.app-category.developer-tools
+  target: dmg

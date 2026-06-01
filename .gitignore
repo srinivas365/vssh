@@ -1,0 +1,8 @@
+node_modules/
+dist/
+out/
+release/
+.vite/
+*.log
+.DS_Store
+test/e2e/.tmp/
