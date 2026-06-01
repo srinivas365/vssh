@@ -5,20 +5,39 @@ import { Terminal } from '../components/Terminal/Terminal';
 import { ToastOverlay } from '../components/Toast/Toast';
 import { VmEditForm } from '../components/VmEditForm/VmEditForm';
 import { QuickConnect } from '../components/QuickConnect/QuickConnect';
+import { HostsPage } from './HostsPage';
 import { useSessionsStore } from '../state/sessions-store';
 import { useVaultStore } from '../state/vault-store';
 import { Vm } from '@shared/types';
 
+type View = 'hosts' | 'terminal';
+
 export function Main() {
-  const { tabs, activeTabId, updateState, pushToast, removeTab } = useSessionsStore();
+  const { tabs, activeTabId, updateState, pushToast, removeTab, addTab } = useSessionsStore();
   const lock = useVaultStore((s) => s.lock);
   const [editing, setEditing] = useState<Vm | null | undefined>(undefined);
   const [quickOpen, setQuickOpen] = useState(false);
+  const [view, setView] = useState<View>('hosts');
 
   useEffect(() => {
     window.api.session.onState((s) => updateState(s));
     window.api.session.onToast((t) => pushToast(t));
   }, [updateState, pushToast]);
+
+  // Auto-switch to terminal view when a new session is started, and back to
+  // hosts when the last terminal closes.
+  useEffect(() => {
+    if (tabs.length === 0 && view === 'terminal') setView('hosts');
+  }, [tabs.length, view]);
+
+  // Subscribe to new-tab events from anywhere (sidebar, quick-connect, hosts page).
+  useEffect(() => {
+    const prev = addTab;
+    // We can't intercept; instead, watch activeTabId — when it changes to a new value, jump to terminal view.
+  }, [addTab]);
+  useEffect(() => {
+    if (activeTabId) setView('terminal');
+  }, [activeTabId]);
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -34,10 +53,12 @@ export function Main() {
         e.preventDefault();
         if (activeTabId) void window.api.session.pastePassword(activeTabId, 'login');
       }
+      else if (e.key === '1' && !e.shiftKey) { e.preventDefault(); setView('hosts'); }
+      else if (e.key === '2' && !e.shiftKey && tabs.length > 0) { e.preventDefault(); setView('terminal'); }
     }
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [lock, activeTabId, removeTab]);
+  }, [lock, activeTabId, removeTab, tabs.length]);
 
   const activeTab = tabs.find((t) => t.sessionId === activeTabId);
 
@@ -48,8 +69,23 @@ export function Main() {
           <span className="app-brand-mark">▸</span>
           <span className="app-brand-name">vssh</span>
         </div>
+        <nav className="app-nav">
+          <button
+            className={`nav-btn ${view === 'hosts' ? 'nav-btn-active' : ''}`}
+            onClick={() => setView('hosts')}
+            title="Hosts (⌘1)">
+            Hosts
+          </button>
+          <button
+            className={`nav-btn ${view === 'terminal' ? 'nav-btn-active' : ''}`}
+            onClick={() => setView('terminal')}
+            disabled={tabs.length === 0}
+            title="Terminal (⌘2)">
+            Terminal {tabs.length > 0 && <span className="nav-btn-badge">{tabs.length}</span>}
+          </button>
+        </nav>
         <div className="app-header-meta">
-          {activeTab ? (
+          {view === 'terminal' && activeTab ? (
             <span className="app-header-status">
               <span className={`app-header-dot dot-${activeTab.state}`} />
               {activeTab.label} · {activeTab.state}
@@ -66,10 +102,10 @@ export function Main() {
       <div className="app-body">
         <Sidebar onNewVm={() => setEditing(null)} onEditVm={(vm) => setEditing(vm)} />
         <main className="app-main">
-          <TabBar />
+          {view === 'terminal' && <TabBar />}
           <div className="terminal-stack">
-            {tabs.length === 0 ? (
-              <EmptyState onQuickConnect={() => setQuickOpen(true)} onNewVm={() => setEditing(null)} />
+            {view === 'hosts' ? (
+              <HostsPage onNewVm={() => setEditing(null)} onEditVm={(vm) => setEditing(vm)} />
             ) : (
               tabs.map((t) => (
                 <Terminal key={t.sessionId} sessionId={t.sessionId} active={t.sessionId === activeTabId} />
@@ -82,22 +118,6 @@ export function Main() {
       {editing !== undefined && <VmEditForm initial={editing} onClose={() => setEditing(undefined)} />}
       {quickOpen && <QuickConnect onClose={() => setQuickOpen(false)} />}
       <ToastOverlay />
-    </div>
-  );
-}
-
-function EmptyState({ onQuickConnect, onNewVm }: { onQuickConnect: () => void; onNewVm: () => void }) {
-  return (
-    <div className="empty-state">
-      <div className="empty-state-mark">▸</div>
-      <h1 className="empty-state-title">No active session</h1>
-      <p className="empty-state-sub">
-        Open a saved host from the sidebar, jump to one with <kbd>⌘K</kbd>, or add a new one.
-      </p>
-      <div className="empty-state-actions">
-        <button className="btn btn-primary" onClick={onQuickConnect}>Quick connect</button>
-        <button className="btn" onClick={onNewVm}>+ New host</button>
-      </div>
     </div>
   );
 }

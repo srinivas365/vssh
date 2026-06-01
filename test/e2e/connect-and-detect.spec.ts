@@ -83,10 +83,10 @@ test('create vault, save VM, connect, see password-detected toast', async () => 
 
   await form.getByRole('button', { name: /^Create$/ }).click();
 
-  // 4. VM row appears in the sidebar; click the connect button (▶).
-  const vmRow = page.locator('.vm-row', { hasText: 'e2e-vm' });
-  await expect(vmRow).toBeVisible({ timeout: 10_000 });
-  await vmRow.getByRole('button', { name: '▶' }).click();
+  // 4. A host card appears on the Hosts page; click Connect.
+  const hostCard = page.locator('.host-card', { hasText: 'e2e-vm' });
+  await expect(hostCard).toBeVisible({ timeout: 10_000 });
+  await hostCard.getByRole('button', { name: /^Connect$/ }).click();
 
   // 5. The SSH session starts. linuxserver/openssh-server will prompt for password.
   // The PromptDetector should fire 'login' → main sends SESSION_TOAST → renderer shows the toast.
