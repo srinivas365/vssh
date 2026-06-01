@@ -8,13 +8,20 @@ interface VmsStore {
   create: (input: VmInput, secret: VaultEntry) => Promise<Vm>;
   update: (id: number, input: VmInput, secret: VaultEntry) => Promise<void>;
   remove: (id: number) => Promise<void>;
+  createFolder: (name: string) => Promise<Folder>;
+  renameFolder: (id: number, name: string) => Promise<void>;
+  deleteFolder: (id: number) => Promise<void>;
+  moveVmToFolder: (vmId: number, folderId: number) => Promise<void>;
 }
 
 export const useVmsStore = create<VmsStore>((set, get) => ({
   vms: [],
   folders: [],
   refresh: async () => {
-    const [vms, folders] = await Promise.all([window.api.vms.list(), window.api.folders.list()]);
+    const [vms, folders] = await Promise.all([
+      window.api.vms.list(),
+      window.api.folders.list(),
+    ]);
     set({ vms, folders });
   },
   create: async (input, secret) => {
@@ -28,6 +35,27 @@ export const useVmsStore = create<VmsStore>((set, get) => ({
   },
   remove: async (id) => {
     await window.api.vms.delete(id);
+    await get().refresh();
+  },
+  createFolder: async (name) => {
+    const folder = await window.api.folders.create({
+      name,
+      parentId: null,
+      sortOrder: 0,
+    });
+    await get().refresh();
+    return folder;
+  },
+  renameFolder: async (id, name) => {
+    await window.api.folders.rename(id, name);
+    await get().refresh();
+  },
+  deleteFolder: async (id) => {
+    await window.api.folders.delete(id);
+    await get().refresh();
+  },
+  moveVmToFolder: async (vmId, folderId) => {
+    await window.api.vms.moveToFolder(vmId, folderId);
     await get().refresh();
   },
 }));
