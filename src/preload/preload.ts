@@ -18,11 +18,14 @@ const api = {
     update: (id: number, input: VmInput, secret: VaultEntry) => ipcRenderer.invoke(IPC.VMS_UPDATE, id, input, secret),
     delete: (id: number) => ipcRenderer.invoke(IPC.VMS_DELETE, id),
     touchUsed: (id: number) => ipcRenderer.invoke(IPC.VMS_TOUCH_USED, id),
+    moveToFolder: (vmId: number, folderId: number) =>
+      ipcRenderer.invoke(IPC.VMS_MOVE_TO_FOLDER, vmId, folderId),
   },
   folders: {
     list: (): Promise<Folder[]> => ipcRenderer.invoke(IPC.FOLDERS_LIST),
     create: (f: Omit<Folder, 'id'>) => ipcRenderer.invoke(IPC.FOLDERS_CREATE, f),
     delete: (id: number) => ipcRenderer.invoke(IPC.FOLDERS_DELETE, id),
+    rename: (id: number, name: string) => ipcRenderer.invoke(IPC.FOLDERS_RENAME, id, name),
   },
   session: {
     start: (vmId: number, cols: number, rows: number): Promise<string> =>
