@@ -37,7 +37,7 @@ app.whenReady().then(() => {
   const sessions = new SessionManager();
   const clip = new ClipboardService({
     writeText: (t) => clipboard.writeText(t),
-    readText: () => clipboard.readText(),
+    clear: () => clipboard.clear(),
   });
 
   registerIpc({ db, repo, vault, sessions, clip, mainWindow: () => mainWindow });
