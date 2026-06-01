@@ -11,11 +11,7 @@ mac:
   target: dmg
   icon: build/icon.icns
 dmg:
-  background: null
   iconSize: 100
   window:
     width: 540
     height: 380
-  contents:
-    - { x: 140, y: 200, type: file }
-    - { x: 400, y: 200, type: link, path: /Applications }
