@@ -54,3 +54,9 @@ export interface SessionState {
   latencyMs: number | null;
   startedAt: number;
 }
+
+declare global {
+  interface Window {
+    api: import('../preload/preload').Api;
+  }
+}
