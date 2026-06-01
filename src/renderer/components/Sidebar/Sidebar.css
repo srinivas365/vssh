@@ -1,0 +1,9 @@
+.sidebar { width: 260px; padding: 8px; background: #1e1e1e; color: #eee; height: 100vh; overflow: auto; font-family: system-ui; }
+.sidebar-search { width: 100%; padding: 6px; box-sizing: border-box; margin-bottom: 8px; background: #2a2a2a; border: 1px solid #333; color: #eee; }
+.sidebar-folder { margin-bottom: 8px; }
+.sidebar-folder-name { font-weight: 600; padding: 4px 0; opacity: 0.85; }
+.vm-row { display: flex; justify-content: space-between; padding: 4px 6px; border-radius: 4px; cursor: pointer; }
+.vm-row:hover { background: #2a2a2a; }
+.vm-actions button { background: none; border: none; color: #aaa; cursor: pointer; margin-left: 2px; }
+.vm-actions button:hover { color: #fff; }
+.sidebar-new { width: 100%; padding: 6px; margin-top: 8px; background: #2a2a2a; color: #eee; border: 1px solid #333; cursor: pointer; }
