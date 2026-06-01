@@ -102,7 +102,11 @@ export function Main() {
       <div className="app-body">
         <Sidebar onNewVm={() => setEditing(null)} onEditVm={(vm) => setEditing(vm)} />
         <main className="app-main">
-          <div style={{ display: view === 'terminal' ? 'block' : 'none' }}>
+          <div
+            style={{
+              display: view === 'terminal' ? 'block' : 'none',
+              flexShrink: 0,
+            }}>
             <TabBar />
           </div>
           <div className="terminal-stack">
