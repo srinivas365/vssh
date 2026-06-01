@@ -8,9 +8,12 @@
     "build:preload": "esbuild src/preload/preload.ts --bundle --platform=node --target=node20 --format=cjs --external:electron --outfile=dist/preload/preload.js",
     "build:renderer": "vite build",
     "build": "npm run build:main && npm run build:preload && npm run build:renderer",
+    "rebuild:node": "npm rebuild better-sqlite3 argon2 node-pty",
+    "rebuild:electron": "electron-rebuild -f -w better-sqlite3,argon2,node-pty",
+    "pretest": "npm run rebuild:node",
     "test": "vitest run",
     "test:watch": "vitest",
-    "e2e": "playwright test",
+    "e2e": "npm run rebuild:electron && playwright test",
     "dist": "npm run build && electron-builder",
     "typecheck": "tsc -p tsconfig.main.json --noEmit && tsc -p tsconfig.preload.json --noEmit && tsc -p tsconfig.renderer.json --noEmit"
   },
@@ -26,6 +29,7 @@
     "zustand": "^5.0.0"
   },
   "devDependencies": {
+    "@electron/rebuild": "^3.7.2",
     "@playwright/test": "^1.48.0",
     "@types/better-sqlite3": "^7.6.11",
     "@types/node": "^22.0.0",
