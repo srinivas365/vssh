@@ -58,17 +58,31 @@ jobs:
       # Optional code signing: set the secrets below in your repo settings to
       # enable. Without them, electron-builder produces an unsigned DMG that
       # macOS will warn about on first launch (right-click → Open to bypass).
+      #
+      # NOTE: GitHub Actions substitutes empty strings for unset secrets.
+      # electron-builder treats CSC_LINK="" as 'look for cert at CWD' and
+      # fails with '/Users/runner/work/vssh/vssh not a file'. The shell
+      # block below unsets any empty signing var so electron-builder
+      # cleanly skips signing instead.
       - name: Package DMG
         env:
-          # Code signing (skip if secrets are absent)
           CSC_LINK: ${{ secrets.MAC_CERT_P12_BASE64 }}
           CSC_KEY_PASSWORD: ${{ secrets.MAC_CERT_PASSWORD }}
-          # Notarization (skip if secrets are absent)
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npx electron-builder --mac dmg --${{ matrix.arch }} --publish never
+        shell: bash
+        run: |
+          for v in CSC_LINK CSC_KEY_PASSWORD APPLE_ID APPLE_APP_SPECIFIC_PASSWORD APPLE_TEAM_ID; do
+            if [ -z "${!v}" ]; then unset "$v"; fi
+          done
+          # Disable automatic identity discovery so electron-builder doesn't
+          # try to sign with a keychain identity that doesn't exist on the runner.
+          if [ -z "${CSC_LINK:-}" ]; then
+            export CSC_IDENTITY_AUTO_DISCOVERY=false
+          fi
+          npx electron-builder --mac dmg --${{ matrix.arch }} --publish never
 
       - name: Inspect release output
         run: ls -lh release/
