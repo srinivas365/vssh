@@ -4,9 +4,8 @@ import fs from 'node:fs';
 import os from 'node:os';
 
 const REPO_ROOT = path.resolve(__dirname, '..', '..');
-const MAIN_ENTRY = path.join(REPO_ROOT, 'dist', 'main', 'main', 'index.js');
+const MAIN_ENTRY = path.join(REPO_ROOT, 'dist', 'main', 'index.js');
 const RENDERER_HTML = path.join(REPO_ROOT, 'dist', 'renderer', 'index.html');
-const LAUNCHER = path.join(__dirname, 'electron-launcher.js');
 
 let app: ElectronApplication;
 let page: Page;
@@ -25,13 +24,10 @@ test.beforeAll(async () => {
   userDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'termius-e2e-'));
 
   app = await electron.launch({
-    args: [LAUNCHER, `--user-data-dir=${userDataDir}`],
+    args: ['.', `--user-data-dir=${userDataDir}`],
     cwd: REPO_ROOT,
     env: {
       ...process.env,
-      // Workaround: main loads renderer from `../renderer/index.html` relative to its own dir,
-      // which the current build does not produce. Force loadURL to the real built renderer.
-      VITE_DEV_SERVER_URL: 'file://' + RENDERER_HTML,
       NODE_ENV: 'test',
     },
   });
