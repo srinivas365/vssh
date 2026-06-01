@@ -20,17 +20,9 @@ concurrency:
 
 jobs:
   dmg:
-    name: Build DMG (${{ matrix.arch }})
-    runs-on: ${{ matrix.runner }}
+    name: Build DMG (arm64)
+    runs-on: macos-14   # Apple Silicon
     timeout-minutes: 40
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - arch: arm64
-            runner: macos-14   # Apple Silicon
-          - arch: x64
-            runner: macos-13   # Intel
     steps:
       - uses: actions/checkout@v4
 
@@ -82,7 +74,7 @@ jobs:
           if [ -z "${CSC_LINK:-}" ]; then
             export CSC_IDENTITY_AUTO_DISCOVERY=false
           fi
-          npx electron-builder --mac dmg --${{ matrix.arch }} --publish never
+          npx electron-builder --mac dmg --arm64 --publish never
 
       - name: Inspect release output
         run: ls -lh release/
@@ -90,7 +82,7 @@ jobs:
       - name: Upload DMG artifact
         uses: actions/upload-artifact@v4
         with:
-          name: vssh-${{ matrix.arch }}-dmg
+          name: vssh-arm64-dmg
           path: |
             release/*.dmg
             release/*.blockmap
@@ -98,7 +90,7 @@ jobs:
           if-no-files-found: error
 
   publish:
-    name: Attach DMGs to GitHub Release
+    name: Attach DMG to GitHub Release
     needs: dmg
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/v')
@@ -106,17 +98,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Download all DMG artifacts
+      - name: Download DMG artifact
         uses: actions/download-artifact@v4
         with:
-          path: artifacts
+          name: vssh-arm64-dmg
+          path: release
 
-      - name: Flatten artifacts
-        run: |
-          mkdir -p release
-          find artifacts -name '*.dmg'      -exec cp {} release/ \;
-          find artifacts -name '*.blockmap' -exec cp {} release/ \;
-          ls -lh release/
+      - name: List release output
+        run: ls -lh release/
 
       - name: Create / update GitHub Release
         uses: softprops/action-gh-release@v2

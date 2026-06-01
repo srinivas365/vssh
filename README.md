@@ -53,11 +53,11 @@ Working across a fleet of VMs means typing — or worse, pasting — the same pa
 
 ### Download
 
-Grab the latest `.dmg` from the [Releases page](https://github.com/srinivas365/vssh/releases/latest):
-- `vssh-x.y.z-arm64.dmg` for Apple Silicon
-- `vssh-x.y.z-x64.dmg` for Intel Macs
+Grab the latest `vssh-x.y.z-arm64.dmg` from the [Releases page](https://github.com/srinivas365/vssh/releases/latest).
 
 Open the DMG, drag **vssh** to Applications.
+
+> Apple Silicon only for now — Intel builds are paused because GitHub deprecated the `macos-13` runner image. If you need an Intel build, see [Build from source](#build-from-source).
 
 > First launch: right-click → Open (unsigned builds trigger Gatekeeper). For a signed build, configure the secrets described under [Releases](#releases).
 
@@ -211,8 +211,7 @@ git push origin v0.1.0
 
 GitHub Actions:
 1. Builds `vssh-0.1.0-arm64.dmg` on `macos-14` (Apple Silicon)
-2. Builds `vssh-0.1.0-x64.dmg`   on `macos-13` (Intel) in parallel
-3. Creates a GitHub Release at `/releases/tag/v0.1.0` with both DMGs attached and auto-generated notes
+2. Creates a GitHub Release at `/releases/tag/v0.1.0` with the DMG attached and auto-generated notes
 
 ### Code signing (optional)
 
