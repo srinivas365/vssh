@@ -64,7 +64,7 @@ export function HostsPage({ onNewVm, onEditVm }: Props) {
           <button
             className={`chip ${folderId === 'all' ? 'chip-active' : ''}`}
             onClick={() => setFolderId('all')}>
-            All <span className="chip-count">{vms.length}</span>
+            All workspaces <span className="chip-count">{vms.length}</span>
           </button>
           {folders.map((f) => {
             const count = vms.filter((v) => v.folderId === f.id).length;
