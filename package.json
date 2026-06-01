@@ -1,6 +1,14 @@
 {
   "name": "vssh",
   "version": "0.0.1",
+  "description": "Termius-alternative SSH client with encrypted credential vault and automatic password-prompt detection",
+  "license": "MIT",
+  "author": "Srinivas Mannem",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/srinivas365/vssh.git"
+  },
+  "homepage": "https://github.com/srinivas365/vssh",
   "main": "dist/main/index.js",
   "scripts": {
     "dev": "concurrently -k \"vite\" \"tsc -p tsconfig.main.json -w\" \"esbuild src/preload/preload.ts --bundle --platform=node --target=node20 --format=cjs --external:electron --outfile=dist/preload/preload.js --watch\" \"wait-on tcp:5173 dist/main/index.js dist/preload/preload.js && electron .\"",

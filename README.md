@@ -280,7 +280,7 @@ All commits use [Conventional Commits](https://www.conventionalcommits.org/) (`f
 
 ## License
 
-TBD.
+[MIT](LICENSE) © 2026 Srinivas Mannem
 
 ## Design and planning
 
