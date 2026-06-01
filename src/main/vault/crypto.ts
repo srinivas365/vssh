@@ -22,11 +22,14 @@ export async function encryptVault(plaintext: Buffer, password: string): Promise
   const salt = randomBytes(SALT_LEN);
   const nonce = randomBytes(NONCE_LEN);
   const key = await deriveKey(password, salt);
-  const cipher = createCipheriv('aes-256-gcm', key, nonce);
-  const ct = Buffer.concat([cipher.update(plaintext), cipher.final()]);
-  const tag = cipher.getAuthTag();
-  key.fill(0);
-  return Buffer.concat([salt, nonce, ct, tag]);
+  try {
+    const cipher = createCipheriv('aes-256-gcm', key, nonce);
+    const ct = Buffer.concat([cipher.update(plaintext), cipher.final()]);
+    const tag = cipher.getAuthTag();
+    return Buffer.concat([salt, nonce, ct, tag]);
+  } finally {
+    key.fill(0);
+  }
 }
 
 export async function decryptVault(blob: Buffer, password: string): Promise<Buffer> {
