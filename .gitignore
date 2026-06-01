@@ -6,3 +6,5 @@ release/
 *.log
 .DS_Store
 test/e2e/.tmp/
+test-results/
+playwright-report/

@@ -1,0 +1,15 @@
+services:
+  sshd:
+    image: linuxserver/openssh-server:latest
+    container_name: termius-e2e-sshd
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+      - PASSWORD_ACCESS=true
+      - USER_NAME=testuser
+      - USER_PASSWORD=testpassword12345
+      - SUDO_ACCESS=false
+    ports:
+      - "2222:2222"
+    restart: unless-stopped
