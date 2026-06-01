@@ -15,6 +15,8 @@ export const IPC = {
   FOLDERS_LIST: 'folders:list',
   FOLDERS_CREATE: 'folders:create',
   FOLDERS_DELETE: 'folders:delete',
+  FOLDERS_RENAME: 'folders:rename',
+  VMS_MOVE_TO_FOLDER: 'vms:move-to-folder',
   // sessions
   SESSION_START: 'session:start',
   SESSION_INPUT: 'session:input',

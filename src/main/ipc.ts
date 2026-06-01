@@ -63,7 +63,37 @@ export function registerIpc(d: Deps): void {
   // folders
   ipcMain.handle(IPC.FOLDERS_LIST, () => d.repo.listFolders());
   ipcMain.handle(IPC.FOLDERS_CREATE, (_e, f: Omit<Folder, 'id'>) => d.repo.createFolder(f));
-  ipcMain.handle(IPC.FOLDERS_DELETE, (_e, id: number) => d.repo.deleteFolder(id));
+  ipcMain.handle(IPC.FOLDERS_DELETE, (_e, id: number) => {
+    const all = d.repo.listFolders();
+    if (all.length <= 1) {
+      throw new Error('cannot-delete-last-workspace');
+    }
+    const fallback = all.find((f) => f.id !== id && f.name === 'Default')
+                   ?? all.find((f) => f.id !== id);
+    if (!fallback) throw new Error('cannot-delete-last-workspace');
+    d.repo.reassignVmsFromFolder(id, fallback.id);
+    d.repo.deleteFolder(id);
+  });
+
+  ipcMain.handle(IPC.FOLDERS_RENAME, (_e, id: number, name: string) => {
+    const trimmed = name.trim();
+    if (!trimmed) throw new Error('empty-workspace-name');
+    d.repo.renameFolder(id, trimmed);
+  });
+
+  ipcMain.handle(IPC.VMS_MOVE_TO_FOLDER, (_e, vmId: number, folderId: number) => {
+    const vm = d.repo.getVm(vmId);
+    if (!vm) throw new Error('vm-not-found');
+    d.repo.updateVm(vmId, {
+      folderId,
+      label: vm.label,
+      host: vm.host,
+      port: vm.port,
+      username: vm.username,
+      authMethod: vm.authMethod,
+      keyPath: vm.keyPath,
+    });
+  });
 
   // sessions
   ipcMain.handle(IPC.SESSION_START, async (_e, vmId: number, cols: number, rows: number) => {
