@@ -2,9 +2,20 @@ appId: dev.local.vssh
 productName: vssh
 directories:
   output: release
+  buildResources: build
 files:
   - dist/**/*
   - package.json
 mac:
   category: public.app-category.developer-tools
   target: dmg
+  icon: build/icon.icns
+dmg:
+  background: null
+  iconSize: 100
+  window:
+    width: 540
+    height: 380
+  contents:
+    - { x: 140, y: 200, type: file }
+    - { x: 400, y: 200, type: link, path: /Applications }

@@ -8,3 +8,4 @@ release/
 test/e2e/.tmp/
 test-results/
 playwright-report/
+build/icon.iconset/
