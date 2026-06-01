@@ -26,6 +26,7 @@ interface UiStore {
   collapsedFolders: Set<number>;
   toggleFolderCollapsed: (id: number) => void;
   isFolderCollapsed: (id: number) => boolean;
+  forgetFolders: (keepIds: number[]) => void;
 }
 
 export const useUiStore = create<UiStore>((set, get) => ({
@@ -38,4 +39,18 @@ export const useUiStore = create<UiStore>((set, get) => ({
     set({ collapsedFolders: next });
   },
   isFolderCollapsed: (id: number) => get().collapsedFolders.has(id),
+  forgetFolders: (keepIds: number[]) => {
+    const keep = new Set(keepIds);
+    const current = get().collapsedFolders;
+    let changed = false;
+    const next = new Set<number>();
+    for (const id of current) {
+      if (keep.has(id)) next.add(id);
+      else changed = true;
+    }
+    if (changed) {
+      save(next);
+      set({ collapsedFolders: next });
+    }
+  },
 }));

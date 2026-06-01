@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useVmsStore } from '../../state/vms-store';
 import { useSessionsStore } from '../../state/sessions-store';
+import { useUiStore } from '../../state/ui-store';
 import { Vm } from '@shared/types';
 import { WorkspaceSection } from './WorkspaceSection';
 import { NewWorkspaceButton } from './NewWorkspaceButton';
@@ -17,6 +18,11 @@ export function Sidebar({ onNewVm, onEditVm }: Props) {
   const [query, setQuery] = useState('');
 
   useEffect(() => { refresh(); }, [refresh]);
+
+  const forgetFolders = useUiStore((s) => s.forgetFolders);
+  useEffect(() => {
+    forgetFolders(folders.map((f) => f.id));
+  }, [folders, forgetFolders]);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -43,10 +49,8 @@ export function Sidebar({ onNewVm, onEditVm }: Props) {
     addTab({ sessionId, vmId: vm.id, label: vm.label, state: 'connecting' });
   }
 
-  const sortedFolders = useMemo(
-    () => [...folders].sort((a, b) => a.name.localeCompare(b.name)),
-    [folders],
-  );
+  // folders come from listFolders() pre-sorted by sort_order, name
+  const sortedFolders = folders;
   const onlyOneWorkspace = folders.length === 1;
   const ungrouped = grouped.get(null) ?? [];
 

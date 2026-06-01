@@ -98,7 +98,7 @@ export function WorkspaceSection({ folder, count, canDelete, children }: Props) 
       )}
       {mode === 'delete-confirm' && (
         <div className="ws-delete-confirm">
-          <span className="ws-delete-confirm-msg">Delete? Hosts move to Default</span>
+          <span className="ws-delete-confirm-msg">Delete? Hosts move to another workspace</span>
           <button className="yes" onClick={confirmDelete}>Yes</button>
           <button onClick={() => setMode('view')}>No</button>
         </div>
