@@ -1,7 +1,8 @@
-.qc-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: grid; place-items: start center; padding-top: 80px; z-index: 150; }
-.qc-panel { background: #222; color: #eee; padding: 12px; border-radius: 8px; width: 480px; font-family: system-ui; box-shadow: 0 8px 24px rgba(0,0,0,0.5); }
-.qc-panel input { width: 100%; padding: 8px; box-sizing: border-box; background: #1a1a1a; color: #eee; border: 1px solid #333; font-size: 14px; }
+.qc-backdrop { position: fixed; inset: 0; background: rgba(15,23,42,0.4); display: grid; place-items: start center; padding-top: 80px; z-index: 150; }
+.qc-panel { background: #ffffff; color: #1a1a1a; padding: 12px; border-radius: 8px; width: 480px; font-family: system-ui; box-shadow: 0 12px 32px rgba(0,0,0,0.18); border: 1px solid #e5e5e5; }
+.qc-panel input { width: 100%; padding: 8px; box-sizing: border-box; background: #ffffff; color: #1a1a1a; border: 1px solid #d4d4d4; border-radius: 4px; font-size: 14px; }
+.qc-panel input:focus { outline: none; border-color: #3b82f6; }
 .qc-panel ul { list-style: none; padding: 0; margin: 8px 0 0 0; }
 .qc-panel li { padding: 6px 8px; border-radius: 4px; cursor: pointer; }
-.qc-panel li.highlight, .qc-panel li:hover { background: #333; }
-.qc-host { opacity: 0.6; font-size: 12px; margin-left: 8px; }
+.qc-panel li.highlight, .qc-panel li:hover { background: #eef2ff; }
+.qc-host { color: #6b7280; font-size: 12px; margin-left: 8px; }

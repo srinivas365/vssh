@@ -1,5 +1,11 @@
-.modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: grid; place-items: center; z-index: 100; }
-.vm-form { background: #222; color: #eee; padding: 20px; border-radius: 8px; min-width: 360px; display: flex; flex-direction: column; gap: 10px; }
-.vm-form label { display: flex; flex-direction: column; font-size: 13px; gap: 4px; }
-.vm-form input, .vm-form select { padding: 6px; background: #1a1a1a; border: 1px solid #444; color: #eee; }
+.modal-backdrop { position: fixed; inset: 0; background: rgba(15,23,42,0.45); display: grid; place-items: center; z-index: 100; }
+.vm-form { background: #ffffff; color: #1a1a1a; padding: 20px; border-radius: 8px; min-width: 360px; display: flex; flex-direction: column; gap: 10px; box-shadow: 0 12px 40px rgba(0,0,0,0.18); font-family: system-ui; }
+.vm-form h2 { margin: 0 0 4px 0; font-size: 16px; }
+.vm-form label { display: flex; flex-direction: column; font-size: 13px; gap: 4px; color: #374151; }
+.vm-form input, .vm-form select { padding: 6px; background: #ffffff; border: 1px solid #d4d4d4; color: #1a1a1a; border-radius: 4px; }
+.vm-form input:focus, .vm-form select:focus { outline: none; border-color: #3b82f6; }
 .form-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 10px; }
+.form-actions button { padding: 6px 14px; background: #ffffff; color: #1a1a1a; border: 1px solid #d4d4d4; border-radius: 4px; cursor: pointer; }
+.form-actions button[type="submit"] { background: #3b82f6; color: #ffffff; border-color: #3b82f6; }
+.form-actions button[type="submit"]:hover { background: #2563eb; }
+.form-actions button:not([type="submit"]):hover { background: #f3f4f6; }

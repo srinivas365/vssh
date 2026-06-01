@@ -36,11 +36,11 @@ export function Unlock() {
   }
 
   return (
-    <div style={{ display: 'grid', placeItems: 'center', height: '100vh', fontFamily: 'system-ui' }}>
-      <form onSubmit={submit} style={{ width: 360, display: 'flex', flexDirection: 'column', gap: 12 }}>
-        <h1 style={{ margin: 0 }}>{isInit ? 'Create master password' : 'Unlock'}</h1>
+    <div style={{ display: 'grid', placeItems: 'center', height: '100vh', fontFamily: 'system-ui', background: '#f5f5f5', color: '#1a1a1a' }}>
+      <form onSubmit={submit} style={{ width: 360, display: 'flex', flexDirection: 'column', gap: 12, background: '#ffffff', padding: 24, borderRadius: 8, border: '1px solid #e5e5e5', boxShadow: '0 4px 16px rgba(0,0,0,0.06)' }}>
+        <h1 style={{ margin: 0, fontSize: 20 }}>{isInit ? 'Create master password' : 'Unlock'}</h1>
         {isInit && (
-          <p style={{ margin: 0, fontSize: 13, opacity: 0.7 }}>
+          <p style={{ margin: 0, fontSize: 13, color: '#6b7280' }}>
             This password encrypts your saved VM credentials. There is no recovery — if you lose it, the vault is gone.
           </p>
         )}
@@ -51,7 +51,7 @@ export function Unlock() {
           placeholder="master password"
           onChange={(e) => setPw(e.target.value)}
           disabled={busy}
-          style={{ padding: 8, fontSize: 14 }}
+          style={{ padding: 8, fontSize: 14, background: '#ffffff', color: '#1a1a1a', border: '1px solid #d4d4d4', borderRadius: 4 }}
         />
         {isInit && (
           <input
@@ -60,11 +60,11 @@ export function Unlock() {
             placeholder="confirm"
             onChange={(e) => setPw2(e.target.value)}
             disabled={busy}
-            style={{ padding: 8, fontSize: 14 }}
+            style={{ padding: 8, fontSize: 14, background: '#ffffff', color: '#1a1a1a', border: '1px solid #d4d4d4', borderRadius: 4 }}
           />
         )}
-        {err && <div style={{ color: '#b00', fontSize: 13 }}>{err}</div>}
-        <button type="submit" disabled={busy || !pw} style={{ padding: 8 }}>
+        {err && <div style={{ color: '#dc2626', fontSize: 13 }}>{err}</div>}
+        <button type="submit" disabled={busy || !pw} style={{ padding: 8, background: '#3b82f6', color: '#ffffff', border: 'none', borderRadius: 4, cursor: busy || !pw ? 'not-allowed' : 'pointer', opacity: busy || !pw ? 0.5 : 1 }}>
           {isInit ? 'Create vault' : 'Unlock'}
         </button>
       </form>

@@ -40,7 +40,7 @@ export function Main() {
   }, [lock, activeTabId, removeTab]);
 
   return (
-    <div style={{ display: 'flex', height: '100vh', background: '#1e1e1e' }}>
+    <div style={{ display: 'flex', height: '100vh', background: '#ffffff' }}>
       <Sidebar onNewVm={() => setEditing(null)} onEditVm={(vm) => setEditing(vm)} />
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
         <TabBar />
