@@ -1,0 +1,83 @@
+.ws-section { margin-bottom: 12px; }
+
+.ws-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-radius: 4px;
+  user-select: none;
+}
+.ws-header:hover { background: var(--bg-muted); }
+.ws-chev { font-size: 10px; color: var(--text-faint); transition: transform 0.1s; }
+.ws-chev-collapsed { transform: rotate(-90deg); }
+
+.ws-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.ws-count {
+  font-size: 11px;
+  color: var(--text-faint);
+  background: var(--bg-muted);
+  border-radius: 10px;
+  padding: 1px 7px;
+  font-weight: 500;
+}
+.ws-header:hover .ws-count { background: var(--bg-panel); }
+
+.ws-actions { display: none; gap: 2px; }
+.ws-header:hover .ws-actions { display: flex; }
+.ws-actions button {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-size: 11px;
+}
+.ws-actions button:hover { background: var(--bg-panel); color: var(--text); }
+
+.ws-rename-input {
+  flex: 1;
+  padding: 2px 6px;
+  background: var(--bg-panel);
+  color: var(--text);
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  outline: none;
+}
+
+.ws-delete-confirm {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 6px;
+  font-size: 11px;
+  color: var(--text);
+}
+.ws-delete-confirm-msg { flex: 1; color: var(--danger); }
+.ws-delete-confirm button {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 2px 8px;
+  font-size: 11px;
+  cursor: pointer;
+  color: var(--text);
+}
+.ws-delete-confirm button.yes { background: var(--danger); color: #fff; border-color: var(--danger); }
+
+.ws-body { padding-top: 2px; }
+.ws-body-collapsed { display: none; }
+
+.ws-section.ws-dragover .ws-header {
+  background: var(--accent-soft);
+  outline: 2px dashed var(--accent);
+  outline-offset: -2px;
+}
