@@ -2,6 +2,8 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useVmsStore } from '../../state/vms-store';
 import { useSessionsStore } from '../../state/sessions-store';
 import { Vm } from '@shared/types';
+import { WorkspaceSection } from './WorkspaceSection';
+import { NewWorkspaceButton } from './NewWorkspaceButton';
 import './Sidebar.css';
 
 interface Props {
@@ -41,12 +43,16 @@ export function Sidebar({ onNewVm, onEditVm }: Props) {
     addTab({ sessionId, vmId: vm.id, label: vm.label, state: 'connecting' });
   }
 
-  const uncategorized = grouped.get(null) ?? [];
-  const hasAny = vms.length > 0;
+  const sortedFolders = useMemo(
+    () => [...folders].sort((a, b) => a.name.localeCompare(b.name)),
+    [folders],
+  );
+  const onlyOneWorkspace = folders.length === 1;
+  const ungrouped = grouped.get(null) ?? [];
 
   return (
     <aside className="sidebar">
-      <div className="sidebar-section-label">Hosts</div>
+      <div className="sidebar-section-label">Workspaces</div>
       <div className="sidebar-search-wrap">
         <span className="sidebar-search-icon">⌕</span>
         <input
@@ -58,35 +64,37 @@ export function Sidebar({ onNewVm, onEditVm }: Props) {
       </div>
 
       <div className="sidebar-list">
-        {folders.map((f) => {
+        {sortedFolders.map((f) => {
           const items = grouped.get(f.id) ?? [];
-          if (items.length === 0) return null;
           return (
-            <div key={f.id} className="sidebar-folder">
-              <div className="sidebar-folder-name">
-                <span className="sidebar-folder-chev">▾</span>
-                {f.name}
-                <span className="sidebar-folder-count">{items.length}</span>
-              </div>
+            <WorkspaceSection
+              key={f.id}
+              folder={f}
+              count={items.length}
+              canDelete={!onlyOneWorkspace}>
               {items.map((vm) => (
-                <VmRow key={vm.id} vm={vm} onConnect={() => connect(vm)} onEdit={() => onEditVm(vm)} onDelete={() => remove(vm.id)} />
+                <VmRow key={vm.id} vm={vm}
+                  onConnect={() => connect(vm)}
+                  onEdit={() => onEditVm(vm)}
+                  onDelete={() => remove(vm.id)} />
               ))}
-            </div>
+            </WorkspaceSection>
           );
         })}
-        {uncategorized.length > 0 && (
+
+        {ungrouped.length > 0 && (
           <div className="sidebar-folder">
-            <div className="sidebar-folder-name">
-              <span className="sidebar-folder-chev">▾</span>
-              All hosts
-              <span className="sidebar-folder-count">{uncategorized.length}</span>
-            </div>
-            {uncategorized.map((vm) => (
-              <VmRow key={vm.id} vm={vm} onConnect={() => connect(vm)} onEdit={() => onEditVm(vm)} onDelete={() => remove(vm.id)} />
+            <div className="sidebar-folder-name">Unassigned</div>
+            {ungrouped.map((vm) => (
+              <VmRow key={vm.id} vm={vm}
+                onConnect={() => connect(vm)}
+                onEdit={() => onEditVm(vm)}
+                onDelete={() => remove(vm.id)} />
             ))}
           </div>
         )}
-        {!hasAny && (
+
+        {folders.length === 0 && ungrouped.length === 0 && (
           <div className="sidebar-empty">
             <p>No saved hosts yet.</p>
             <p>Add one to get started.</p>
@@ -94,16 +102,31 @@ export function Sidebar({ onNewVm, onEditVm }: Props) {
         )}
       </div>
 
-      <button className="sidebar-new" onClick={onNewVm}>
+      <NewWorkspaceButton />
+      <button className="sidebar-new" onClick={onNewVm} style={{ marginTop: 4 }}>
         <span className="sidebar-new-plus">+</span> New host
       </button>
     </aside>
   );
 }
 
-function VmRow({ vm, onConnect, onEdit, onDelete }: { vm: Vm; onConnect: () => void; onEdit: () => void; onDelete: () => void }) {
+function VmRow({ vm, onConnect, onEdit, onDelete }: {
+  vm: Vm;
+  onConnect: () => void;
+  onEdit: () => void;
+  onDelete: () => void;
+}) {
+  function onDragStart(e: React.DragEvent) {
+    e.dataTransfer.setData('application/vm-id', String(vm.id));
+    e.dataTransfer.effectAllowed = 'move';
+  }
+
   return (
-    <div className="vm-row" onDoubleClick={onConnect} title={`${vm.username}@${vm.host}:${vm.port}`}>
+    <div className="vm-row"
+         draggable
+         onDragStart={onDragStart}
+         onDoubleClick={onConnect}
+         title={`${vm.username}@${vm.host}:${vm.port}`}>
       <div className="vm-row-main">
         <span className="vm-row-icon">⊟</span>
         <div className="vm-row-text">
