@@ -114,3 +114,27 @@ jobs:
           draft: false
           prerelease: ${{ contains(github.ref_name, '-') }}
           generate_release_notes: true
+          append_body: true
+          body: |
+            ## Install
+
+            1. Download `vssh-${{ github.ref_name }}-arm64.dmg` below.
+            2. Open the DMG and drag **vssh** to Applications.
+            3. **One-time setup** — remove the macOS quarantine flag:
+               ```bash
+               sudo xattr -cr /Applications/vssh.app
+               ```
+            4. Open vssh.
+
+            > macOS shows *"vssh is damaged and can't be opened"* for any
+            > unsigned app downloaded from the internet. The `xattr` command
+            > removes the *"downloaded from internet"* marker so Gatekeeper
+            > stops complaining. The app itself is fine — only the marker
+            > and the lack of a $99/yr Apple Developer ID cert are the
+            > issue. You only need this once per install.
+
+            Apple Silicon only for this release.
+
+            ---
+
+            ### What's changed

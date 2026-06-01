@@ -55,11 +55,16 @@ Working across a fleet of VMs means typing — or worse, pasting — the same pa
 
 Grab the latest `vssh-x.y.z-arm64.dmg` from the [Releases page](https://github.com/srinivas365/vssh/releases/latest).
 
-Open the DMG, drag **vssh** to Applications.
+1. Open the DMG and drag **vssh** to Applications.
+2. **One-time setup** — remove the macOS quarantine flag so Gatekeeper stops blocking the unsigned app:
+   ```bash
+   sudo xattr -cr /Applications/vssh.app
+   ```
+3. Open vssh.
+
+> **Why step 2?** macOS shows _"vssh is damaged and can't be opened"_ for unsigned apps downloaded from the internet, even though the app itself is fine. The `xattr` command removes the "downloaded from internet" marker so the OS stops complaining. Right-click → Open does **not** work for this particular Gatekeeper rule (it does for "unidentified developer", but not for "damaged"). You only need to do this once per install. Future updates may swap in a signed + notarized build that opens without this step — see [Code signing](#code-signing-optional).
 
 > Apple Silicon only for now — Intel builds are paused because GitHub deprecated the `macos-13` runner image. If you need an Intel build, see [Build from source](#build-from-source).
-
-> First launch: right-click → Open (unsigned builds trigger Gatekeeper). For a signed build, configure the secrets described under [Releases](#releases).
 
 ### Build from source
 
