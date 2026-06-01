@@ -10,6 +10,14 @@ mac:
   category: public.app-category.developer-tools
   target: dmg
   icon: build/icon.icns
+  # Ad-hoc signing: tells electron-builder to `codesign --sign -` the app
+  # so macOS doesn't refuse to open it as "damaged". With this, an unsigned
+  # build only shows the milder "unidentified developer" prompt on first
+  # launch (bypassable via right-click → Open). When MAC_CERT_P12_BASE64 /
+  # APPLE_ID secrets are set, electron-builder picks up the real Developer
+  # ID cert and notarizes instead — this `null` is just the fallback.
+  identity: null
+  gatekeeperAssess: false
 dmg:
   iconSize: 100
   window:
