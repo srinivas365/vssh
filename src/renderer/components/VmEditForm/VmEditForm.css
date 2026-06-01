@@ -1,0 +1,5 @@
+.modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: grid; place-items: center; z-index: 100; }
+.vm-form { background: #222; color: #eee; padding: 20px; border-radius: 8px; min-width: 360px; display: flex; flex-direction: column; gap: 10px; }
+.vm-form label { display: flex; flex-direction: column; font-size: 13px; gap: 4px; }
+.vm-form input, .vm-form select { padding: 6px; background: #1a1a1a; border: 1px solid #444; color: #eee; }
+.form-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 10px; }
