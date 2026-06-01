@@ -102,15 +102,22 @@ export function Main() {
       <div className="app-body">
         <Sidebar onNewVm={() => setEditing(null)} onEditVm={(vm) => setEditing(vm)} />
         <main className="app-main">
-          {view === 'terminal' && <TabBar />}
+          <div style={{ display: view === 'terminal' ? 'block' : 'none' }}>
+            <TabBar />
+          </div>
           <div className="terminal-stack">
-            {view === 'hosts' ? (
+            {/* Terminals stay mounted so xterm scrollback survives view switches. */}
+            {tabs.map((t) => (
+              <Terminal
+                key={t.sessionId}
+                sessionId={t.sessionId}
+                active={view === 'terminal' && t.sessionId === activeTabId}
+              />
+            ))}
+            {/* Hosts page overlays the terminal stack when active. */}
+            <div style={{ display: view === 'hosts' ? 'block' : 'none' }}>
               <HostsPage onNewVm={() => setEditing(null)} onEditVm={(vm) => setEditing(vm)} />
-            ) : (
-              tabs.map((t) => (
-                <Terminal key={t.sessionId} sessionId={t.sessionId} active={t.sessionId === activeTabId} />
-              ))
-            )}
+            </div>
           </div>
         </main>
       </div>
