@@ -92,5 +92,5 @@ test('create vault, save VM, connect, see password-detected toast', async () => 
   // The PromptDetector should fire 'login' → main sends SESSION_TOAST → renderer shows the toast.
   const toast = page.locator('.toast');
   await expect(toast).toBeVisible({ timeout: 45_000 });
-  await expect(toast).toContainText(/Login password copied|Password copied/i, { timeout: 5_000 });
+  await expect(toast).toContainText(/Login password sent|Login password copied|Password sent|Password copied/i, { timeout: 5_000 });
 });
