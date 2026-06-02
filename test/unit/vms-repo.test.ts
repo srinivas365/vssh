@@ -20,15 +20,18 @@ describe('VmsRepo', () => {
       username: 'admin',
       authMethod: 'password',
       keyPath: null,
+      autoSubmitEnabled: true,
     });
     expect(vm.id).toBeGreaterThan(0);
     expect(vm.label).toBe('prod-db-01');
     expect(vm.vaultRef).toMatch(/^[0-9a-f-]{36}$/);
+    expect(vm.autoSubmitEnabled).toBe(true);
+    expect(vm.autoCopyDisabled).toBe(false);
   });
 
   it('lists VMs ordered by last_used desc then label', () => {
-    const a = repo.createVm({ folderId: null, label: 'a', host: 'h', port: 22, username: 'u', authMethod: 'password', keyPath: null });
-    const b = repo.createVm({ folderId: null, label: 'b', host: 'h', port: 22, username: 'u', authMethod: 'password', keyPath: null });
+    const a = repo.createVm({ folderId: null, label: 'a', host: 'h', port: 22, username: 'u', authMethod: 'password', keyPath: null, autoSubmitEnabled: true });
+    const b = repo.createVm({ folderId: null, label: 'b', host: 'h', port: 22, username: 'u', authMethod: 'password', keyPath: null, autoSubmitEnabled: true });
     repo.touchUsed(b.id);
     const list = repo.listVms();
     expect(list[0].id).toBe(b.id);
@@ -36,13 +39,13 @@ describe('VmsRepo', () => {
   });
 
   it('updates a VM', () => {
-    const vm = repo.createVm({ folderId: null, label: 'a', host: 'h', port: 22, username: 'u', authMethod: 'password', keyPath: null });
-    repo.updateVm(vm.id, { ...vm, label: 'renamed', host: vm.host, port: vm.port, username: vm.username, authMethod: vm.authMethod, keyPath: vm.keyPath, folderId: vm.folderId });
+    const vm = repo.createVm({ folderId: null, label: 'a', host: 'h', port: 22, username: 'u', authMethod: 'password', keyPath: null, autoSubmitEnabled: true });
+    repo.updateVm(vm.id, { ...vm, label: 'renamed', host: vm.host, port: vm.port, username: vm.username, authMethod: vm.authMethod, keyPath: vm.keyPath, folderId: vm.folderId, autoSubmitEnabled: vm.autoSubmitEnabled });
     expect(repo.getVm(vm.id)?.label).toBe('renamed');
   });
 
   it('deletes a VM', () => {
-    const vm = repo.createVm({ folderId: null, label: 'a', host: 'h', port: 22, username: 'u', authMethod: 'password', keyPath: null });
+    const vm = repo.createVm({ folderId: null, label: 'a', host: 'h', port: 22, username: 'u', authMethod: 'password', keyPath: null, autoSubmitEnabled: true });
     repo.deleteVm(vm.id);
     expect(repo.getVm(vm.id)).toBeNull();
   });
@@ -54,9 +57,15 @@ describe('VmsRepo', () => {
   });
 
   it('sets auto_copy_disabled', () => {
-    const vm = repo.createVm({ folderId: null, label: 'a', host: 'h', port: 22, username: 'u', authMethod: 'password', keyPath: null });
+    const vm = repo.createVm({ folderId: null, label: 'a', host: 'h', port: 22, username: 'u', authMethod: 'password', keyPath: null, autoSubmitEnabled: true });
     repo.setAutoCopyDisabled(vm.id, true);
     expect(repo.getVm(vm.id)?.autoCopyDisabled).toBe(true);
+  });
+
+  it('sets auto_submit_enabled', () => {
+    const vm = repo.createVm({ folderId: null, label: 'a', host: 'h', port: 22, username: 'u', authMethod: 'password', keyPath: null, autoSubmitEnabled: true });
+    repo.setAutoSubmitEnabled(vm.id, false);
+    expect(repo.getVm(vm.id)?.autoSubmitEnabled).toBe(false);
   });
 
   it('renames a folder', () => {
@@ -68,9 +77,9 @@ describe('VmsRepo', () => {
   it('reassigns vms from one folder to another', () => {
     const from = repo.createFolder({ name: 'from', parentId: null, sortOrder: 0 });
     const to   = repo.createFolder({ name: 'to',   parentId: null, sortOrder: 0 });
-    const a = repo.createVm({ folderId: from.id, label: 'a', host: 'h', port: 22, username: 'u', authMethod: 'password', keyPath: null });
-    const b = repo.createVm({ folderId: from.id, label: 'b', host: 'h', port: 22, username: 'u', authMethod: 'password', keyPath: null });
-    const c = repo.createVm({ folderId: to.id,   label: 'c', host: 'h', port: 22, username: 'u', authMethod: 'password', keyPath: null });
+    const a = repo.createVm({ folderId: from.id, label: 'a', host: 'h', port: 22, username: 'u', authMethod: 'password', keyPath: null, autoSubmitEnabled: true });
+    const b = repo.createVm({ folderId: from.id, label: 'b', host: 'h', port: 22, username: 'u', authMethod: 'password', keyPath: null, autoSubmitEnabled: true });
+    const c = repo.createVm({ folderId: to.id,   label: 'c', host: 'h', port: 22, username: 'u', authMethod: 'password', keyPath: null, autoSubmitEnabled: true });
 
     repo.reassignVmsFromFolder(from.id, to.id);
 

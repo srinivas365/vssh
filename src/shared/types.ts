@@ -18,6 +18,7 @@ export interface Vm {
   keyPath: string | null;
   vaultRef: string;
   autoCopyDisabled: boolean;
+  autoSubmitEnabled: boolean;
   lastUsedAt: number | null;
   createdAt: number;
 }
@@ -30,6 +31,7 @@ export interface VmInput {
   username: string;
   authMethod: AuthMethod;
   keyPath: string | null;
+  autoSubmitEnabled: boolean;
 }
 
 export interface VaultEntry {
@@ -45,6 +47,7 @@ export interface ToastPayload {
   vmId: number;
   promptType: PromptType;
   hasSecret: boolean;
+  delivery: 'copied' | 'sent' | 'none';
 }
 
 export interface SessionState {

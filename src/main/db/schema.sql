@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS vms (
   key_path            TEXT,
   vault_ref           TEXT NOT NULL UNIQUE,
   auto_copy_disabled  INTEGER NOT NULL DEFAULT 0,
+  auto_submit_enabled INTEGER NOT NULL DEFAULT 1,
   last_used_at        INTEGER,
   created_at          INTEGER NOT NULL
 );
