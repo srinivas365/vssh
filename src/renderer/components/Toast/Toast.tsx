@@ -10,6 +10,18 @@ const label: Record<PromptType, string> = {
   generic: 'Password',
 };
 
+function toastTitle(toast: { promptType: PromptType; hasSecret: boolean; delivery: 'copied' | 'sent' | 'none' }): string {
+  if (!toast.hasSecret) return `No saved ${label[toast.promptType].toLowerCase()} for this host`;
+  if (toast.delivery === 'sent') return `${label[toast.promptType]} sent`;
+  return `${label[toast.promptType]} copied`;
+}
+
+function toastSubtext(toast: { hasSecret: boolean; delivery: 'copied' | 'sent' | 'none' }): string | null {
+  if (!toast.hasSecret) return null;
+  if (toast.delivery === 'sent') return 'Submitted automatically';
+  return 'Press ⌘V to paste into the terminal';
+}
+
 export function ToastOverlay() {
   const { toasts, dismissToast } = useSessionsStore();
   const activeTabId = useSessionsStore((s) => s.activeTabId);
@@ -27,9 +39,9 @@ export function ToastOverlay() {
     <div className="toast">
       <div className="toast-title">
         <span className="toast-icon">🔑</span>
-        {toast.hasSecret ? `${label[toast.promptType]} copied` : `No saved ${label[toast.promptType].toLowerCase()} for this host`}
+        {toastTitle(toast)}
       </div>
-      {toast.hasSecret && <div className="toast-sub">Press ⌘V to paste into the terminal</div>}
+      {toastSubtext(toast) && <div className="toast-sub">{toastSubtext(toast)}</div>}
       <div className="toast-actions">
         <button onClick={() => dismissToast(toast.sessionId)}>Dismiss</button>
       </div>
