@@ -13,6 +13,7 @@ interface VmRow {
   key_path: string | null;
   vault_ref: string;
   auto_copy_disabled: number;
+  auto_submit_enabled: number;
   last_used_at: number | null;
   created_at: number;
 }
@@ -36,6 +37,7 @@ function rowToVm(r: VmRow): Vm {
     keyPath: r.key_path,
     vaultRef: r.vault_ref,
     autoCopyDisabled: r.auto_copy_disabled === 1,
+    autoSubmitEnabled: r.auto_submit_enabled === 1,
     lastUsedAt: r.last_used_at,
     createdAt: r.created_at,
   };
@@ -52,10 +54,15 @@ export class VmsRepo {
     const vaultRef = randomUUID();
     const now = Date.now();
     const stmt = this.db.prepare(`
-      INSERT INTO vms (folder_id, label, host, port, username, auth_method, key_path, vault_ref, created_at)
-      VALUES (@folderId, @label, @host, @port, @username, @authMethod, @keyPath, @vaultRef, @createdAt)
+      INSERT INTO vms (folder_id, label, host, port, username, auth_method, key_path, vault_ref, auto_submit_enabled, created_at)
+      VALUES (@folderId, @label, @host, @port, @username, @authMethod, @keyPath, @vaultRef, @autoSubmitEnabled, @createdAt)
     `);
-    const info = stmt.run({ ...input, vaultRef, createdAt: now });
+    const info = stmt.run({
+      ...input,
+      autoSubmitEnabled: input.autoSubmitEnabled ? 1 : 0,
+      vaultRef,
+      createdAt: now,
+    });
     return this.getVm(Number(info.lastInsertRowid))!;
   }
 
@@ -64,11 +71,12 @@ export class VmsRepo {
       .prepare(
         `
       UPDATE vms SET folder_id=@folderId, label=@label, host=@host, port=@port,
-        username=@username, auth_method=@authMethod, key_path=@keyPath
+        username=@username, auth_method=@authMethod, key_path=@keyPath,
+        auto_submit_enabled=@autoSubmitEnabled
       WHERE id=@id
     `,
       )
-      .run({ ...input, id });
+      .run({ ...input, autoSubmitEnabled: input.autoSubmitEnabled ? 1 : 0, id });
   }
 
   deleteVm(id: number): void {
@@ -99,6 +107,12 @@ export class VmsRepo {
     this.db
       .prepare('UPDATE vms SET auto_copy_disabled = ? WHERE id = ?')
       .run(disabled ? 1 : 0, id);
+  }
+
+  setAutoSubmitEnabled(id: number, enabled: boolean): void {
+    this.db
+      .prepare('UPDATE vms SET auto_submit_enabled = ? WHERE id = ?')
+      .run(enabled ? 1 : 0, id);
   }
 
   createFolder(f: Omit<Folder, 'id'>): Folder {
