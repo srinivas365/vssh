@@ -8,6 +8,7 @@ import { SshSession } from './ssh/session';
 import { ClipboardService } from './clipboard';
 import { logger } from './logger';
 import { Vm, VmInput, VaultEntry, Folder, PromptType, ToastPayload } from '@shared/types';
+import { decidePromptAction, pickSecretByPrompt } from './ssh/prompt-action';
 
 interface Deps {
   db: Database.Database;
@@ -16,15 +17,6 @@ interface Deps {
   sessions: SessionManager;
   clip: ClipboardService;
   mainWindow: () => BrowserWindow | null;
-}
-
-function pickSecretByPrompt(entry: VaultEntry, type: PromptType): string | undefined {
-  switch (type) {
-    case 'login':
-    case 'generic':       return entry.password;
-    case 'sudo':          return entry.sudoPassword;
-    case 'key-passphrase':return entry.keyPassphrase;
-  }
 }
 
 export function registerIpc(d: Deps): void {
@@ -92,6 +84,7 @@ export function registerIpc(d: Deps): void {
       username: vm.username,
       authMethod: vm.authMethod,
       keyPath: vm.keyPath,
+      autoSubmitEnabled: vm.autoSubmitEnabled,
     });
   });
 
@@ -110,18 +103,24 @@ export function registerIpc(d: Deps): void {
       d.mainWindow()?.webContents.send(IPC.SESSION_STATE, state);
     });
     session.on('promptDetected', (type: PromptType) => {
-      if (vm.autoCopyDisabled) {
-        const toast: ToastPayload = { sessionId: session.id, vmId, promptType: type, hasSecret: false };
-        d.mainWindow()?.webContents.send(IPC.SESSION_TOAST, toast);
-        return;
-      }
       const entry = d.vault.getSecret(vm.vaultRef);
-      const secret = pickSecretByPrompt(entry, type);
-      if (secret) {
-        d.clip.copySecret(secret);
-        logger.registerSecret(secret);
+      const action = decidePromptAction(vm, entry, type);
+
+      if (action.secret && action.delivery === 'sent') {
+        session.write(`${action.secret}\r`);
+        logger.registerSecret(action.secret);
+      } else if (action.secret && action.delivery === 'copied') {
+        d.clip.copySecret(action.secret);
+        logger.registerSecret(action.secret);
       }
-      const toast: ToastPayload = { sessionId: session.id, vmId, promptType: type, hasSecret: !!secret };
+
+      const toast: ToastPayload = {
+        sessionId: session.id,
+        vmId,
+        promptType: type,
+        hasSecret: !!action.secret,
+        delivery: action.delivery,
+      };
       d.mainWindow()?.webContents.send(IPC.SESSION_TOAST, toast);
     });
 
