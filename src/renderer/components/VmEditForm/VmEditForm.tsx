@@ -35,6 +35,7 @@ export function VmEditForm({ initial, onClose }: Props) {
   const [password, setPassword] = useState('');
   const [sudoPassword, setSudoPassword] = useState('');
   const [keyPassphrase, setKeyPassphrase] = useState('');
+  const [autoSubmitEnabled, setAutoSubmitEnabled] = useState(initial?.autoSubmitEnabled ?? true);
 
   const workspaceOptions: SelectOption<string>[] = [
     ...folders.map((f) => ({ value: String(f.id), label: f.name })),
@@ -67,6 +68,7 @@ export function VmEditForm({ initial, onClose }: Props) {
       folderId,
       label, host, port, username, authMethod,
       keyPath: authMethod === 'password' ? null : (keyPath || null),
+      autoSubmitEnabled,
     };
     const secret: VaultEntry = {
       password: authMethod !== 'key' ? password || undefined : undefined,
@@ -125,6 +127,14 @@ export function VmEditForm({ initial, onClose }: Props) {
           <label>Password <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} /></label>
         )}
         <label>Sudo password <input type="password" value={sudoPassword} onChange={(e) => setSudoPassword(e.target.value)} /></label>
+        <label className="checkbox-label">
+          <input
+            type="checkbox"
+            checked={autoSubmitEnabled}
+            onChange={(e) => setAutoSubmitEnabled(e.target.checked)}
+          />
+          Automatically submit login/key secrets
+        </label>
         <div className="form-actions">
           <button type="button" onClick={onClose}>Cancel</button>
           <button type="submit">{initial ? 'Save' : 'Create'}</button>
