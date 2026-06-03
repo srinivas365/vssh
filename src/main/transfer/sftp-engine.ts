@@ -14,6 +14,13 @@ export interface EngineContext {
 }
 
 export class SftpTransferEngine {
+  private activeStreams = new Map<string, { destroy: () => void }>();
+
+  abort(id: string): void {
+    this.activeStreams.get(id)?.destroy();
+    this.activeStreams.delete(id);
+  }
+
   async start(record: TransferRecord, context: EngineContext): Promise<void> {
     context.markRunning();
     context.emitLog('Starting SFTP transfer');
@@ -108,9 +115,11 @@ export class SftpTransferEngine {
         transferred += chunk.length;
         context.emitProgress({ id: record.id, transferredBytes: transferred, totalBytes: total, percent: Math.min(100, (transferred / total) * 100) });
       });
-      read.once('error', reject);
-      write.once('error', reject);
-      write.once('close', resolve);
+      this.activeStreams.set(record.id, { destroy: () => { read.destroy(); write.destroy(); } });
+      const cleanup = () => this.activeStreams.delete(record.id);
+      write.once('close', () => { cleanup(); resolve(); });
+      read.once('error', (err: Error) => { cleanup(); reject(err); });
+      write.once('error', (err: Error) => { cleanup(); reject(err); });
       read.pipe(write);
     });
   }
@@ -125,9 +134,11 @@ export class SftpTransferEngine {
         transferred += chunk.length;
         context.emitProgress({ id: record.id, transferredBytes: transferred, totalBytes: null, percent: null });
       });
-      read.once('error', reject);
-      write.once('error', reject);
-      write.once('close', resolve);
+      this.activeStreams.set(record.id, { destroy: () => { read.destroy(); write.destroy(); } });
+      const cleanup = () => this.activeStreams.delete(record.id);
+      write.once('close', () => { cleanup(); resolve(); });
+      read.once('error', (err: Error) => { cleanup(); reject(err); });
+      write.once('error', (err: Error) => { cleanup(); reject(err); });
       read.pipe(write);
     });
   }

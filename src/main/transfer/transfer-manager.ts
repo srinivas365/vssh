@@ -67,6 +67,36 @@ export class TransferManager extends EventEmitter {
     this.emit('toast', { id, vmId: updated.vmId, status: updated.status, message: error, canResume: partialsKept, canDeletePartials: partialsKept });
   }
 
+  pause(id: string): void {
+    this.updateStatus(id, 'paused');
+    this.markPartials(id, true);
+    this.emit('engine-pause', id);
+  }
+
+  resume(id: string): void {
+    const record = this.records.get(id);
+    if (record) void this.deps.startEngine(record);
+  }
+
+  stop(id: string): void {
+    this.markPartials(id, false);
+    this.updateStatus(id, 'stopped');
+    this.emit('engine-stop', id);
+  }
+
+  deletePartials(id: string): void {
+    this.markPartials(id, false);
+    this.emit('delete-partials', id);
+  }
+
+  private markPartials(id: string, partialsKept: boolean): void {
+    const record = this.records.get(id);
+    if (!record) return;
+    const updated = { ...record, partialsKept };
+    this.records.set(id, updated);
+    this.emit('state', updated);
+  }
+
   private hasActiveTransferForVm(vmId: number): boolean {
     return this.list().some((record) => record.vmId === vmId && ['preparing', 'running', 'paused'].includes(record.status));
   }

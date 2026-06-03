@@ -82,6 +82,9 @@ app.whenReady().then(() => {
 
   registerIpc({ db, repo, vault, sessions, clip, mainWindow: () => mainWindow, transfers, remoteBrowser });
 
+  transfers.on('engine-stop', (id: string) => { rsyncEngine.stop(id); sftpEngine.abort(id); });
+  transfers.on('engine-pause', (id: string) => { rsyncEngine.stop(id); sftpEngine.abort(id); });
+
   mainWindow = createWindow();
 
   // auto-lock on system events
