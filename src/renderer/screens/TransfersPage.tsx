@@ -10,7 +10,7 @@ function formatBytes(bytes: number): string {
   return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
 }
 
-function progressLabel(transferredBytes: number, totalBytes: number | null, percent: number | null): string {
+function progressLabel(transferredBytes: number, percent: number | null): string {
   if (percent != null) return `${percent.toFixed(0)}%`;
   return formatBytes(transferredBytes);
 }
@@ -54,7 +54,7 @@ export function TransfersPage() {
               <div className="transfer-sub">{transfer.source.path} → {transfer.destination.finalPath}</div>
               <div className="transfer-progress-row">
                 <progress value={transfer.percent ?? 0} max={100} />
-                <span>{progressLabel(transfer.transferredBytes, transfer.totalBytes, transfer.percent)}</span>
+                <span>{progressLabel(transfer.transferredBytes, transfer.percent)}</span>
               </div>
               <div className="transfer-actions">
                 <button
