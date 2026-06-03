@@ -65,6 +65,46 @@
   cursor: pointer;
 }
 
+.connection-test {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.connection-test-button {
+  align-self: flex-start;
+  padding: 6px 12px;
+  background: var(--bg-panel);
+  color: var(--text);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.connection-test-button:hover:not(:disabled) {
+  background: var(--bg-muted);
+}
+
+.connection-test-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.connection-test-message {
+  margin: 0;
+  font-size: 12px;
+}
+
+.connection-test-message.is-success {
+  color: var(--success);
+}
+
+.connection-test-message.is-error {
+  color: var(--danger);
+}
+
 .form-actions {
   display: flex;
   justify-content: flex-end;

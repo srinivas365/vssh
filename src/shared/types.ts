@@ -40,6 +40,12 @@ export interface VaultEntry {
   keyPassphrase?: string;
 }
 
+export interface VmConnectionTestResult {
+  ok: boolean;
+  latencyMs: number | null;
+  message: string;
+}
+
 export type PromptType = 'login' | 'sudo' | 'key-passphrase' | 'generic';
 
 export interface ToastPayload {

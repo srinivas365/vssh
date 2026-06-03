@@ -13,6 +13,7 @@ import { decidePromptAction, pickSecretByPrompt } from './ssh/prompt-action';
 import type { TransferManager } from './transfer/transfer-manager';
 import { RemoteBrowserService } from './transfer/remote-browser-service';
 import { basenameForPath } from './transfer/path-utils';
+import { testVmConnection } from './ssh/test-connection';
 import type { LocalSelection, TransferStartRequest } from '@shared/types';
 
 interface Deps {
@@ -58,6 +59,8 @@ export function registerIpc(d: Deps): void {
     d.repo.deleteVm(id);
   });
   ipcMain.handle(IPC.VMS_TOUCH_USED, (_e, id: number) => d.repo.touchUsed(id));
+  ipcMain.handle(IPC.VMS_TEST_CONNECTION, async (_e, input: VmInput, secret: VaultEntry) =>
+    testVmConnection(input, secret));
 
   // folders
   ipcMain.handle(IPC.FOLDERS_LIST, () => d.repo.listFolders());

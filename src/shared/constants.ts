@@ -11,6 +11,7 @@ export const IPC = {
   VMS_UPDATE: 'vms:update',
   VMS_DELETE: 'vms:delete',
   VMS_TOUCH_USED: 'vms:touch-used',
+  VMS_TEST_CONNECTION: 'vms:test-connection',
   // folders
   FOLDERS_LIST: 'folders:list',
   FOLDERS_CREATE: 'folders:create',

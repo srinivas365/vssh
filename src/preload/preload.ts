@@ -1,6 +1,6 @@
 import { contextBridge, ipcRenderer } from 'electron';
 import { IPC } from '@shared/constants';
-import { Vm, VmInput, Folder, VaultEntry, SessionState, ToastPayload, PromptType, LocalSelection, RemoteEntry, TransferStartRequest, TransferRecord, TransferProgressEvent, TransferLogEvent, TransferToastPayload } from '@shared/types';
+import { Vm, VmInput, Folder, VaultEntry, SessionState, ToastPayload, PromptType, LocalSelection, RemoteEntry, TransferStartRequest, TransferRecord, TransferProgressEvent, TransferLogEvent, TransferToastPayload, VmConnectionTestResult } from '@shared/types';
 
 const api = {
   vault: {
@@ -18,6 +18,8 @@ const api = {
     update: (id: number, input: VmInput, secret: VaultEntry) => ipcRenderer.invoke(IPC.VMS_UPDATE, id, input, secret),
     delete: (id: number) => ipcRenderer.invoke(IPC.VMS_DELETE, id),
     touchUsed: (id: number) => ipcRenderer.invoke(IPC.VMS_TOUCH_USED, id),
+    testConnection: (input: VmInput, secret: VaultEntry): Promise<VmConnectionTestResult> =>
+      ipcRenderer.invoke(IPC.VMS_TEST_CONNECTION, input, secret),
     moveToFolder: (vmId: number, folderId: number) =>
       ipcRenderer.invoke(IPC.VMS_MOVE_TO_FOLDER, vmId, folderId),
   },
