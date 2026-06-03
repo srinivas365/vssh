@@ -11,6 +11,8 @@ import { registerIpc } from './ipc';
 import { DEFAULTS, IPC } from '@shared/constants';
 import { TransferManager } from './transfer/transfer-manager';
 import { RemoteBrowserService } from './transfer/remote-browser-service';
+import { chooseTransferEngine } from './transfer/engine-selection';
+import { hasLocalRsync, hasRemoteRsync } from './transfer/rsync-availability';
 
 let mainWindow: BrowserWindow | null = null;
 
@@ -44,7 +46,17 @@ app.whenReady().then(() => {
     clear: () => clipboard.clear(),
   });
 
-  const transfers = new TransferManager({ chooseEngine: async () => 'sftp', startEngine: async () => undefined });
+  const transfers = new TransferManager({
+    chooseEngine: async (request) => {
+      const vm = repo.getVm(request.vmId);
+      if (!vm) throw new Error('vm-not-found');
+      return chooseTransferEngine({
+        localRsync: await hasLocalRsync(),
+        remoteRsync: await hasRemoteRsync(vm),
+      });
+    },
+    startEngine: async () => undefined,
+  });
   const remoteBrowser = new RemoteBrowserService();
 
   registerIpc({ db, repo, vault, sessions, clip, mainWindow: () => mainWindow, transfers, remoteBrowser });
