@@ -20,15 +20,81 @@ export class SftpTransferEngine {
     const conn = await connectSftp(context.vm, context.secret);
     try {
       if (record.direction === 'upload') {
-        await this.uploadFile(record, context, conn.sftp);
+        if (record.source.type === 'directory') await this.uploadDirectory(record, context, conn.sftp);
+        else await this.uploadFile(record, context, conn.sftp);
       } else {
-        await this.downloadFile(record, context, conn.sftp);
+        if (record.source.type === 'directory') await this.downloadDirectory(record, context, conn.sftp);
+        else await this.downloadFile(record, context, conn.sftp);
       }
       context.markSucceeded();
     } catch (err) {
       context.markFailed(err instanceof Error ? err.message : String(err), true);
     } finally {
       conn.close();
+    }
+  }
+
+  private async ensureRemoteDir(sftp: import('ssh2').SFTPWrapper, dir: string): Promise<void> {
+    const parts = dir.split('/').filter(Boolean);
+    let current = '';
+    for (const part of parts) {
+      current += `/${part}`;
+      await new Promise<void>((resolve) => sftp.mkdir(current, () => resolve()));
+    }
+  }
+
+  private walkLocalFiles(root: string): string[] {
+    const stat = fs.statSync(root);
+    if (stat.isFile()) return [root];
+    const out: string[] = [];
+    for (const name of fs.readdirSync(root)) {
+      const child = path.join(root, name);
+      const childStat = fs.statSync(child);
+      if (childStat.isDirectory()) out.push(...this.walkLocalFiles(child));
+      else if (childStat.isFile()) out.push(child);
+    }
+    return out;
+  }
+
+  private async readdir(sftp: import('ssh2').SFTPWrapper, dir: string): Promise<import('ssh2').FileEntry[]> {
+    return new Promise((resolve, reject) => sftp.readdir(dir, (err, list) => err ? reject(err) : resolve(list)));
+  }
+
+  private async walkRemoteFiles(sftp: import('ssh2').SFTPWrapper, root: string): Promise<string[]> {
+    const entries = await this.readdir(sftp, root);
+    const out: string[] = [];
+    for (const entry of entries) {
+      if (entry.filename === '.' || entry.filename === '..') continue;
+      const child = `${root.replace(/\/+$/, '')}/${entry.filename}`;
+      const kind = entry.attrs.mode & 0o170000;
+      if (kind === 0o040000) out.push(...await this.walkRemoteFiles(sftp, child));
+      else if (kind === 0o100000) out.push(child);
+    }
+    return out;
+  }
+
+  private async uploadDirectory(record: TransferRecord, context: EngineContext, sftp: import('ssh2').SFTPWrapper): Promise<void> {
+    const files = this.walkLocalFiles(record.source.path);
+    const root = record.source.path.replace(/[\/]+$/, '');
+    for (const file of files) {
+      const relative = path.relative(root, file).split(path.sep).join('/');
+      const remoteBase = record.folderMode === 'contents-only' ? record.destination.directory : record.destination.finalPath;
+      const remotePath = `${remoteBase.replace(/\/+$/, '')}/${relative}`;
+      await this.ensureRemoteDir(sftp, remotePath.replace(/\/[^/]+$/, ''));
+      const childRecord = { ...record, source: { path: file, name: path.basename(file), type: 'file' as const }, destination: { directory: remotePath.replace(/\/[^/]+$/, ''), finalPath: remotePath } };
+      await this.uploadFile(childRecord, context, sftp);
+    }
+  }
+
+  private async downloadDirectory(record: TransferRecord, context: EngineContext, sftp: import('ssh2').SFTPWrapper): Promise<void> {
+    const files = await this.walkRemoteFiles(sftp, record.source.path);
+    const root = record.source.path.replace(/\/+$/, '');
+    const localBase = record.folderMode === 'contents-only' ? record.destination.directory : record.destination.finalPath;
+    for (const remotePath of files) {
+      const relative = remotePath.slice(root.length).replace(/^\/+/, '');
+      const localPath = path.join(localBase, relative);
+      const childRecord = { ...record, source: { path: remotePath, name: path.posix.basename(remotePath), type: 'file' as const }, destination: { directory: path.dirname(localPath), finalPath: localPath } };
+      await this.downloadFile(childRecord, context, sftp);
     }
   }
 
