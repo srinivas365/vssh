@@ -13,7 +13,9 @@ import { decidePromptAction, pickSecretByPrompt } from './ssh/prompt-action';
 import type { TransferManager } from './transfer/transfer-manager';
 import { RemoteBrowserService } from './transfer/remote-browser-service';
 import { basenameForPath } from './transfer/path-utils';
-import type { LocalSelection, TransferStartRequest } from '@shared/types';
+import { testVmConnection } from './ssh/test-connection';
+import type { LocalSelection, TransferStartRequest, AppSettingsPatch } from '@shared/types';
+import type { SettingsStore } from './settings/store';
 
 interface Deps {
   db: Database.Database;
@@ -24,6 +26,7 @@ interface Deps {
   mainWindow: () => BrowserWindow | null;
   transfers: TransferManager;
   remoteBrowser: RemoteBrowserService;
+  settings: SettingsStore;
 }
 
 export function registerIpc(d: Deps): void {
@@ -36,6 +39,12 @@ export function registerIpc(d: Deps): void {
     const vm = d.repo.getVm(vmId);
     if (!vm) throw new Error('vm not found');
     await d.vault.setSecret(vm.vaultRef, entry);
+  });
+  ipcMain.handle(IPC.SETTINGS_GET, () => d.settings.get());
+  ipcMain.handle(IPC.SETTINGS_UPDATE, (_e, patch: AppSettingsPatch) => {
+    const settings = d.settings.update(patch);
+    d.mainWindow()?.webContents.send(IPC.SETTINGS_CHANGED, settings);
+    return settings;
   });
 
   // vms
@@ -58,6 +67,8 @@ export function registerIpc(d: Deps): void {
     d.repo.deleteVm(id);
   });
   ipcMain.handle(IPC.VMS_TOUCH_USED, (_e, id: number) => d.repo.touchUsed(id));
+  ipcMain.handle(IPC.VMS_TEST_CONNECTION, async (_e, input: VmInput, secret: VaultEntry) =>
+    testVmConnection(input, secret));
 
   // folders
   ipcMain.handle(IPC.FOLDERS_LIST, () => d.repo.listFolders());

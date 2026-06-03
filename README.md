@@ -33,14 +33,15 @@ Working across a fleet of VMs means typing — or worse, pasting — the same pa
 ### UI
 - **Hosts page** — a Termius-style grid of every saved host with auth badges, last-used timestamps, and primary "Connect" buttons.
 - **Sidebar** — folders, search, hover-only actions, host subtext (`user@host`).
+- **Settings tab (sidebar)** — configure themes, app/terminal fonts, terminal font size, and idle lock timeout.
 - **Quick connect** — `⌘K` Spotlight-style picker, keyboard-driven.
-- **Light theme** — refined CSS-variable-based design tokens; rounded squircle app icon.
+- **Multiple built-in themes** — Light, Dark, Claude, Dracula, Nord, and Solarized Dark.
 - **Custom React dropdowns** — fully keyboard-navigable Select component (no native widgets).
 
 ### Security
 - **Encrypted vault** — AES-256-GCM blob with an Argon2id-derived key (m=64 MiB, t=3, p=1).
 - **Master password on first launch** — no recovery; vault is yours alone.
-- **Auto-lock** — after 15 min idle, on system sleep, on system lock-screen, or via `⌘L`. The vault is wiped from memory; existing sessions keep running but new secret access requires re-unlock.
+- **Auto-lock** — configurable idle timeout (default 15 min), plus lock on system sleep, lock-screen, or `⌘L`. The vault is wiped from memory; existing sessions keep running but new secret access requires re-unlock.
 - **Renderer never sees plaintext secrets** — they flow main process → clipboard via a typed IPC surface.
 - **Sandboxed renderer** — `contextIsolation: true`, `nodeIntegration: false`, `sandbox: true`, strict CSP, preload bundled with `esbuild` so there are no runtime `require()` calls.
 
@@ -118,7 +119,8 @@ Two-process Electron app:
 │   Header  │  Sidebar  │  Hosts page                │
 │   Tabs    │  Terminal │  Toast / Modals / Picker   │
 │                                                    │
-│   State: Zustand stores (vault, vms, sessions)     │
+│   State: Zustand stores (vault, vms, sessions,      │
+│          settings)                                  │
 └────────────────────────────────────────────────────┘
 ```
 
@@ -177,6 +179,7 @@ If you see `NODE_MODULE_VERSION` mismatch errors, run `make rebuild-node` or `ma
 src/
 ├── main/                # Electron main process (Node)
 │   ├── db/              # SQLite schema, migrations, repo
+│   ├── settings/        # App settings persistence (electron-store)
 │   ├── vault/           # Argon2id + AES-GCM + lifecycle
 │   ├── ssh/             # node-pty session, manager, prompt detector
 │   ├── clipboard.ts     # auto-clearing clipboard service
@@ -187,7 +190,7 @@ src/
 ├── renderer/            # React app
 │   ├── components/      # Sidebar, TabBar, Terminal, Toast, VmEditForm,
 │   │                    # QuickConnect, Select
-│   ├── screens/         # Unlock, Main, HostsPage
+│   ├── screens/         # Unlock, Main, HostsPage, TransfersPage, SettingsPage
 │   ├── state/           # Zustand stores
 │   └── styles/          # design tokens (app.css)
 └── shared/              # cross-process types and constants

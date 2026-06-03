@@ -8,13 +8,14 @@ import { Vault } from './vault/vault';
 import { SessionManager } from './ssh/session-manager';
 import { ClipboardService } from './clipboard';
 import { registerIpc } from './ipc';
-import { DEFAULTS, IPC } from '@shared/constants';
+import { IPC } from '@shared/constants';
 import { TransferManager } from './transfer/transfer-manager';
 import { RemoteBrowserService } from './transfer/remote-browser-service';
 import { chooseTransferEngine } from './transfer/engine-selection';
 import { hasLocalRsync, hasRemoteRsync } from './transfer/rsync-availability';
 import { SftpTransferEngine } from './transfer/sftp-engine';
 import { RsyncTransferEngine } from './transfer/rsync-engine';
+import { SettingsStore } from './settings/store';
 
 let mainWindow: BrowserWindow | null = null;
 
@@ -35,13 +36,14 @@ function createWindow(): BrowserWindow {
   return win;
 }
 
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
   const userData = app.getPath('userData');
   const db = new Database(path.join(userData, 'vms.db'));
   migrate(db);
   const repo = new VmsRepo(db);
   ensureDefaultWorkspace(db, repo);
   const vault = new Vault(path.join(userData, 'vault.enc'));
+  const settings = await SettingsStore.create();
   const sessions = new SessionManager();
   const clip = new ClipboardService({
     writeText: (t) => clipboard.writeText(t),
@@ -87,7 +89,7 @@ app.whenReady().then(() => {
   });
   const remoteBrowser = new RemoteBrowserService();
 
-  registerIpc({ db, repo, vault, sessions, clip, mainWindow: () => mainWindow, transfers, remoteBrowser });
+  registerIpc({ db, repo, vault, sessions, clip, mainWindow: () => mainWindow, transfers, remoteBrowser, settings });
 
   transfers.on('engine-stop', (id: string) => { rsyncEngine.stop(id); sftpEngine.abort(id); });
   transfers.on('engine-pause', (id: string) => { rsyncEngine.stop(id); sftpEngine.abort(id); });
@@ -111,7 +113,8 @@ app.whenReady().then(() => {
   // idle auto-lock — poll every 30s, lock if idleSeconds > AUTO_LOCK_MS / 1000
   setInterval(() => {
     if (vault.state() !== 'unlocked') return;
-    if (powerMonitor.getSystemIdleTime() * 1000 > DEFAULTS.AUTO_LOCK_MS) void lockAll();
+    const autoLockMs = settings.get().autoLockMinutes * 60_000;
+    if (powerMonitor.getSystemIdleTime() * 1000 > autoLockMs) void lockAll();
   }, 30_000);
 });
 

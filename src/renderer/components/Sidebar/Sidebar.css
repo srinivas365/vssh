@@ -44,7 +44,7 @@
 }
 .sidebar-search:focus {
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.12);
+  box-shadow: 0 0 0 3px var(--accent-ring);
 }
 
 .sidebar-list {
@@ -140,6 +140,13 @@
 }
 .sidebar-empty p { margin: 4px 0; }
 
+.sidebar-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 8px;
+}
+
 .sidebar-new {
   display: flex;
   align-items: center;
@@ -147,7 +154,6 @@
   gap: 6px;
   width: 100%;
   padding: 8px;
-  margin-top: 8px;
   background: var(--bg-panel);
   color: var(--text);
   border: 1px solid var(--border-strong);
@@ -159,3 +165,7 @@
 }
 .sidebar-new:hover { background: var(--bg-muted); border-color: var(--accent); color: var(--accent); }
 .sidebar-new-plus { font-weight: 700; font-size: 14px; }
+
+.sidebar-settings-button {
+  border-style: dashed;
+}

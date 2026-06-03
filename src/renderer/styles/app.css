@@ -1,4 +1,12 @@
 :root {
+  --app-font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", system-ui, sans-serif;
+  --radius: 6px;
+  --radius-lg: 10px;
+  --header-h: 44px;
+}
+
+:root,
+:root[data-theme='light'] {
   --bg: #f8fafc;
   --bg-panel: #ffffff;
   --bg-muted: #f1f5f9;
@@ -12,21 +20,135 @@
   --accent: #4f46e5;
   --accent-hover: #4338ca;
   --accent-soft: #eef2ff;
+  --accent-ring: rgba(79, 70, 229, 0.14);
   --success: #10b981;
   --warn: #f59e0b;
   --danger: #ef4444;
   --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04);
   --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.06);
   --shadow-lg: 0 12px 32px rgba(15, 23, 42, 0.12);
-  --radius: 6px;
-  --radius-lg: 10px;
-  --header-h: 44px;
+}
+
+:root[data-theme='dark'] {
+  --bg: #0b1220;
+  --bg-panel: #111a2b;
+  --bg-muted: #172338;
+  --bg-hover: #1b2d4a;
+  --bg-selected: #23385f;
+  --border: #243550;
+  --border-strong: #314767;
+  --text: #e2e8f0;
+  --text-muted: #94a3b8;
+  --text-faint: #64748b;
+  --accent: #7c83ff;
+  --accent-hover: #6c74f4;
+  --accent-soft: rgba(124, 131, 255, 0.14);
+  --accent-ring: rgba(124, 131, 255, 0.22);
+  --success: #34d399;
+  --warn: #fbbf24;
+  --danger: #f87171;
+  --shadow-sm: 0 1px 2px rgba(2, 8, 20, 0.5);
+  --shadow-md: 0 6px 16px rgba(2, 8, 20, 0.42);
+  --shadow-lg: 0 16px 38px rgba(2, 8, 20, 0.5);
+}
+
+:root[data-theme='claude'] {
+  --bg: #f6f2e9;
+  --bg-panel: #fffaf1;
+  --bg-muted: #efe6d6;
+  --bg-hover: #eadfcb;
+  --bg-selected: #e4d5bb;
+  --border: #d9ccb8;
+  --border-strong: #c9b79b;
+  --text: #2d2418;
+  --text-muted: #6f614f;
+  --text-faint: #94836a;
+  --accent: #c56b1a;
+  --accent-hover: #ad5d15;
+  --accent-soft: #f3e5d2;
+  --accent-ring: rgba(197, 107, 26, 0.24);
+  --success: #2f855a;
+  --warn: #b7791f;
+  --danger: #c0563a;
+  --shadow-sm: 0 1px 2px rgba(57, 46, 29, 0.06);
+  --shadow-md: 0 6px 16px rgba(57, 46, 29, 0.1);
+  --shadow-lg: 0 16px 36px rgba(57, 46, 29, 0.18);
+}
+
+:root[data-theme='dracula'] {
+  --bg: #1f1d2b;
+  --bg-panel: #282a36;
+  --bg-muted: #32364a;
+  --bg-hover: #3a3f56;
+  --bg-selected: #444b66;
+  --border: #3f3a5b;
+  --border-strong: #5a547a;
+  --text: #f8f8f2;
+  --text-muted: #c9c7d8;
+  --text-faint: #9d98b5;
+  --accent: #bd93f9;
+  --accent-hover: #aa7ff0;
+  --accent-soft: rgba(189, 147, 249, 0.18);
+  --accent-ring: rgba(189, 147, 249, 0.3);
+  --success: #50fa7b;
+  --warn: #ffb86c;
+  --danger: #ff5555;
+  --shadow-sm: 0 1px 2px rgba(14, 13, 20, 0.5);
+  --shadow-md: 0 6px 16px rgba(14, 13, 20, 0.42);
+  --shadow-lg: 0 18px 40px rgba(14, 13, 20, 0.52);
+}
+
+:root[data-theme='nord'] {
+  --bg: #2e3440;
+  --bg-panel: #3b4252;
+  --bg-muted: #434c5e;
+  --bg-hover: #4c566a;
+  --bg-selected: #5e6a82;
+  --border: #4c566a;
+  --border-strong: #6b778f;
+  --text: #eceff4;
+  --text-muted: #d8dee9;
+  --text-faint: #aeb9cf;
+  --accent: #88c0d0;
+  --accent-hover: #72b1c4;
+  --accent-soft: rgba(136, 192, 208, 0.16);
+  --accent-ring: rgba(136, 192, 208, 0.26);
+  --success: #a3be8c;
+  --warn: #ebcb8b;
+  --danger: #bf616a;
+  --shadow-sm: 0 1px 2px rgba(15, 19, 26, 0.46);
+  --shadow-md: 0 6px 16px rgba(15, 19, 26, 0.38);
+  --shadow-lg: 0 18px 40px rgba(15, 19, 26, 0.5);
+}
+
+:root[data-theme='solarized-dark'] {
+  --bg: #002b36;
+  --bg-panel: #073642;
+  --bg-muted: #12414f;
+  --bg-hover: #1a4b59;
+  --bg-selected: #2a5a67;
+  --border: #24505c;
+  --border-strong: #356470;
+  --text: #eee8d5;
+  --text-muted: #c9c2af;
+  --text-faint: #93a1a1;
+  --accent: #268bd2;
+  --accent-hover: #1f7cbf;
+  --accent-soft: rgba(38, 139, 210, 0.2);
+  --accent-ring: rgba(38, 139, 210, 0.32);
+  --success: #859900;
+  --warn: #b58900;
+  --danger: #dc322f;
+  --shadow-sm: 0 1px 2px rgba(0, 18, 22, 0.54);
+  --shadow-md: 0 6px 16px rgba(0, 18, 22, 0.44);
+  --shadow-lg: 0 18px 40px rgba(0, 18, 22, 0.56);
 }
 
 .app-shell {
   display: flex;
   flex-direction: column;
   height: 100vh;
+  font-family: var(--app-font-family);
   background: var(--bg);
   color: var(--text);
   overflow: hidden;
@@ -56,13 +178,12 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 22px;
-  height: 22px;
+  width: 24px;
+  height: 24px;
   background: var(--accent);
   color: #fff;
   border-radius: 6px;
-  font-size: 12px;
-  font-weight: 700;
+  box-shadow: var(--shadow-sm);
 }
 .app-brand-name {
   font-weight: 700;
@@ -150,7 +271,7 @@
 .terminal-stack {
   flex: 1;
   position: relative;
-  background: #ffffff;
+  background: var(--bg-panel);
   min-height: 0;
 }
 

@@ -44,7 +44,7 @@
   background: var(--text-faint);
   flex-shrink: 0;
 }
-.tab.active .tab-dot { box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.18); }
+.tab.active .tab-dot { box-shadow: 0 0 0 2px var(--accent-ring); }
 
 .tab-label {
   max-width: 180px;

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Terminal as TerminalIcon } from 'lucide-react';
 import { useVaultStore } from '../state/vault-store';
 
 export function Unlock() {
@@ -49,7 +50,7 @@ export function Unlock() {
         {/* Hero column with brand + decorative SVG illustration */}
         <div className="unlock-hero" aria-hidden>
           <div className="unlock-brand">
-            <div className="unlock-brand-mark">▸</div>
+            <div className="unlock-brand-mark"><TerminalIcon size={26} strokeWidth={2.2} /></div>
             <div>
               <div className="unlock-brand-name">vssh</div>
               <div className="unlock-brand-tag">{isInit ? 'Encrypted SSH credential store' : 'Welcome back'}</div>

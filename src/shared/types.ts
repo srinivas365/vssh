@@ -40,6 +40,24 @@ export interface VaultEntry {
   keyPassphrase?: string;
 }
 
+export interface VmConnectionTestResult {
+  ok: boolean;
+  latencyMs: number | null;
+  message: string;
+}
+
+export type ThemeName = 'light' | 'dark' | 'claude' | 'dracula' | 'nord' | 'solarized-dark';
+
+export interface AppSettings {
+  theme: ThemeName;
+  appFontFamily: string;
+  terminalFontFamily: string;
+  terminalFontSize: number;
+  autoLockMinutes: number;
+}
+
+export type AppSettingsPatch = Partial<AppSettings>;
+
 export type PromptType = 'login' | 'sudo' | 'key-passphrase' | 'generic';
 
 export interface ToastPayload {

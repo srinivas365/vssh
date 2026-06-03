@@ -1,6 +1,6 @@
 import { contextBridge, ipcRenderer } from 'electron';
 import { IPC } from '@shared/constants';
-import { Vm, VmInput, Folder, VaultEntry, SessionState, ToastPayload, PromptType, LocalSelection, RemoteEntry, TransferStartRequest, TransferRecord, TransferProgressEvent, TransferLogEvent, TransferToastPayload } from '@shared/types';
+import { Vm, VmInput, Folder, VaultEntry, SessionState, ToastPayload, PromptType, LocalSelection, RemoteEntry, TransferStartRequest, TransferRecord, TransferProgressEvent, TransferLogEvent, TransferToastPayload, VmConnectionTestResult, AppSettings, AppSettingsPatch } from '@shared/types';
 
 const api = {
   vault: {
@@ -12,12 +12,20 @@ const api = {
     onStateChanged: (cb: (state: 'empty' | 'locked' | 'unlocked') => void) =>
       ipcRenderer.on(IPC.VAULT_STATE_CHANGED, (_e, s) => cb(s)),
   },
+  settings: {
+    get: (): Promise<AppSettings> => ipcRenderer.invoke(IPC.SETTINGS_GET),
+    update: (patch: AppSettingsPatch): Promise<AppSettings> => ipcRenderer.invoke(IPC.SETTINGS_UPDATE, patch),
+    onChanged: (cb: (settings: AppSettings) => void) =>
+      ipcRenderer.on(IPC.SETTINGS_CHANGED, (_e, settings) => cb(settings)),
+  },
   vms: {
     list: (): Promise<Vm[]> => ipcRenderer.invoke(IPC.VMS_LIST),
     create: (input: VmInput, secret: VaultEntry): Promise<Vm> => ipcRenderer.invoke(IPC.VMS_CREATE, input, secret),
     update: (id: number, input: VmInput, secret: VaultEntry) => ipcRenderer.invoke(IPC.VMS_UPDATE, id, input, secret),
     delete: (id: number) => ipcRenderer.invoke(IPC.VMS_DELETE, id),
     touchUsed: (id: number) => ipcRenderer.invoke(IPC.VMS_TOUCH_USED, id),
+    testConnection: (input: VmInput, secret: VaultEntry): Promise<VmConnectionTestResult> =>
+      ipcRenderer.invoke(IPC.VMS_TEST_CONNECTION, input, secret),
     moveToFolder: (vmId: number, folderId: number) =>
       ipcRenderer.invoke(IPC.VMS_MOVE_TO_FOLDER, vmId, folderId),
   },

@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Vm, VmInput, VaultEntry, AuthMethod } from '@shared/types';
+import React, { useEffect, useState } from 'react';
+import { Vm, VmInput, VaultEntry, AuthMethod, VmConnectionTestResult } from '@shared/types';
 import { useVmsStore } from '../../state/vms-store';
 import { Select, SelectOption } from '../Select/Select';
 import './VmEditForm.css';
@@ -36,6 +36,8 @@ export function VmEditForm({ initial, onClose }: Props) {
   const [sudoPassword, setSudoPassword] = useState('');
   const [keyPassphrase, setKeyPassphrase] = useState('');
   const [autoSubmitEnabled, setAutoSubmitEnabled] = useState(initial?.autoSubmitEnabled ?? true);
+  const [isTestingConnection, setIsTestingConnection] = useState(false);
+  const [connectionTestResult, setConnectionTestResult] = useState<VmConnectionTestResult | null>(null);
 
   const workspaceOptions: SelectOption<string>[] = [
     ...folders.map((f) => ({ value: String(f.id), label: f.name })),
@@ -64,20 +66,53 @@ export function VmEditForm({ initial, onClose }: Props) {
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    const input: VmInput = {
+    const input = buildVmInput();
+    const secret = buildVaultEntry();
+    if (initial) await update(initial.id, input, secret);
+    else await create(input, secret);
+    onClose();
+  }
+
+  const canTestConnection = host.trim().length > 0 && username.trim().length > 0 && Number.isFinite(port) && port > 0;
+
+  useEffect(() => {
+    setConnectionTestResult(null);
+  }, [host, port, username, authMethod, keyPath, password, keyPassphrase]);
+
+  function buildVmInput(): VmInput {
+    return {
       folderId,
-      label, host, port, username, authMethod,
+      label,
+      host,
+      port,
+      username,
+      authMethod,
       keyPath: authMethod === 'password' ? null : (keyPath || null),
       autoSubmitEnabled,
     };
-    const secret: VaultEntry = {
+  }
+
+  function buildVaultEntry(): VaultEntry {
+    return {
       password: authMethod !== 'key' ? password || undefined : undefined,
       sudoPassword: sudoPassword || undefined,
       keyPassphrase: authMethod !== 'password' ? keyPassphrase || undefined : undefined,
     };
-    if (initial) await update(initial.id, input, secret);
-    else await create(input, secret);
-    onClose();
+  }
+
+  async function testConnection() {
+    if (!canTestConnection || isTestingConnection) return;
+    setIsTestingConnection(true);
+    setConnectionTestResult(null);
+    try {
+      const result = await window.api.vms.testConnection(buildVmInput(), buildVaultEntry());
+      setConnectionTestResult(result);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Connection test failed.';
+      setConnectionTestResult({ ok: false, latencyMs: null, message });
+    } finally {
+      setIsTestingConnection(false);
+    }
   }
 
   return (
@@ -135,6 +170,24 @@ export function VmEditForm({ initial, onClose }: Props) {
           />
           Automatically submit login/key secrets
         </label>
+        <div className="connection-test">
+          <button
+            type="button"
+            className="connection-test-button"
+            disabled={!canTestConnection || isTestingConnection}
+            onClick={() => { void testConnection(); }}
+          >
+            {isTestingConnection ? 'Testing...' : 'Test connection'}
+          </button>
+          {connectionTestResult && (
+            <p className={`connection-test-message ${connectionTestResult.ok ? 'is-success' : 'is-error'}`}>
+              {connectionTestResult.message}
+              {connectionTestResult.ok && connectionTestResult.latencyMs !== null
+                ? ` (${connectionTestResult.latencyMs} ms)`
+                : ''}
+            </p>
+          )}
+        </div>
         <div className="form-actions">
           <button type="button" onClick={onClose}>Cancel</button>
           <button type="submit">{initial ? 'Save' : 'Create'}</button>

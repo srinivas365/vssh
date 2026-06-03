@@ -11,9 +11,10 @@ import './Sidebar.css';
 interface Props {
   onNewVm: () => void;
   onEditVm: (vm: Vm) => void;
+  onOpenSettings: () => void;
 }
 
-export function Sidebar({ onNewVm, onEditVm }: Props) {
+export function Sidebar({ onNewVm, onEditVm, onOpenSettings }: Props) {
   const { vms, folders, refresh, remove } = useVmsStore();
   const addTab = useSessionsStore((s) => s.addTab);
   const [query, setQuery] = useState('');
@@ -106,10 +107,15 @@ export function Sidebar({ onNewVm, onEditVm }: Props) {
         )}
       </div>
 
-      <NewWorkspaceButton />
-      <button className="sidebar-new" onClick={onNewVm} style={{ marginTop: 4 }}>
-        <span className="sidebar-new-plus">+</span> New host
-      </button>
+      <div className="sidebar-footer">
+        <NewWorkspaceButton />
+        <button className="sidebar-new" onClick={onNewVm}>
+          <span className="sidebar-new-plus">+</span> New host
+        </button>
+        <button className="sidebar-new sidebar-settings-button" onClick={onOpenSettings}>
+          <span className="sidebar-new-plus">⚙</span> Settings
+        </button>
+      </div>
     </aside>
   );
 }

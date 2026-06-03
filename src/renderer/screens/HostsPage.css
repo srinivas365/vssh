@@ -58,7 +58,7 @@
 .hosts-search:focus {
   outline: none;
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.12);
+  box-shadow: 0 0 0 3px var(--accent-ring);
 }
 
 .hosts-chips {
