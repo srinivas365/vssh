@@ -8,9 +8,11 @@ import './HostsPage.css';
 interface Props {
   onNewVm: () => void;
   onEditVm: (vm: Vm) => void;
+  onUploadVm: (vm: Vm) => void;
+  onDownloadVm: (vm: Vm) => void;
 }
 
-export function HostsPage({ onNewVm, onEditVm }: Props) {
+export function HostsPage({ onNewVm, onEditVm, onUploadVm, onDownloadVm }: Props) {
   const { vms, folders, refresh, remove } = useVmsStore();
   const addTab = useSessionsStore((s) => s.addTab);
   const [query, setQuery] = useState('');
@@ -86,7 +88,7 @@ export function HostsPage({ onNewVm, onEditVm }: Props) {
           <div className="hosts-grid">
             {recent.map((vm) => (
               <HostCard key={`recent-${vm.id}`} vm={vm}
-                onConnect={() => connect(vm)} onEdit={() => onEditVm(vm)} onDelete={() => remove(vm.id)} />
+                onConnect={() => connect(vm)} onEdit={() => onEditVm(vm)} onDelete={() => remove(vm.id)} onUpload={() => onUploadVm(vm)} onDownload={() => onDownloadVm(vm)} />
             ))}
           </div>
         </section>
@@ -111,7 +113,7 @@ export function HostsPage({ onNewVm, onEditVm }: Props) {
           <div className="hosts-grid">
             {filtered.map((vm) => (
               <HostCard key={vm.id} vm={vm}
-                onConnect={() => connect(vm)} onEdit={() => onEditVm(vm)} onDelete={() => remove(vm.id)} />
+                onConnect={() => connect(vm)} onEdit={() => onEditVm(vm)} onDelete={() => remove(vm.id)} onUpload={() => onUploadVm(vm)} onDownload={() => onDownloadVm(vm)} />
             ))}
           </div>
         )}
@@ -120,11 +122,13 @@ export function HostsPage({ onNewVm, onEditVm }: Props) {
   );
 }
 
-function HostCard({ vm, onConnect, onEdit, onDelete }: {
+function HostCard({ vm, onConnect, onEdit, onDelete, onUpload, onDownload }: {
   vm: Vm;
   onConnect: () => void;
   onEdit: () => void;
   onDelete: () => void;
+  onUpload: () => void;
+  onDownload: () => void;
 }) {
   const authBadge =
     vm.authMethod === 'password' ? 'Password' :
@@ -145,6 +149,8 @@ function HostCard({ vm, onConnect, onEdit, onDelete }: {
       </div>
       <div className="host-card-actions">
         <button className="btn btn-primary host-card-connect" onClick={onConnect}>Connect</button>
+        <button className="host-card-icon-btn" onClick={onUpload} title="Upload">⇧</button>
+        <button className="host-card-icon-btn" onClick={onDownload} title="Download">⇩</button>
         <button className="host-card-icon-btn" onClick={onEdit} title="Edit">✎</button>
         <button className="host-card-icon-btn" onClick={onDelete} title="Delete">✕</button>
       </div>

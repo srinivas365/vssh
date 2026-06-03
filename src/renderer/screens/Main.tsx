@@ -7,6 +7,8 @@ import { VmEditForm } from '../components/VmEditForm/VmEditForm';
 import { QuickConnect } from '../components/QuickConnect/QuickConnect';
 import { HostsPage } from './HostsPage';
 import { TransfersPage } from './TransfersPage';
+import { TransferWizard } from '../components/Transfers/TransferWizard';
+import type { TransferDirection } from '@shared/types';
 import { useSessionsStore } from '../state/sessions-store';
 import { useVaultStore } from '../state/vault-store';
 import { useTransfersStore } from '../state/transfers-store';
@@ -20,6 +22,7 @@ export function Main() {
   const [editing, setEditing] = useState<Vm | null | undefined>(undefined);
   const [quickOpen, setQuickOpen] = useState(false);
   const [view, setView] = useState<View>('hosts');
+  const [transferWizard, setTransferWizard] = useState<{ vm: Vm; direction: TransferDirection } | null>(null);
 
   useEffect(() => {
     window.api.session.onState((s) => updateState(s));
@@ -137,7 +140,12 @@ export function Main() {
             ))}
             {/* Hosts page overlays the terminal stack when active. */}
             <div style={{ display: view === 'hosts' ? 'block' : 'none' }}>
-              <HostsPage onNewVm={() => setEditing(null)} onEditVm={(vm) => setEditing(vm)} />
+              <HostsPage
+                onNewVm={() => setEditing(null)}
+                onEditVm={(vm) => setEditing(vm)}
+                onUploadVm={(vm) => setTransferWizard({ vm, direction: 'upload' })}
+                onDownloadVm={(vm) => setTransferWizard({ vm, direction: 'download' })}
+              />
             </div>
             <div style={{ display: view === 'transfers' ? 'block' : 'none' }}>
               <TransfersPage />
@@ -148,6 +156,13 @@ export function Main() {
 
       {editing !== undefined && <VmEditForm initial={editing} onClose={() => setEditing(undefined)} />}
       {quickOpen && <QuickConnect onClose={() => setQuickOpen(false)} />}
+      {transferWizard && (
+        <TransferWizard
+          vm={transferWizard.vm}
+          direction={transferWizard.direction}
+          onClose={() => setTransferWizard(null)}
+        />
+      )}
       <ToastOverlay />
     </div>
   );
