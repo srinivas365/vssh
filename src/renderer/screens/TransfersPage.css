@@ -2,10 +2,10 @@
 .transfers-header { display: flex; justify-content: space-between; align-items: end; margin-bottom: 20px; }
 .transfers-header h1 { margin: 0; font-size: 28px; }
 .transfers-header p { margin: 0; color: var(--text-muted); }
-.transfers-empty { border: 1px dashed var(--border); border-radius: 18px; padding: 40px; color: var(--muted); text-align: center; }
+.transfers-empty { border: 1px dashed var(--border); border-radius: 18px; padding: 40px; color: var(--text-muted); text-align: center; }
 .transfers-list { display: grid; gap: 14px; }
 
-.transfer-card { border: 1px solid var(--border); border-radius: 18px; padding: 16px; background: var(--panel); display: flex; flex-direction: column; gap: 10px; }
+.transfer-card { border: 1px solid var(--border); border-radius: 18px; padding: 16px; background: var(--bg-panel); display: flex; flex-direction: column; gap: 10px; }
 
 /* VM header row */
 .transfer-card-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
