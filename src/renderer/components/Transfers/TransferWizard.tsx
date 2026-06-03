@@ -42,6 +42,8 @@ export function TransferWizard({ vm, direction, onClose }: Props) {
       const finalPath = local.type === 'directory' && folderMode === 'contents-only' ? entry.path : joinPath(entry.path, local.name);
       void window.api.transfer.start({
         vmId: vm.id,
+        vmLabel: vm.label,
+        vmHost: vm.host,
         direction: 'upload',
         source: { path: local.path, name: local.name, type: local.type },
         destination: { directory: entry.path, finalPath },
@@ -58,6 +60,8 @@ export function TransferWizard({ vm, direction, onClose }: Props) {
       const finalPath = remote.type === 'directory' && folderMode === 'contents-only' ? dir : joinPath(dir, basename(remote.path));
       void window.api.transfer.start({
         vmId: vm.id,
+        vmLabel: vm.label,
+        vmHost: vm.host,
         direction: 'download',
         source: { path: remote.path, name: remote.name, type: remote.type === 'directory' ? 'directory' : 'file' },
         destination: { directory: dir, finalPath },

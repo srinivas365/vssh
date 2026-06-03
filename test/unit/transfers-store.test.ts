@@ -6,6 +6,8 @@ function record(id: string, status: TransferRecord['status']): TransferRecord {
   return {
     id,
     vmId: 1,
+    vmLabel: 'Test VM',
+    vmHost: '10.0.0.1',
     direction: 'upload',
     engine: 'sftp',
     status,
