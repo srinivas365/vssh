@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Lock } from 'lucide-react';
+import { Lock, Terminal as TerminalIcon } from 'lucide-react';
 import { Sidebar } from '../components/Sidebar/Sidebar';
 import { TabBar } from '../components/TabBar/TabBar';
 import { Terminal } from '../components/Terminal/Terminal';
@@ -8,6 +8,7 @@ import { VmEditForm } from '../components/VmEditForm/VmEditForm';
 import { QuickConnect } from '../components/QuickConnect/QuickConnect';
 import { HostsPage } from './HostsPage';
 import { TransfersPage } from './TransfersPage';
+import { SettingsPage } from './SettingsPage';
 import { TransferWizard } from '../components/Transfers/TransferWizard';
 import type { TransferDirection } from '@shared/types';
 import { useSessionsStore } from '../state/sessions-store';
@@ -15,7 +16,7 @@ import { useVaultStore } from '../state/vault-store';
 import { useTransfersStore } from '../state/transfers-store';
 import { Vm } from '@shared/types';
 
-type View = 'hosts' | 'terminal' | 'transfers';
+type View = 'hosts' | 'terminal' | 'transfers' | 'settings';
 
 export function Main() {
   const { tabs, activeTabId, updateState, pushToast, removeTab, addTab } = useSessionsStore();
@@ -81,7 +82,7 @@ export function Main() {
     <div className="app-shell">
       <header className="app-header">
         <div className="app-brand">
-          <span className="app-brand-mark">▸</span>
+          <span className="app-brand-mark"><TerminalIcon size={13} strokeWidth={2.2} /></span>
           <span className="app-brand-name">vssh</span>
         </div>
         <nav className="app-nav">
@@ -121,7 +122,11 @@ export function Main() {
       </header>
 
       <div className="app-body">
-        <Sidebar onNewVm={() => setEditing(null)} onEditVm={(vm) => setEditing(vm)} />
+        <Sidebar
+          onNewVm={() => setEditing(null)}
+          onEditVm={(vm) => setEditing(vm)}
+          onOpenSettings={() => setView('settings')}
+        />
         <main className="app-main">
           <div
             style={{
@@ -150,6 +155,9 @@ export function Main() {
             </div>
             <div style={{ display: view === 'transfers' ? 'block' : 'none' }}>
               <TransfersPage />
+            </div>
+            <div style={{ display: view === 'settings' ? 'block' : 'none' }}>
+              <SettingsPage />
             </div>
           </div>
         </main>

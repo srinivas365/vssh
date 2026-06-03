@@ -1,3 +1,5 @@
+import type { AppSettings } from './types';
+
 export const IPC = {
   // vault
   VAULT_STATE: 'vault:state',
@@ -12,6 +14,10 @@ export const IPC = {
   VMS_DELETE: 'vms:delete',
   VMS_TOUCH_USED: 'vms:touch-used',
   VMS_TEST_CONNECTION: 'vms:test-connection',
+  // settings
+  SETTINGS_GET: 'settings:get',
+  SETTINGS_UPDATE: 'settings:update',
+  SETTINGS_CHANGED: 'settings:changed',
   // folders
   FOLDERS_LIST: 'folders:list',
   FOLDERS_CREATE: 'folders:create',
@@ -54,3 +60,11 @@ export const DEFAULTS = {
   WRONG_PASSWORD_DELAY_MS: 1_000,
   MIN_MASTER_PW_LEN: 12,
 } as const;
+
+export const DEFAULT_APP_SETTINGS: AppSettings = {
+  theme: 'light',
+  appFontFamily: '-apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", system-ui, sans-serif',
+  terminalFontFamily: 'Menlo, Monaco, Consolas, "Liberation Mono", monospace',
+  terminalFontSize: 13,
+  autoLockMinutes: 15,
+};

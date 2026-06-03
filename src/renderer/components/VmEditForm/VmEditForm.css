@@ -47,7 +47,7 @@
 .vm-form input:not([type='checkbox']):not([type='radio']):focus {
   outline: none;
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+  box-shadow: 0 0 0 3px var(--accent-ring);
 }
 
 .vm-form .checkbox-label {

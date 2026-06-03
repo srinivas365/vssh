@@ -1,6 +1,6 @@
 import { contextBridge, ipcRenderer } from 'electron';
 import { IPC } from '@shared/constants';
-import { Vm, VmInput, Folder, VaultEntry, SessionState, ToastPayload, PromptType, LocalSelection, RemoteEntry, TransferStartRequest, TransferRecord, TransferProgressEvent, TransferLogEvent, TransferToastPayload, VmConnectionTestResult } from '@shared/types';
+import { Vm, VmInput, Folder, VaultEntry, SessionState, ToastPayload, PromptType, LocalSelection, RemoteEntry, TransferStartRequest, TransferRecord, TransferProgressEvent, TransferLogEvent, TransferToastPayload, VmConnectionTestResult, AppSettings, AppSettingsPatch } from '@shared/types';
 
 const api = {
   vault: {
@@ -11,6 +11,12 @@ const api = {
     setSecret: (vmId: number, entry: VaultEntry) => ipcRenderer.invoke(IPC.VAULT_SET_SECRET, vmId, entry),
     onStateChanged: (cb: (state: 'empty' | 'locked' | 'unlocked') => void) =>
       ipcRenderer.on(IPC.VAULT_STATE_CHANGED, (_e, s) => cb(s)),
+  },
+  settings: {
+    get: (): Promise<AppSettings> => ipcRenderer.invoke(IPC.SETTINGS_GET),
+    update: (patch: AppSettingsPatch): Promise<AppSettings> => ipcRenderer.invoke(IPC.SETTINGS_UPDATE, patch),
+    onChanged: (cb: (settings: AppSettings) => void) =>
+      ipcRenderer.on(IPC.SETTINGS_CHANGED, (_e, settings) => cb(settings)),
   },
   vms: {
     list: (): Promise<Vm[]> => ipcRenderer.invoke(IPC.VMS_LIST),
