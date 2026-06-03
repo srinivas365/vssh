@@ -197,10 +197,10 @@ export function registerIpc(d: Deps): void {
   });
 
   ipcMain.handle(IPC.TRANSFER_START, async (_e, request: TransferStartRequest) => d.transfers.start(request));
-  ipcMain.handle(IPC.TRANSFER_PAUSE, async (_e, id: string) => d.transfers.emit('pause-request', id));
-  ipcMain.handle(IPC.TRANSFER_RESUME, async (_e, id: string) => d.transfers.emit('resume-request', id));
-  ipcMain.handle(IPC.TRANSFER_STOP, async (_e, id: string) => d.transfers.emit('stop-request', id));
-  ipcMain.handle(IPC.TRANSFER_DELETE_PARTIALS, async (_e, id: string) => d.transfers.emit('delete-partials-request', id));
+  ipcMain.handle(IPC.TRANSFER_PAUSE, async (_e, id: string) => d.transfers.pause(id));
+  ipcMain.handle(IPC.TRANSFER_RESUME, async (_e, id: string) => d.transfers.resume(id));
+  ipcMain.handle(IPC.TRANSFER_STOP, async (_e, id: string) => d.transfers.stop(id));
+  ipcMain.handle(IPC.TRANSFER_DELETE_PARTIALS, async (_e, id: string) => d.transfers.deletePartials(id));
 
   d.transfers.on('state', (record) => d.mainWindow()?.webContents.send(IPC.TRANSFER_STATE, record));
   d.transfers.on('progress', (progress) => d.mainWindow()?.webContents.send(IPC.TRANSFER_PROGRESS, progress));
