@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Download, Pencil, Search, Server, Upload, X } from 'lucide-react';
+import { Download, Pencil, Search, Server, Trash2, Upload } from 'lucide-react';
 import { useVmsStore } from '../state/vms-store';
 import { useSessionsStore } from '../state/sessions-store';
 import { Vm } from '@shared/types';
@@ -131,11 +131,14 @@ function HostCard({ vm, onConnect, onEdit, onDelete, onUpload, onDownload }: {
   onUpload: () => void;
   onDownload: () => void;
 }) {
+  const [confirmDelete, setConfirmDelete] = useState(false);
+
   const authBadge =
     vm.authMethod === 'password' ? 'Password' :
     vm.authMethod === 'key' ? 'Key' : 'Key + password';
 
   return (
+    <>
     <div className="host-card" onDoubleClick={onConnect}>
       <div className="host-card-head">
         <div className="host-card-icon"><Server size={18} /></div>
@@ -153,9 +156,21 @@ function HostCard({ vm, onConnect, onEdit, onDelete, onUpload, onDownload }: {
         <button className="host-card-icon-btn" onClick={onUpload} title="Upload"><Upload size={14} /></button>
         <button className="host-card-icon-btn" onClick={onDownload} title="Download"><Download size={14} /></button>
         <button className="host-card-icon-btn" onClick={onEdit} title="Edit"><Pencil size={14} /></button>
-        <button className="host-card-icon-btn" onClick={onDelete} title="Delete"><X size={14} /></button>
+        <button className="host-card-icon-btn" onClick={() => setConfirmDelete(true)} title="Delete"><Trash2 size={14} /></button>
       </div>
     </div>
+    {confirmDelete && (
+      <div className="modal-backdrop">
+        <div className="modal-card">
+          <h2>Delete "{vm.label}"?</h2>
+          <div className="modal-actions">
+            <button className="btn" onClick={() => setConfirmDelete(false)}>Cancel</button>
+            <button className="btn btn-danger" onClick={onDelete}>Delete</button>
+          </div>
+        </div>
+      </div>
+    )}
+    </>
   );
 }
 
