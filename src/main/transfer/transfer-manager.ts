@@ -1,6 +1,6 @@
 import { EventEmitter } from 'node:events';
 import { randomUUID } from 'node:crypto';
-import type { TransferEngineName, TransferRecord, TransferStartRequest } from '@shared/types';
+import type { TransferEngineName, TransferRecord, TransferStartRequest, TransferStatus } from '@shared/types';
 
 interface TransferManagerDeps {
   chooseEngine: (request: TransferStartRequest) => Promise<TransferEngineName>;
@@ -48,6 +48,23 @@ export class TransferManager extends EventEmitter {
 
   list(): TransferRecord[] {
     return Array.from(this.records.values());
+  }
+
+  updateStatus(id: string, status: TransferStatus): void {
+    const record = this.records.get(id);
+    if (!record) return;
+    const updated = { ...record, status, finishedAt: ['succeeded', 'failed', 'stopped'].includes(status) ? Date.now() : record.finishedAt };
+    this.records.set(id, updated);
+    this.emit('state', updated);
+  }
+
+  fail(id: string, error: string, partialsKept: boolean): void {
+    const record = this.records.get(id);
+    if (!record) return;
+    const updated = { ...record, status: 'failed' as const, error, partialsKept, finishedAt: Date.now() };
+    this.records.set(id, updated);
+    this.emit('state', updated);
+    this.emit('toast', { id, vmId: updated.vmId, status: updated.status, message: error, canResume: partialsKept, canDeletePartials: partialsKept });
   }
 
   private hasActiveTransferForVm(vmId: number): boolean {
