@@ -43,7 +43,23 @@ export class RemoteBrowserService {
     }
   }
 
-  async stat(_vm: Vm, _secret: VaultEntry | null, _remotePath: string): Promise<RemoteEntry | null> {
-    return null;
+  async stat(vm: Vm, secret: VaultEntry | null, remotePath: string): Promise<RemoteEntry | null> {
+    const conn = await connectSftp(vm, secret);
+    try {
+      const attrs = await new Promise<import('ssh2').Stats>((resolve, reject) => {
+        conn.sftp.stat(remotePath, (err, stats) => (err ? reject(err) : resolve(stats)));
+      });
+      return {
+        name: remotePath.split('/').filter(Boolean).pop() ?? '/',
+        path: remotePath,
+        type: ((attrs.mode & 0o170000) === 0o040000) ? 'directory' : 'file',
+        sizeBytes: Number.isFinite(attrs.size) ? attrs.size : null,
+        modifiedAt: attrs.mtime ? attrs.mtime * 1000 : null,
+      };
+    } catch {
+      return null;
+    } finally {
+      conn.close();
+    }
   }
 }
