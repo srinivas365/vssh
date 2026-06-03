@@ -1,19 +1,74 @@
 .transfers-page { padding: 28px; color: var(--text); }
 .transfers-header { display: flex; justify-content: space-between; align-items: end; margin-bottom: 20px; }
 .transfers-header h1 { margin: 0; font-size: 28px; }
-.transfers-header p { margin: 0; color: var(--muted); }
+.transfers-header p { margin: 0; color: var(--text-muted); }
 .transfers-empty { border: 1px dashed var(--border); border-radius: 18px; padding: 40px; color: var(--muted); text-align: center; }
 .transfers-list { display: grid; gap: 14px; }
-.transfer-card { border: 1px solid var(--border); border-radius: 18px; padding: 16px; background: var(--panel); }
-.transfer-card-main { display: flex; justify-content: space-between; gap: 16px; }
-.transfer-title { font-weight: 700; text-transform: capitalize; }
-.transfer-sub { color: var(--muted); font-size: 12px; overflow-wrap: anywhere; margin-top: 4px; }
-.transfer-badges { display: flex; gap: 8px; }
-.transfer-badges span { border: 1px solid var(--border); border-radius: 999px; padding: 4px 8px; font-size: 12px; }
-.transfer-progress-row { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 12px; margin-top: 14px; }
-.transfer-progress-row progress { width: 100%; height: 10px; }
-.transfer-actions { display: flex; gap: 8px; margin-top: 14px; }
-.transfer-actions button { border: 1px solid var(--border); border-radius: 10px; padding: 6px 10px; background: var(--surface); color: var(--text); }
-.transfer-actions button:disabled { opacity: 0.45; }
-.transfer-logs { margin-top: 12px; }
-.transfer-logs pre { white-space: pre-wrap; color: var(--muted); font-size: 12px; }
+
+.transfer-card { border: 1px solid var(--border); border-radius: 18px; padding: 16px; background: var(--panel); display: flex; flex-direction: column; gap: 10px; }
+
+/* VM header row */
+.transfer-card-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.transfer-card-vm { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.transfer-vm-icon {
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  display: grid; place-items: center;
+  flex-shrink: 0;
+}
+.transfer-vm-info { min-width: 0; }
+.transfer-vm-label { font-weight: 600; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.transfer-vm-host { font-size: 12px; color: var(--text-muted); font-family: ui-monospace, SFMono-Regular, monospace; }
+
+/* Badges */
+.transfer-card-badges { display: flex; gap: 6px; flex-shrink: 0; }
+.transfer-badge-engine {
+  background: var(--bg-muted);
+  color: var(--text-muted);
+  border-radius: 4px;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 500;
+}
+.transfer-badge-status {
+  border-radius: 4px;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 500;
+}
+.transfer-badge-succeeded { background: rgba(16, 185, 129, 0.12); color: var(--success); }
+.transfer-badge-failed    { background: rgba(239, 68, 68, 0.12);  color: var(--danger); }
+.transfer-badge-running   { background: rgba(245, 158, 11, 0.12); color: var(--warn); }
+.transfer-badge-paused    { background: rgba(245, 158, 11, 0.12); color: var(--warn); }
+.transfer-badge-stopped,
+.transfer-badge-preparing { background: var(--bg-muted); color: var(--text-faint); }
+
+/* File row */
+.transfer-file-row { display: flex; align-items: center; gap: 6px; }
+.transfer-direction-icon { color: var(--text-muted); display: flex; align-items: center; }
+.transfer-filename { font-weight: 600; font-size: 13px; }
+.transfer-sub { color: var(--text-muted); font-size: 12px; overflow-wrap: anywhere; }
+
+/* Progress */
+.transfer-progress-row { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 12px; }
+.transfer-progress-row progress { width: 100%; height: 6px; }
+
+/* Actions */
+.transfer-actions { display: flex; gap: 6px; }
+.transfer-action-btn {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  color: var(--text-muted);
+  cursor: pointer;
+  width: 30px; height: 30px;
+  display: grid; place-items: center;
+}
+.transfer-action-btn:hover:not(:disabled) { background: var(--bg-muted); color: var(--text); }
+.transfer-action-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+/* Logs */
+.transfer-logs { margin-top: 2px; }
+.transfer-logs pre { white-space: pre-wrap; color: var(--text-muted); font-size: 12px; }
