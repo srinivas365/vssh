@@ -1,6 +1,6 @@
 import { EventEmitter } from 'node:events';
 import { randomUUID } from 'node:crypto';
-import type { TransferEngineName, TransferRecord, TransferStartRequest, TransferStatus } from '@shared/types';
+import type { TransferEngineName, TransferProgressEvent, TransferRecord, TransferStartRequest, TransferStatus } from '@shared/types';
 
 interface TransferManagerDeps {
   chooseEngine: (request: TransferStartRequest) => Promise<TransferEngineName>;
@@ -89,6 +89,13 @@ export class TransferManager extends EventEmitter {
   deletePartials(id: string): void {
     this.markPartials(id, false);
     this.emit('delete-partials', id);
+  }
+
+  applyProgress(event: TransferProgressEvent): void {
+    const record = this.records.get(event.id);
+    if (!record) return;
+    const updated = { ...record, transferredBytes: event.transferredBytes, totalBytes: event.totalBytes, percent: event.percent };
+    this.records.set(event.id, updated);
   }
 
   private markPartials(id: string, partialsKept: boolean): void {

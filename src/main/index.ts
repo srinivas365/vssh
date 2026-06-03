@@ -69,7 +69,10 @@ app.whenReady().then(() => {
       const context = {
         vm,
         secret: vault.getSecret(vm.vaultRef),
-        emitProgress: (event: import('@shared/types').TransferProgressEvent) => transfers.emit('progress', event),
+        emitProgress: (event: import('@shared/types').TransferProgressEvent) => {
+          transfers.applyProgress(event);
+          transfers.emit('progress', event);
+        },
         emitLog: (line: string, level: 'info' | 'warn' | 'error' = 'info') => transfers.emit('log', { id: record.id, line, level, at: Date.now() }),
         markRunning: () => transfers.updateStatus(record.id, 'running'),
         markSucceeded: () => transfers.updateStatus(record.id, 'succeeded'),
