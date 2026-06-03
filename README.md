@@ -4,7 +4,7 @@
 
 # vssh
 
-A Termius-alternative SSH client for macOS that remembers your hosts and quietly hands you the password when SSH asks for it.
+A Termius-alternative SSH client for macOS, Linux, and Windows that remembers your hosts and quietly hands you the password when SSH asks for it.
 
 [![CI](https://github.com/srinivas365/vssh/actions/workflows/ci.yml/badge.svg)](https://github.com/srinivas365/vssh/actions/workflows/ci.yml)
 [![Release](https://github.com/srinivas365/vssh/actions/workflows/release.yml/badge.svg)](https://github.com/srinivas365/vssh/actions/workflows/release.yml)
@@ -46,7 +46,7 @@ Working across a fleet of VMs means typing — or worse, pasting — the same pa
 - **Sandboxed renderer** — `contextIsolation: true`, `nodeIntegration: false`, `sandbox: true`, strict CSP, preload bundled with `esbuild` so there are no runtime `require()` calls.
 
 ### File transfers
-- **Host-level uploads/downloads** — copy files or folders between your Mac and a saved VM directly from the host card; no SSH, rsync, or sftp commands required.
+- **Host-level uploads/downloads** — copy files or folders between your machine and a saved VM directly from the host card; no SSH, rsync, or sftp commands required.
 - **SFTP browsing + rsync transfers** — browse remote directories with SFTP; transfers use rsync when available on both ends and fall back to SFTP otherwise.
 - **Transfers page** — track progress, bytes transferred, logs, pause/resume, stop, and partial-file recovery for all current-session transfers.
 
@@ -59,18 +59,27 @@ Working across a fleet of VMs means typing — or worse, pasting — the same pa
 
 ### Download
 
-Grab the latest `vssh-x.y.z-arm64.dmg` from the [Releases page](https://github.com/srinivas365/vssh/releases/latest).
+Grab the latest asset for your OS from the [Releases page](https://github.com/srinivas365/vssh/releases/latest):
 
-1. Open the DMG and drag **vssh** to Applications.
-2. **One-time setup** — remove the macOS quarantine flag so Gatekeeper stops blocking the unsigned app:
+- **macOS (Apple Silicon):** `vssh-<version>-arm64.dmg`
+- **Linux (x64):** `vssh-<version>.AppImage`
+- **Windows (x64):** `vssh*Setup*.exe`
+
+Install:
+
+1. **macOS** — open the DMG and drag **vssh** to Applications.
+   - One-time setup for unsigned builds:
+     ```bash
+     sudo xattr -cr /Applications/vssh.app
+     ```
+2. **Linux** — mark the AppImage executable and run it:
    ```bash
-   sudo xattr -cr /Applications/vssh.app
+   chmod +x vssh-*.AppImage
+   ./vssh-*.AppImage
    ```
-3. Open vssh.
+3. **Windows** — run the `.exe` installer.
 
-> **Why step 2?** macOS shows _"vssh is damaged and can't be opened"_ for unsigned apps downloaded from the internet, even though the app itself is fine. The `xattr` command removes the "downloaded from internet" marker so the OS stops complaining. Right-click → Open does **not** work for this particular Gatekeeper rule (it does for "unidentified developer", but not for "damaged"). You only need to do this once per install. Future updates may swap in a signed + notarized build that opens without this step — see [Code signing](#code-signing-optional).
-
-> Apple Silicon only for now — Intel builds are paused because GitHub deprecated the `macos-13` runner image. If you need an Intel build, see [Build from source](#build-from-source).
+> **macOS note:** Gatekeeper may block unsigned apps downloaded from the internet with _"vssh is damaged and can't be opened"_. The `xattr` command above removes the quarantine marker.
 
 ### Build from source
 
@@ -79,7 +88,7 @@ git clone git@github.com:srinivas365/vssh.git
 cd vssh
 make install            # npm install
 make icon               # generate app icon
-make dmg                # produces release/vssh-*.dmg
+make dist               # produces installer in release/ for your current OS
 ```
 
 Or just run it without packaging:
@@ -87,6 +96,38 @@ Or just run it without packaging:
 ```bash
 make run                # build + launch Electron
 ```
+
+## Screenshots
+
+### Landing + vault unlock
+
+![vssh unlock screen](docs/screenshots/unlock.png)
+
+### Hosts, workspaces, and actions
+
+![vssh hosts page](docs/screenshots/hosts.png)
+
+### Quick connect palette
+
+![vssh quick connect](docs/screenshots/quick-connect.png)
+
+### Terminal session + prompt automation
+
+![vssh terminal](docs/screenshots/terminal.png)
+
+### Transfers
+
+![vssh transfers page](docs/screenshots/transfers.png)
+
+### Settings and themes
+
+![vssh settings page](docs/screenshots/settings.png)
+
+### Theme + font customization applied
+
+![vssh settings with dracula + font changes](docs/screenshots/settings-theme-font.png)
+![vssh hosts with dracula + monospace app font](docs/screenshots/hosts-theme-font.png)
+![vssh terminal with dracula + JetBrains Mono](docs/screenshots/terminal-theme-font.png)
 
 ## Architecture
 
@@ -135,8 +176,8 @@ The renderer never receives plaintext secrets. When a prompt is detected, the ma
 | Build | Vite (renderer), tsc + tsc-alias (main), esbuild (preload) |
 | Native | better-sqlite3, argon2, node-pty |
 | Tests | Vitest (unit), Playwright (E2E driving Electron) |
-| Packaging | electron-builder → DMG |
-| CI | GitHub Actions on Ubuntu (test + E2E) and macOS-13/14 (DMG) |
+| Packaging | electron-builder → DMG (macOS), AppImage (Linux), NSIS `.exe` (Windows) |
+| CI | GitHub Actions on Ubuntu (test + E2E) + release builds on macOS, Linux, and Windows |
 
 ## Development
 
@@ -213,9 +254,9 @@ docs/superpowers/        # Design spec and implementation plan
 1. **`test`** (Ubuntu): typecheck → build → unit tests
 2. **`e2e`** (Ubuntu): builds + rebuilds native modules + spins up Dockerized sshd + runs Playwright under `xvfb`
 
-### DMG releases
+### Cross-platform releases
 
-`.github/workflows/release.yml` fires on a `v*` tag push and produces DMGs for both architectures.
+`.github/workflows/release.yml` fires on a `v*` tag push and produces installers for all supported platforms.
 
 ```bash
 git tag v0.1.0
@@ -223,10 +264,12 @@ git push origin v0.1.0
 ```
 
 GitHub Actions:
-1. Builds `vssh-0.1.0-arm64.dmg` on `macos-14` (Apple Silicon)
-2. Creates a GitHub Release at `/releases/tag/v0.1.0` with the DMG attached and auto-generated notes
+1. Builds a macOS Apple Silicon DMG (`*.dmg`) on `macos-14`
+2. Builds a Linux x64 AppImage (`*.AppImage`) on `ubuntu-latest`
+3. Builds a Windows x64 NSIS installer (`*.exe`) on `windows-latest`
+4. Creates a GitHub Release at `/releases/tag/v0.1.0` with those assets attached and auto-generated notes
 
-### Code signing (optional)
+### macOS code signing (optional)
 
 Without signing the DMG still works — macOS Gatekeeper just asks the user to confirm on first launch. To produce signed + notarized builds, add these repo secrets:
 
@@ -242,17 +285,20 @@ The release workflow picks them up automatically; no code change required.
 
 ## Data and updates
 
-User data lives outside the `.app` bundle in:
+User data lives outside the packaged app/binary in:
 
 ```
-~/Library/Application Support/vssh/
-├── vms.db        # VM metadata — SQLite, NOT encrypted
-└── vault.enc     # All passwords — AES-256-GCM blob
+macOS:   ~/Library/Application Support/vssh/
+Linux:   ~/.config/vssh/
+Windows: %APPDATA%\vssh\
+
+vms.db        # VM metadata — SQLite, NOT encrypted
+vault.enc     # All passwords — AES-256-GCM blob
 ```
 
-**Updates preserve data.** Installing a newer DMG only replaces `/Applications/vssh.app`; the data directory is never touched. Your hosts and saved passwords carry over.
+**Updates preserve data.** Installing a newer release replaces app binaries only; the user data directory is not touched. Your hosts and saved passwords carry over.
 
-**Backups.** Copy that folder somewhere safe. The vault is portable across machines (same password unlocks it on any Mac with vssh installed).
+**Backups.** Copy that folder somewhere safe. The vault is portable across machines (same password unlocks it on any machine with vssh installed).
 
 **Lost master password = lost vault.** This is by design — there's no escrow, no recovery key, no support form. Choose a password you can remember or write down somewhere offline.
 

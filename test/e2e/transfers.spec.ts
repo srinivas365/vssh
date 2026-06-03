@@ -68,7 +68,7 @@ test('shows upload and download buttons on host cards when a host exists', async
   await numberInputs.nth(0).fill('2222');
   await textInputs.nth(2).fill('testuser');
   await pwFormInputs.nth(0).fill('testpass');
-  await page.getByRole('button', { name: /save/i }).click();
+  await form.getByRole('button', { name: /^Create$/ }).click();
 
   await expect(page.getByTitle('Upload')).toBeVisible({ timeout: 10_000 });
   await expect(page.getByTitle('Download')).toBeVisible({ timeout: 10_000 });

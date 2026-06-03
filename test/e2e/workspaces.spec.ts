@@ -51,10 +51,9 @@ test('workspace create, host assignment, delete cascade', async () => {
   await page.getByRole('heading', { name: /New VM/i }).waitFor();
 
   // Workspace dropdown shows current pick; choose Production
-  await page.locator('.rselect-trigger').first().click();
-  await page.getByRole('option', { name: 'Production' }).click();
-
   const form = page.locator('form.vm-form');
+  await form.locator('.rselect-trigger').first().click();
+  await page.getByRole('option', { name: 'Production' }).click();
   const textInputs = form.locator('input:not([type="password"]):not([type="number"])');
   const numberInputs = form.locator('input[type="number"]');
   const pwInputsForm = form.locator('input[type="password"]');
