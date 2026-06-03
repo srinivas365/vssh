@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Lock } from 'lucide-react';
 import { Sidebar } from '../components/Sidebar/Sidebar';
 import { TabBar } from '../components/TabBar/TabBar';
 import { Terminal } from '../components/Terminal/Terminal';
@@ -114,7 +115,7 @@ export function Main() {
             <span className="app-header-hint">⌘K to quick-connect · ⌘L to lock</span>
           )}
           <button className="app-header-lock" onClick={() => void lock()} title="Lock (⌘L)">
-            🔒
+            <Lock size={14} />
           </button>
         </div>
       </header>
