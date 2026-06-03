@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { Download, Pencil, Search, Server, Upload, X } from 'lucide-react';
 import { useVmsStore } from '../state/vms-store';
 import { useSessionsStore } from '../state/sessions-store';
 import { Vm } from '@shared/types';
@@ -49,7 +50,7 @@ export function HostsPage({ onNewVm, onEditVm, onUploadVm, onDownloadVm }: Props
         </div>
         <div className="hosts-header-actions">
           <div className="hosts-search-wrap">
-            <span className="hosts-search-icon">⌕</span>
+            <span className="hosts-search-icon"><Search size={14} /></span>
             <input
               className="hosts-search"
               placeholder="Search hosts, IPs, users…"
@@ -100,7 +101,7 @@ export function HostsPage({ onNewVm, onEditVm, onUploadVm, onDownloadVm }: Props
           <div className="hosts-empty">
             {vms.length === 0 ? (
               <>
-                <div className="hosts-empty-icon">⊟</div>
+                <div className="hosts-empty-icon"><Server size={26} /></div>
                 <h3>No hosts yet</h3>
                 <p>Add your first host to get started.</p>
                 <button className="btn btn-primary" onClick={onNewVm}>+ New host</button>
@@ -137,7 +138,7 @@ function HostCard({ vm, onConnect, onEdit, onDelete, onUpload, onDownload }: {
   return (
     <div className="host-card" onDoubleClick={onConnect}>
       <div className="host-card-head">
-        <div className="host-card-icon">⊟</div>
+        <div className="host-card-icon"><Server size={18} /></div>
         <div className="host-card-id">
           <div className="host-card-label">{vm.label}</div>
           <div className="host-card-host">{vm.username}@{vm.host}:{vm.port}</div>
@@ -149,10 +150,10 @@ function HostCard({ vm, onConnect, onEdit, onDelete, onUpload, onDownload }: {
       </div>
       <div className="host-card-actions">
         <button className="btn btn-primary host-card-connect" onClick={onConnect}>Connect</button>
-        <button className="host-card-icon-btn" onClick={onUpload} title="Upload">⇧</button>
-        <button className="host-card-icon-btn" onClick={onDownload} title="Download">⇩</button>
-        <button className="host-card-icon-btn" onClick={onEdit} title="Edit">✎</button>
-        <button className="host-card-icon-btn" onClick={onDelete} title="Delete">✕</button>
+        <button className="host-card-icon-btn" onClick={onUpload} title="Upload"><Upload size={14} /></button>
+        <button className="host-card-icon-btn" onClick={onDownload} title="Download"><Download size={14} /></button>
+        <button className="host-card-icon-btn" onClick={onEdit} title="Edit"><Pencil size={14} /></button>
+        <button className="host-card-icon-btn" onClick={onDelete} title="Delete"><X size={14} /></button>
       </div>
     </div>
   );

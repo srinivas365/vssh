@@ -88,7 +88,7 @@
   border-color: var(--accent);
 }
 .chip-count {
-  background: rgba(15, 23, 42, 0.08);
+  background: var(--bg-muted);
   border-radius: 8px;
   padding: 1px 6px;
   font-size: 10px;
