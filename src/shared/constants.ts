@@ -25,6 +25,20 @@ export const IPC = {
   SESSION_OUTPUT: 'session:output',           // main → renderer
   SESSION_STATE: 'session:state',             // main → renderer
   SESSION_TOAST: 'session:toast',             // main → renderer
+  // transfers
+  TRANSFER_PICK_UPLOAD_SOURCE: 'transfer:pick-upload-source',
+  TRANSFER_PICK_DOWNLOAD_DESTINATION: 'transfer:pick-download-destination',
+  TRANSFER_REMOTE_LIST: 'transfer:remote-list',
+  TRANSFER_REMOTE_STAT: 'transfer:remote-stat',
+  TRANSFER_START: 'transfer:start',
+  TRANSFER_PAUSE: 'transfer:pause',
+  TRANSFER_RESUME: 'transfer:resume',
+  TRANSFER_STOP: 'transfer:stop',
+  TRANSFER_DELETE_PARTIALS: 'transfer:delete-partials',
+  TRANSFER_PROGRESS: 'transfer:progress',       // main → renderer
+  TRANSFER_STATE: 'transfer:state',             // main → renderer
+  TRANSFER_LOG: 'transfer:log',                 // main → renderer
+  TRANSFER_TOAST: 'transfer:toast',             // main → renderer
   // misc
   PASTE_PASSWORD: 'session:paste-password',   // ⌘⇧P manual fallback
   VAULT_STATE_CHANGED: 'vault:state-changed', // main → renderer broadcast
