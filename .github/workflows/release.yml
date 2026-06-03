@@ -110,8 +110,14 @@ jobs:
           fi
           npx electron-builder ${{ matrix.target.electron_args }} --publish never
 
-      - name: Inspect release output
+      - name: Inspect release output (Unix)
+        if: runner.os != 'Windows'
         run: ls -lh release/
+
+      - name: Inspect release output (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: Get-ChildItem release | Format-Table Name,Length,LastWriteTime
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
