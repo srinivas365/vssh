@@ -44,6 +44,11 @@ Working across a fleet of VMs means typing — or worse, pasting — the same pa
 - **Renderer never sees plaintext secrets** — they flow main process → clipboard via a typed IPC surface.
 - **Sandboxed renderer** — `contextIsolation: true`, `nodeIntegration: false`, `sandbox: true`, strict CSP, preload bundled with `esbuild` so there are no runtime `require()` calls.
 
+### File transfers
+- **Host-level uploads/downloads** — copy files or folders between your Mac and a saved VM directly from the host card; no SSH, rsync, or sftp commands required.
+- **SFTP browsing + rsync transfers** — browse remote directories with SFTP; transfers use rsync when available on both ends and fall back to SFTP otherwise.
+- **Transfers page** — track progress, bytes transferred, logs, pause/resume, stop, and partial-file recovery for all current-session transfers.
+
 ### Productivity
 - **Keyboard-first** — `⌘1`/`⌘2` Hosts/Terminal view, `⌘K` quick-connect, `⌘T` new tab, `⌘W` close tab, `⌘⇧[`/`⌘⇧]` switch tabs, `⌘L` lock, `⌘⇧P` paste password.
 - **Terminal scrollback preserved** — switching between Hosts and Terminal views keeps every session's xterm buffer alive; only visibility toggles.
