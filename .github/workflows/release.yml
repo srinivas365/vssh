@@ -1,4 +1,4 @@
-name: Release (build DMG)
+name: Release (build installers)
 
 on:
   push:
@@ -19,10 +19,36 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  dmg:
-    name: Build DMG (arm64)
-    runs-on: macos-14   # Apple Silicon
+  build:
+    name: Build ${{ matrix.target.name }}
+    runs-on: ${{ matrix.target.os }}
     timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        target:
+          - name: macOS (arm64 DMG)
+            os: macos-14
+            electron_args: --mac dmg --arm64
+            artifact_name: vssh-arm64-dmg
+            artifact_paths: |
+              release/*.dmg
+              release/*.blockmap
+          - name: Linux (x64 AppImage)
+            os: ubuntu-latest
+            electron_args: --linux AppImage --x64
+            artifact_name: vssh-linux-x64-appimage
+            artifact_paths: |
+              release/*.AppImage
+              release/*.blockmap
+          - name: Windows (x64 NSIS)
+            os: windows-latest
+            electron_args: --win nsis --x64
+            artifact_name: vssh-windows-x64-nsis
+            artifact_paths: |
+              release/*.exe
+              release/*.blockmap
+              release/latest*.yml
     steps:
       - uses: actions/checkout@v4
 
@@ -32,13 +58,19 @@ jobs:
           node-version: '20'
           cache: npm
 
+      - name: Install build tools (Linux)
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y build-essential python3
+
       - name: Install librsvg (for icon build)
+        if: runner.os == 'macOS'
         run: brew install librsvg
 
       - name: Install dependencies
         run: npm ci
 
       - name: Build app icon
+        if: runner.os == 'macOS'
         run: npm run build:icon
 
       - name: Build (main + preload + renderer)
@@ -56,7 +88,7 @@ jobs:
       # fails with '/Users/runner/work/vssh/vssh not a file'. The shell
       # block below unsets any empty signing var so electron-builder
       # cleanly skips signing instead.
-      - name: Package DMG
+      - name: Package app
         env:
           CSC_LINK: ${{ secrets.MAC_CERT_P12_BASE64 }}
           CSC_KEY_PASSWORD: ${{ secrets.MAC_CERT_PASSWORD }}
@@ -66,43 +98,43 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: bash
         run: |
-          for v in CSC_LINK CSC_KEY_PASSWORD APPLE_ID APPLE_APP_SPECIFIC_PASSWORD APPLE_TEAM_ID; do
-            if [ -z "${!v}" ]; then unset "$v"; fi
-          done
-          # Disable automatic identity discovery so electron-builder doesn't
-          # try to sign with a keychain identity that doesn't exist on the runner.
-          if [ -z "${CSC_LINK:-}" ]; then
-            export CSC_IDENTITY_AUTO_DISCOVERY=false
+          if [ "$RUNNER_OS" = "macOS" ]; then
+            for v in CSC_LINK CSC_KEY_PASSWORD APPLE_ID APPLE_APP_SPECIFIC_PASSWORD APPLE_TEAM_ID; do
+              if [ -z "${!v}" ]; then unset "$v"; fi
+            done
+            # Disable automatic identity discovery so electron-builder doesn't
+            # try to sign with a keychain identity that doesn't exist on the runner.
+            if [ -z "${CSC_LINK:-}" ]; then
+              export CSC_IDENTITY_AUTO_DISCOVERY=false
+            fi
           fi
-          npx electron-builder --mac dmg --arm64 --publish never
+          npx electron-builder ${{ matrix.target.electron_args }} --publish never
 
       - name: Inspect release output
         run: ls -lh release/
 
-      - name: Upload DMG artifact
+      - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
-          name: vssh-arm64-dmg
-          path: |
-            release/*.dmg
-            release/*.blockmap
+          name: ${{ matrix.target.artifact_name }}
+          path: ${{ matrix.target.artifact_paths }}
           retention-days: 30
           if-no-files-found: error
 
   publish:
-    name: Attach DMG to GitHub Release
-    needs: dmg
+    name: Attach artifacts to GitHub Release
+    needs: build
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/v')
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
 
-      - name: Download DMG artifact
+      - name: Download build artifacts
         uses: actions/download-artifact@v4
         with:
-          name: vssh-arm64-dmg
           path: release
+          merge-multiple: true
 
       - name: List release output
         run: ls -lh release/
@@ -118,22 +150,35 @@ jobs:
           body: |
             ## Install
 
-            1. Download `vssh-${{ github.ref_name }}-arm64.dmg` below.
+            - **macOS (Apple Silicon)**: download the `.dmg`, open it, then drag **vssh** to Applications.
+            - **Linux (x64)**: download the `.AppImage`, then:
+              ```bash
+              chmod +x vssh-*.AppImage
+              ./vssh-*.AppImage
+              ```
+            - **Windows (x64)**: download and run the `.exe` installer.
+
+            ### macOS one-time setup
+
+            If macOS shows *"vssh is damaged and can't be opened"* for an unsigned app:
+            ```bash
+            sudo xattr -cr /Applications/vssh.app
+            ```
+
+            ### Why this is needed on macOS
+
+            Unsigned apps downloaded from the internet may be quarantined by Gatekeeper.
+            Removing the quarantine marker allows the app to open.
+
+            ### Legacy detailed steps
+
+            1. Download the macOS `.dmg` below.
             2. Open the DMG and drag **vssh** to Applications.
-            3. **One-time setup** — remove the macOS quarantine flag:
+            3. If prompted by Gatekeeper, run:
                ```bash
                sudo xattr -cr /Applications/vssh.app
                ```
             4. Open vssh.
-
-            > macOS shows *"vssh is damaged and can't be opened"* for any
-            > unsigned app downloaded from the internet. The `xattr` command
-            > removes the *"downloaded from internet"* marker so Gatekeeper
-            > stops complaining. The app itself is fine — only the marker
-            > and the lack of a $99/yr Apple Developer ID cert are the
-            > issue. You only need this once per install.
-
-            Apple Silicon only for this release.
 
             ---
 

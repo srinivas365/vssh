@@ -18,6 +18,14 @@ mac:
   # ID cert and notarizes instead — this `null` is just the fallback.
   identity: null
   gatekeeperAssess: false
+linux:
+  target: AppImage
+  icon: build/icon.png
+win:
+  target: nsis
+  # Keep a single source icon; electron-builder can derive Windows resources
+  # from this when a dedicated .ico is not provided.
+  icon: build/icon.png
 dmg:
   iconSize: 100
   window:
