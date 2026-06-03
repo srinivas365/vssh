@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useVmsStore } from '../../state/vms-store';
 import { useSessionsStore } from '../../state/sessions-store';
+import { connectVm } from '../../connect-vm';
 import './QuickConnect.css';
 
 interface Props { onClose: () => void; }
@@ -21,9 +22,7 @@ export function QuickConnect({ onClose }: Props) {
   async function connect(idx: number) {
     const vm = matches[idx];
     if (!vm) return;
-    const sessionId = await window.api.session.start(vm.id, 80, 24);
-    addTab({ sessionId, vmId: vm.id, label: vm.label, state: 'connecting' });
-    onClose();
+    await connectVm(vm, addTab, onClose);
   }
 
   function onKey(e: React.KeyboardEvent) {

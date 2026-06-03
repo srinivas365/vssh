@@ -99,7 +99,17 @@ export function registerIpc(d: Deps): void {
   ipcMain.handle(IPC.SESSION_START, async (_e, vmId: number, cols: number, rows: number) => {
     const vm = d.repo.getVm(vmId);
     if (!vm) throw new Error('vm not found');
-    const session = new SshSession(vm, cols, rows);
+    let session: SshSession;
+    try {
+      session = new SshSession(vm, cols, rows);
+    } catch (error) {
+      const reason = error instanceof Error ? error.message : String(error);
+      logger.log('error', 'Failed to start SSH session', { vmId, host: vm.host, reason });
+      const windowsHint = process.platform === 'win32'
+        ? ' Ensure OpenSSH Client is installed and ssh.exe is available.'
+        : '';
+      throw new Error(`Failed to start SSH session: ${reason}.${windowsHint}`.trim());
+    }
     d.sessions.register(session);
     d.repo.touchUsed(vmId);
 

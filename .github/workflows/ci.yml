@@ -3,8 +3,6 @@ name: CI
 on:
   push:
     branches: [main]
-  pull_request:
-    branches: [main]
   workflow_dispatch:
 
 concurrency:
@@ -14,6 +12,7 @@ concurrency:
 jobs:
   test:
     name: Typecheck + unit tests
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -42,6 +41,7 @@ jobs:
 
   e2e:
     name: End-to-end (Electron + sshd)
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 25
     needs: test

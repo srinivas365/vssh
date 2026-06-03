@@ -3,6 +3,7 @@ import { useVmsStore } from '../../state/vms-store';
 import { useSessionsStore } from '../../state/sessions-store';
 import { useUiStore } from '../../state/ui-store';
 import { Vm } from '@shared/types';
+import { connectVm } from '../../connect-vm';
 import { WorkspaceSection } from './WorkspaceSection';
 import { NewWorkspaceButton } from './NewWorkspaceButton';
 import './Sidebar.css';
@@ -45,8 +46,7 @@ export function Sidebar({ onNewVm, onEditVm }: Props) {
   }, [filtered]);
 
   async function connect(vm: Vm) {
-    const sessionId = await window.api.session.start(vm.id, 80, 24);
-    addTab({ sessionId, vmId: vm.id, label: vm.label, state: 'connecting' });
+    await connectVm(vm, addTab);
   }
 
   // folders come from listFolders() pre-sorted by sort_order, name

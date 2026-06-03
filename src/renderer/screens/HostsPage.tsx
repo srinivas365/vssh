@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useVmsStore } from '../state/vms-store';
 import { useSessionsStore } from '../state/sessions-store';
 import { Vm } from '@shared/types';
+import { connectVm } from '../connect-vm';
 import './HostsPage.css';
 
 interface Props {
@@ -29,8 +30,7 @@ export function HostsPage({ onNewVm, onEditVm }: Props) {
   }, [vms, query, folderId]);
 
   async function connect(vm: Vm) {
-    const sessionId = await window.api.session.start(vm.id, 80, 24);
-    addTab({ sessionId, vmId: vm.id, label: vm.label, state: 'connecting' });
+    await connectVm(vm, addTab);
   }
 
   const recent = useMemo(

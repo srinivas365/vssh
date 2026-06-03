@@ -1,6 +1,8 @@
 import { randomUUID } from 'node:crypto';
 import { spawn, IPty } from 'node-pty';
 import { EventEmitter } from 'node:events';
+import { existsSync } from 'node:fs';
+import path from 'node:path';
 import { Vm, PromptType, SessionState } from '@shared/types';
 import { PromptDetector } from './prompt-detector';
 
@@ -28,7 +30,7 @@ export class SshSession extends EventEmitter {
     args.push('-o', 'StrictHostKeyChecking=accept-new');
     args.push(`${vm.username}@${vm.host}`);
 
-    this.pty = spawn('ssh', args, {
+    this.pty = spawn(resolveSshCommand(), args, {
       name: 'xterm-256color',
       cols,
       rows,
@@ -68,4 +70,13 @@ export class SshSession extends EventEmitter {
   kill(): void {
     this.pty.kill();
   }
+}
+
+function resolveSshCommand(): string {
+  if (process.platform !== 'win32') return 'ssh';
+  const explicit = process.env.VSSH_SSH_PATH;
+  if (explicit) return explicit;
+  const windir = process.env.WINDIR || 'C:\\Windows';
+  const bundled = path.join(windir, 'System32', 'OpenSSH', 'ssh.exe');
+  return existsSync(bundled) ? bundled : 'ssh';
 }
