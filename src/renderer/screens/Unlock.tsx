@@ -140,43 +140,43 @@ function HeroIllustration() {
     <svg className="unlock-illu" viewBox="0 0 480 280" xmlns="http://www.w3.org/2000/svg" aria-hidden>
       <defs>
         <linearGradient id="termGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#ffffff"/>
-          <stop offset="100%" stopColor="#f8fafc"/>
+          <stop offset="0%" stopColor="var(--bg-panel)"/>
+          <stop offset="100%" stopColor="var(--bg)"/>
         </linearGradient>
         <linearGradient id="serverGrad" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="#eef2ff"/>
-          <stop offset="100%" stopColor="#e0e7ff"/>
+          <stop offset="0%" stopColor="var(--accent-soft)"/>
+          <stop offset="100%" stopColor="var(--bg-hover)"/>
         </linearGradient>
         <linearGradient id="lineGrad" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stopColor="#4f46e5" stopOpacity="0.0"/>
-          <stop offset="50%" stopColor="#4f46e5" stopOpacity="0.9"/>
-          <stop offset="100%" stopColor="#4f46e5" stopOpacity="0.0"/>
+          <stop offset="0%" stopColor="var(--accent)" stopOpacity="0.0"/>
+          <stop offset="50%" stopColor="var(--accent)" stopOpacity="0.9"/>
+          <stop offset="100%" stopColor="var(--accent)" stopOpacity="0.0"/>
         </linearGradient>
       </defs>
 
       {/* Terminal window — left */}
       <g>
         <rect x="20" y="40" width="200" height="160" rx="14"
-          fill="url(#termGrad)" stroke="#e2e8f0" strokeWidth="1.5"/>
+          fill="url(#termGrad)" stroke="var(--border)" strokeWidth="1.5"/>
         {/* title bar */}
-        <rect x="20" y="40" width="200" height="28" rx="14" fill="#f1f5f9"/>
-        <rect x="20" y="54" width="200" height="14" fill="#f1f5f9"/>
-        <circle cx="36" cy="54" r="4" fill="#ef4444"/>
-        <circle cx="50" cy="54" r="4" fill="#f59e0b"/>
-        <circle cx="64" cy="54" r="4" fill="#10b981"/>
+        <rect x="20" y="40" width="200" height="28" rx="14" fill="var(--bg-muted)"/>
+        <rect x="20" y="54" width="200" height="14" fill="var(--bg-muted)"/>
+        <circle cx="36" cy="54" r="4" fill="var(--danger)"/>
+        <circle cx="50" cy="54" r="4" fill="var(--warn)"/>
+        <circle cx="64" cy="54" r="4" fill="var(--success)"/>
         {/* code lines */}
-        <rect x="36" y="86"  width="14" height="6" rx="2" fill="#4f46e5"/>
-        <rect x="56" y="86"  width="100" height="6" rx="2" fill="#cbd5e1"/>
-        <rect x="36" y="104" width="14" height="6" rx="2" fill="#4f46e5"/>
-        <rect x="56" y="104" width="78"  height="6" rx="2" fill="#cbd5e1"/>
-        <rect x="36" y="122" width="14" height="6" rx="2" fill="#4f46e5"/>
-        <rect x="56" y="122" width="120" height="6" rx="2" fill="#cbd5e1"/>
-        <rect x="36" y="140" width="14" height="6" rx="2" fill="#10b981"/>
-        <rect x="56" y="140" width="58"  height="6" rx="2" fill="#cbd5e1"/>
+        <rect x="36" y="86"  width="14" height="6" rx="2" fill="var(--accent)"/>
+        <rect x="56" y="86"  width="100" height="6" rx="2" fill="var(--border-strong)"/>
+        <rect x="36" y="104" width="14" height="6" rx="2" fill="var(--accent)"/>
+        <rect x="56" y="104" width="78"  height="6" rx="2" fill="var(--border-strong)"/>
+        <rect x="36" y="122" width="14" height="6" rx="2" fill="var(--accent)"/>
+        <rect x="56" y="122" width="120" height="6" rx="2" fill="var(--border-strong)"/>
+        <rect x="36" y="140" width="14" height="6" rx="2" fill="var(--success)"/>
+        <rect x="56" y="140" width="58"  height="6" rx="2" fill="var(--border-strong)"/>
         {/* prompt line with cursor */}
-        <rect x="36" y="170" width="6"  height="6" rx="1" fill="#4f46e5"/>
-        <rect x="48" y="170" width="50" height="6" rx="2" fill="#94a3b8"/>
-        <rect x="102" y="168" width="10" height="10" fill="#4f46e5">
+        <rect x="36" y="170" width="6"  height="6" rx="1" fill="var(--accent)"/>
+        <rect x="48" y="170" width="50" height="6" rx="2" fill="var(--text-faint)"/>
+        <rect x="102" y="168" width="10" height="10" fill="var(--accent)">
           <animate attributeName="opacity" values="1;0;1" dur="1.2s" repeatCount="indefinite" />
         </rect>
       </g>
@@ -185,33 +185,33 @@ function HeroIllustration() {
       <g>
         <path d="M 220 120 Q 250 80, 280 120 T 340 120"
           stroke="url(#lineGrad)" strokeWidth="2.5" fill="none" strokeDasharray="6 5"/>
-        <circle cx="280" cy="96" r="20" fill="#ffffff" stroke="#e0e7ff" strokeWidth="2"/>
-        <text x="280" y="103" textAnchor="middle" fontSize="16" fill="#4f46e5">🔒</text>
+        <circle cx="280" cy="96" r="20" fill="var(--bg-panel)" stroke="var(--border)" strokeWidth="2"/>
+        <text x="280" y="103" textAnchor="middle" fontSize="16" fill="var(--accent)">🔒</text>
       </g>
 
       {/* Server stack — right */}
       <g transform="translate(340 50)">
-        <rect x="0" y="0"  width="120" height="40" rx="8" fill="url(#serverGrad)" stroke="#c7d2fe" strokeWidth="1.5"/>
-        <rect x="0" y="50" width="120" height="40" rx="8" fill="url(#serverGrad)" stroke="#c7d2fe" strokeWidth="1.5"/>
-        <rect x="0" y="100" width="120" height="40" rx="8" fill="url(#serverGrad)" stroke="#c7d2fe" strokeWidth="1.5"/>
+        <rect x="0" y="0"  width="120" height="40" rx="8" fill="url(#serverGrad)" stroke="var(--border-strong)" strokeWidth="1.5"/>
+        <rect x="0" y="50" width="120" height="40" rx="8" fill="url(#serverGrad)" stroke="var(--border-strong)" strokeWidth="1.5"/>
+        <rect x="0" y="100" width="120" height="40" rx="8" fill="url(#serverGrad)" stroke="var(--border-strong)" strokeWidth="1.5"/>
         {/* server LEDs */}
-        <circle cx="14" cy="20"  r="3" fill="#10b981"/>
-        <circle cx="14" cy="70"  r="3" fill="#10b981"/>
-        <circle cx="14" cy="120" r="3" fill="#f59e0b"/>
+        <circle cx="14" cy="20"  r="3" fill="var(--success)"/>
+        <circle cx="14" cy="70"  r="3" fill="var(--success)"/>
+        <circle cx="14" cy="120" r="3" fill="var(--warn)"/>
         {/* rack lines */}
-        <rect x="32" y="17" width="74" height="3" rx="1" fill="#a5b4fc"/>
-        <rect x="32" y="24" width="50" height="3" rx="1" fill="#c7d2fe"/>
-        <rect x="32" y="67" width="74" height="3" rx="1" fill="#a5b4fc"/>
-        <rect x="32" y="74" width="60" height="3" rx="1" fill="#c7d2fe"/>
-        <rect x="32" y="117" width="74" height="3" rx="1" fill="#a5b4fc"/>
-        <rect x="32" y="124" width="40" height="3" rx="1" fill="#c7d2fe"/>
+        <rect x="32" y="17" width="74" height="3" rx="1" fill="var(--accent)"/>
+        <rect x="32" y="24" width="50" height="3" rx="1" fill="var(--border-strong)"/>
+        <rect x="32" y="67" width="74" height="3" rx="1" fill="var(--accent)"/>
+        <rect x="32" y="74" width="60" height="3" rx="1" fill="var(--border-strong)"/>
+        <rect x="32" y="117" width="74" height="3" rx="1" fill="var(--accent)"/>
+        <rect x="32" y="124" width="40" height="3" rx="1" fill="var(--border-strong)"/>
       </g>
 
       {/* Floating accent dots */}
-      <circle cx="60" cy="20" r="4" fill="#a5b4fc" opacity="0.7"/>
-      <circle cx="420" cy="220" r="5" fill="#fbcfe8" opacity="0.8"/>
-      <circle cx="250" cy="240" r="3" fill="#67e8f9" opacity="0.7"/>
-      <circle cx="160" cy="240" r="3" fill="#c4b5fd" opacity="0.7"/>
+      <circle cx="60" cy="20" r="4" fill="var(--accent)" opacity="0.7"/>
+      <circle cx="420" cy="220" r="5" fill="var(--accent-soft)" opacity="0.8"/>
+      <circle cx="250" cy="240" r="3" fill="var(--success)" opacity="0.7"/>
+      <circle cx="160" cy="240" r="3" fill="var(--accent-hover)" opacity="0.7"/>
     </svg>
   );
 }
@@ -223,7 +223,7 @@ const UNLOCK_CSS = `
   place-items: center;
   height: 100vh;
   overflow: hidden;
-  background: linear-gradient(180deg, #fafbff 0%, #f4f6fd 100%);
+  background: linear-gradient(180deg, var(--bg) 0%, var(--bg-muted) 100%);
   font-family: inherit;
 }
 
@@ -242,25 +242,25 @@ const UNLOCK_CSS = `
 }
 .unlock-blob-1 {
   width: 460px; height: 460px;
-  background: #c7d2fe;
+  background: var(--accent-soft);
   top: -160px; left: -120px;
 }
 .unlock-blob-2 {
   width: 380px; height: 380px;
-  background: #a5f3fc;
+  background: var(--bg-hover);
   bottom: -140px; right: -80px;
   opacity: 0.4;
 }
 .unlock-blob-3 {
   width: 300px; height: 300px;
-  background: #fbcfe8;
+  background: var(--bg-selected);
   top: 55%; left: 30%;
   opacity: 0.28;
 }
 .unlock-dots {
   position: absolute;
   inset: 0;
-  background-image: radial-gradient(circle, #cbd5e1 1px, transparent 1.5px);
+  background-image: radial-gradient(circle, var(--border-strong) 1px, transparent 1.5px);
   background-size: 28px 28px;
   mask-image: radial-gradient(ellipse at center, black 25%, transparent 70%);
   -webkit-mask-image: radial-gradient(ellipse at center, black 25%, transparent 70%);
@@ -294,13 +294,13 @@ const UNLOCK_CSS = `
   width: 56px;
   height: 56px;
   border-radius: 14px;
-  background: linear-gradient(135deg, #6366f1, #4338ca);
+  background: linear-gradient(135deg, var(--accent), var(--accent-hover));
   color: #fff;
   display: grid;
   place-items: center;
   font-size: 26px;
   font-weight: 700;
-  box-shadow: 0 8px 24px rgba(79, 70, 229, 0.35);
+  box-shadow: 0 8px 24px var(--accent-ring);
 }
 .unlock-brand-name {
   font-size: 36px;
@@ -320,7 +320,7 @@ const UNLOCK_CSS = `
   width: 100%;
   max-width: 480px;
   height: auto;
-  filter: drop-shadow(0 12px 32px rgba(79, 70, 229, 0.12));
+  filter: drop-shadow(0 12px 32px var(--accent-ring));
 }
 
 .unlock-bullets {
@@ -342,9 +342,9 @@ const UNLOCK_CSS = `
   font-size: 16px;
   flex-shrink: 0;
 }
-.unlock-bullet-icon-1 { background: #eef2ff; }
-.unlock-bullet-icon-2 { background: #ecfeff; }
-.unlock-bullet-icon-3 { background: #fef3c7; }
+.unlock-bullet-icon-1 { background: var(--accent-soft); }
+.unlock-bullet-icon-2 { background: var(--bg-hover); }
+.unlock-bullet-icon-3 { background: var(--bg-muted); }
 .unlock-bullet-title { font-size: 13px; font-weight: 600; color: var(--text); }
 .unlock-bullet-sub   { font-size: 12px; color: var(--text-muted); margin-top: 1px; }
 
@@ -354,15 +354,15 @@ const UNLOCK_CSS = `
   display: flex;
   flex-direction: column;
   gap: 14px;
-  background: rgba(255, 255, 255, 0.95);
+  background: color-mix(in srgb, var(--bg-panel) 92%, transparent);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   padding: 32px;
   border-radius: 16px;
-  border: 1px solid rgba(226, 232, 240, 0.9);
+  border: 1px solid var(--border);
   box-shadow:
-    0 12px 40px rgba(15, 23, 42, 0.08),
-    0 1px 0 rgba(255, 255, 255, 0.8) inset;
+    var(--shadow-lg),
+    0 1px 0 color-mix(in srgb, var(--bg-panel) 80%, #ffffff) inset;
 }
 .unlock-card-head { margin-bottom: 4px; }
 .unlock-title {
@@ -394,7 +394,7 @@ const UNLOCK_CSS = `
 .unlock-input {
   padding: 11px 14px;
   font-size: 14px;
-  background: #ffffff;
+  background: var(--bg);
   color: var(--text);
   border: 1px solid var(--border-strong);
   border-radius: 8px;
@@ -404,15 +404,15 @@ const UNLOCK_CSS = `
 .unlock-input:focus {
   outline: none;
   border-color: var(--accent);
-  box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.18);
+  box-shadow: 0 0 0 4px var(--accent-ring);
 }
 .unlock-input::placeholder { color: var(--text-faint); }
 
 .unlock-err {
   color: var(--danger);
   font-size: 12px;
-  background: #fef2f2;
-  border: 1px solid #fecaca;
+  background: color-mix(in srgb, var(--danger) 10%, var(--bg-panel));
+  border: 1px solid color-mix(in srgb, var(--danger) 45%, var(--border));
   padding: 9px 11px;
   border-radius: 8px;
   font-weight: 500;
@@ -429,7 +429,7 @@ const UNLOCK_CSS = `
   font-family: inherit;
   margin-top: 4px;
   transition: background 0.1s, transform 0.05s;
-  box-shadow: 0 4px 14px rgba(79, 70, 229, 0.35);
+  box-shadow: 0 4px 14px var(--accent-ring);
 }
 .unlock-btn:hover:not(:disabled) { background: var(--accent-hover); }
 .unlock-btn:active:not(:disabled) { transform: translateY(1px); }
