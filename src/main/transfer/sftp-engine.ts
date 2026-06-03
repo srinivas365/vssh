@@ -14,14 +14,20 @@ export interface EngineContext {
 }
 
 export class SftpTransferEngine {
-  private activeStreams = new Map<string, { destroy: () => void }>();
+  private activeStreams = new Map<string, { destroy: (err: Error) => void }>();
+  private abortedIds = new Set<string>();
 
   abort(id: string): void {
-    this.activeStreams.get(id)?.destroy();
-    this.activeStreams.delete(id);
+    this.abortedIds.add(id);
+    const streams = this.activeStreams.get(id);
+    if (streams) {
+      streams.destroy(new Error('transfer-aborted'));
+      this.activeStreams.delete(id);
+    }
   }
 
   async start(record: TransferRecord, context: EngineContext): Promise<void> {
+    this.abortedIds.delete(record.id);
     context.markRunning();
     context.emitLog('Starting SFTP transfer');
     const conn = await connectSftp(context.vm, context.secret);
@@ -35,9 +41,12 @@ export class SftpTransferEngine {
       }
       context.markSucceeded();
     } catch (err) {
-      context.markFailed(err instanceof Error ? err.message : String(err), true);
+      if (!this.abortedIds.has(record.id)) {
+        context.markFailed(err instanceof Error ? err.message : String(err), true);
+      }
     } finally {
       conn.close();
+      this.abortedIds.delete(record.id);
     }
   }
 
@@ -84,6 +93,7 @@ export class SftpTransferEngine {
     const files = this.walkLocalFiles(record.source.path);
     const root = record.source.path.replace(/[\/]+$/, '');
     for (const file of files) {
+      if (this.abortedIds.has(record.id)) break;
       const relative = path.relative(root, file).split(path.sep).join('/');
       const remoteBase = record.folderMode === 'contents-only' ? record.destination.directory : record.destination.finalPath;
       const remotePath = `${remoteBase.replace(/\/+$/, '')}/${relative}`;
@@ -98,6 +108,7 @@ export class SftpTransferEngine {
     const root = record.source.path.replace(/\/+$/, '');
     const localBase = record.folderMode === 'contents-only' ? record.destination.directory : record.destination.finalPath;
     for (const remotePath of files) {
+      if (this.abortedIds.has(record.id)) break;
       const relative = remotePath.slice(root.length).replace(/^\/+/, '');
       const localPath = path.join(localBase, relative);
       const childRecord = { ...record, source: { path: remotePath, name: path.posix.basename(remotePath), type: 'file' as const }, destination: { directory: path.dirname(localPath), finalPath: localPath } };
@@ -115,7 +126,8 @@ export class SftpTransferEngine {
         transferred += chunk.length;
         context.emitProgress({ id: record.id, transferredBytes: transferred, totalBytes: total, percent: Math.min(100, (transferred / total) * 100) });
       });
-      this.activeStreams.set(record.id, { destroy: () => { read.destroy(); write.destroy(); } });
+      // write is an ssh2 stream whose destroy() accepts no error arg — pass err to read (fs stream) only
+      this.activeStreams.set(record.id, { destroy: (err) => { read.destroy(err); write.destroy(); } });
       const cleanup = () => this.activeStreams.delete(record.id);
       write.once('close', () => { cleanup(); resolve(); });
       read.once('error', (err: Error) => { cleanup(); reject(err); });
@@ -134,7 +146,8 @@ export class SftpTransferEngine {
         transferred += chunk.length;
         context.emitProgress({ id: record.id, transferredBytes: transferred, totalBytes: null, percent: null });
       });
-      this.activeStreams.set(record.id, { destroy: () => { read.destroy(); write.destroy(); } });
+      // read is an ssh2 stream whose destroy() accepts no error arg — pass err to write (fs stream) only
+      this.activeStreams.set(record.id, { destroy: (err) => { read.destroy(); write.destroy(err); } });
       const cleanup = () => this.activeStreams.delete(record.id);
       write.once('close', () => { cleanup(); resolve(); });
       read.once('error', (err: Error) => { cleanup(); reject(err); });

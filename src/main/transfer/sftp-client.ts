@@ -34,7 +34,7 @@ export function connectSftp(vm: Vm, secret: VaultEntry | null): Promise<SftpConn
         resolve({ client, sftp, close: () => client.end() });
       });
     });
-    client.once('error', reject);
+    client.once('error', (err) => { client.end(); reject(err); });
     client.connect(connectConfigForVm(vm, secret));
   });
 }

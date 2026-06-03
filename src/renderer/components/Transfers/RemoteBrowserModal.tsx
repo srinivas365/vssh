@@ -29,11 +29,13 @@ export function RemoteBrowserModal({ vmId, select, onCancel, onSelect }: Props) 
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    let cancelled = false;
     setLoading(true);
     setError(null);
     window.api.transfer.remoteList(vmId, directory)
-      .then((list) => { setEntries(list); setLoading(false); })
-      .catch((err) => { setError(err instanceof Error ? err.message : String(err)); setLoading(false); });
+      .then((list) => { if (!cancelled) { setEntries(list); setLoading(false); } })
+      .catch((err) => { if (!cancelled) { setError(err instanceof Error ? err.message : String(err)); setLoading(false); } });
+    return () => { cancelled = true; };
   }, [vmId, directory]);
 
   function navigate(path: string) {
