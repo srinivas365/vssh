@@ -58,6 +58,88 @@ export interface SessionState {
   startedAt: number;
 }
 
+export type TransferDirection = 'upload' | 'download';
+export type TransferEngineName = 'rsync' | 'sftp';
+export type TransferStatus = 'preparing' | 'running' | 'paused' | 'stopped' | 'succeeded' | 'failed';
+export type TransferEntryType = 'file' | 'directory' | 'symlink' | 'unknown';
+export type FolderCopyMode = 'as-is' | 'contents-only';
+
+export interface LocalSelection {
+  path: string;
+  name: string;
+  type: 'file' | 'directory';
+  sizeBytes: number | null;
+}
+
+export interface RemoteEntry {
+  name: string;
+  path: string;
+  type: TransferEntryType;
+  sizeBytes: number | null;
+  modifiedAt: number | null;
+}
+
+export interface TransferSource {
+  path: string;
+  name: string;
+  type: 'file' | 'directory';
+}
+
+export interface TransferDestination {
+  directory: string;
+  finalPath: string;
+}
+
+export interface TransferStartRequest {
+  vmId: number;
+  direction: TransferDirection;
+  source: TransferSource;
+  destination: TransferDestination;
+  folderMode: FolderCopyMode;
+  overwrite: boolean;
+}
+
+export interface TransferRecord {
+  id: string;
+  vmId: number;
+  direction: TransferDirection;
+  engine: TransferEngineName;
+  status: TransferStatus;
+  source: TransferSource;
+  destination: TransferDestination;
+  folderMode: FolderCopyMode;
+  startedAt: number;
+  finishedAt: number | null;
+  transferredBytes: number;
+  totalBytes: number | null;
+  percent: number | null;
+  error: string | null;
+  partialsKept: boolean;
+}
+
+export interface TransferProgressEvent {
+  id: string;
+  transferredBytes: number;
+  totalBytes: number | null;
+  percent: number | null;
+}
+
+export interface TransferLogEvent {
+  id: string;
+  line: string;
+  level: 'info' | 'warn' | 'error';
+  at: number;
+}
+
+export interface TransferToastPayload {
+  id: string;
+  vmId: number;
+  status: TransferStatus;
+  message: string;
+  canResume: boolean;
+  canDeletePartials: boolean;
+}
+
 declare global {
   interface Window {
     api: import('../preload/preload').Api;
