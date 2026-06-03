@@ -1,16 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import type { FolderCopyMode, LocalSelection, RemoteEntry, TransferDirection, Vm } from '@shared/types';
+import { useTransfersStore } from '../../state/transfers-store';
 import { FolderModeModal } from './FolderModeModal';
 import { RemoteBrowserModal } from './RemoteBrowserModal';
 
 interface Props { vm: Vm; direction: TransferDirection; onClose: () => void; }
 
-type Stage = 'local' | 'folder-mode' | 'remote-source' | 'remote-destination' | 'local-destination' | 'done';
+type Stage = 'local' | 'folder-mode' | 'remote-source' | 'remote-destination' | 'local-destination';
 
 function basename(input: string): string { return input.replace(/[\\/]+$/, '').split(/[\\/]/).pop() ?? input; }
 function joinPath(dir: string, name: string): string { return dir === '/' ? `/${name}` : `${dir.replace(/\/+$/, '')}/${name}`; }
 
 export function TransferWizard({ vm, direction, onClose }: Props) {
+  const pushToast = useTransfersStore((s) => s.pushToast);
   const [stage, setStage] = useState<Stage>(direction === 'upload' ? 'local' : 'remote-source');
   const [local, setLocal] = useState<LocalSelection | null>(null);
   const [remote, setRemote] = useState<RemoteEntry | null>(null);
@@ -49,8 +51,8 @@ export function TransferWizard({ vm, direction, onClose }: Props) {
         destination: { directory: entry.path, finalPath },
         folderMode,
         overwrite: false,
-      });
-      setStage('done');
+      }).then((record) => pushToast({ id: record.id, vmId: record.vmId, status: 'preparing', message: `Uploading ${record.source.name} → ${vm.label}`, canResume: false, canDeletePartials: false }));
+      onClose();
     }} />;
   }
 
@@ -67,10 +69,10 @@ export function TransferWizard({ vm, direction, onClose }: Props) {
         destination: { directory: dir, finalPath },
         folderMode,
         overwrite: false,
-      });
-      setStage('done');
+      }).then((record) => pushToast({ id: record.id, vmId: record.vmId, status: 'preparing', message: `Downloading ${record.source.name} from ${vm.label}`, canResume: false, canDeletePartials: false }));
+      onClose();
     });
   }
 
-  return <div className="modal-backdrop"><div className="modal-card"><p>Transfer started.</p><button onClick={onClose}>Close</button></div></div>;
+  return null;
 }

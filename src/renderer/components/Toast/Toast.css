@@ -54,3 +54,5 @@
   font-size: 12px;
 }
 .toast-actions button:hover { background: var(--bg-hover); border-color: var(--accent); color: var(--accent); }
+
+.transfer-toast { bottom: 100px; }

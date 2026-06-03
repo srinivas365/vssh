@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { useSessionsStore } from '../../state/sessions-store';
+import { useTransfersStore } from '../../state/transfers-store';
 import { PromptType } from '@shared/types';
 import './Toast.css';
 
@@ -20,6 +21,39 @@ function toastSubtext(toast: { hasSecret: boolean; delivery: 'copied' | 'sent' |
   if (!toast.hasSecret) return null;
   if (toast.delivery === 'sent') return 'Submitted automatically';
   return 'Press ⌘V to paste into the terminal';
+}
+
+export function TransferToastOverlay() {
+  const { toasts, dismissToast } = useTransfersStore();
+  const toast = toasts[toasts.length - 1] ?? null;
+
+  useEffect(() => {
+    if (!toast) return;
+    const id = setTimeout(() => dismissToast(toast.id), 4000);
+    return () => clearTimeout(id);
+  }, [toast, dismissToast]);
+
+  if (!toast) return null;
+
+  const title =
+    toast.status === 'succeeded' ? 'Transfer complete' :
+    toast.status === 'failed' ? 'Transfer failed' :
+    toast.message;
+
+  return (
+    <div className="toast transfer-toast">
+      <div className="toast-title">
+        <span className="toast-icon">⇅</span>
+        {title}
+      </div>
+      {toast.status === 'failed' && toast.message && (
+        <div className="toast-sub">{toast.message}</div>
+      )}
+      <div className="toast-actions">
+        <button onClick={() => dismissToast(toast.id)}>Dismiss</button>
+      </div>
+    </div>
+  );
 }
 
 export function ToastOverlay() {
