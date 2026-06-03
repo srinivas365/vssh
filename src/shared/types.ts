@@ -92,6 +92,8 @@ export interface TransferDestination {
 
 export interface TransferStartRequest {
   vmId: number;
+  vmLabel: string;
+  vmHost: string;
   direction: TransferDirection;
   source: TransferSource;
   destination: TransferDestination;
@@ -102,6 +104,8 @@ export interface TransferStartRequest {
 export interface TransferRecord {
   id: string;
   vmId: number;
+  vmLabel: string;
+  vmHost: string;
   direction: TransferDirection;
   engine: TransferEngineName;
   status: TransferStatus;

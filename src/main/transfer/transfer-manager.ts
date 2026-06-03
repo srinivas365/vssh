@@ -21,6 +21,8 @@ export class TransferManager extends EventEmitter {
     const record: TransferRecord = {
       id: randomUUID(),
       vmId: request.vmId,
+      vmLabel: request.vmLabel,
+      vmHost: request.vmHost,
       direction: request.direction,
       engine,
       status: 'preparing',

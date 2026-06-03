@@ -5,6 +5,8 @@ import type { TransferStartRequest } from '../../src/shared/types';
 function request(vmId = 1): TransferStartRequest {
   return {
     vmId,
+    vmLabel: 'Test VM',
+    vmHost: '10.0.0.1',
     direction: 'upload',
     source: { path: '/tmp/a.txt', name: 'a.txt', type: 'file' },
     destination: { directory: '/home/admin', finalPath: '/home/admin/a.txt' },
