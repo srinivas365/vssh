@@ -3,7 +3,7 @@ import { Lock } from 'lucide-react';
 import { Sidebar } from '../components/Sidebar/Sidebar';
 import { TabBar } from '../components/TabBar/TabBar';
 import { Terminal } from '../components/Terminal/Terminal';
-import { ToastOverlay } from '../components/Toast/Toast';
+import { ToastOverlay, TransferToastOverlay } from '../components/Toast/Toast';
 import { VmEditForm } from '../components/VmEditForm/VmEditForm';
 import { QuickConnect } from '../components/QuickConnect/QuickConnect';
 import { HostsPage } from './HostsPage';
@@ -165,6 +165,7 @@ export function Main() {
         />
       )}
       <ToastOverlay />
+      <TransferToastOverlay />
     </div>
   );
 }
