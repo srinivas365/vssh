@@ -6,11 +6,13 @@ import { ToastOverlay } from '../components/Toast/Toast';
 import { VmEditForm } from '../components/VmEditForm/VmEditForm';
 import { QuickConnect } from '../components/QuickConnect/QuickConnect';
 import { HostsPage } from './HostsPage';
+import { TransfersPage } from './TransfersPage';
 import { useSessionsStore } from '../state/sessions-store';
 import { useVaultStore } from '../state/vault-store';
+import { useTransfersStore } from '../state/transfers-store';
 import { Vm } from '@shared/types';
 
-type View = 'hosts' | 'terminal';
+type View = 'hosts' | 'terminal' | 'transfers';
 
 export function Main() {
   const { tabs, activeTabId, updateState, pushToast, removeTab, addTab } = useSessionsStore();
@@ -60,6 +62,15 @@ export function Main() {
     return () => window.removeEventListener('keydown', onKey);
   }, [lock, activeTabId, removeTab, tabs.length]);
 
+  const transfersStore = useTransfersStore();
+
+  useEffect(() => {
+    window.api.transfer.onState((record) => transfersStore.upsert(record));
+    window.api.transfer.onProgress((progress) => transfersStore.applyProgress(progress));
+    window.api.transfer.onLog((log) => transfersStore.pushLog(log));
+    window.api.transfer.onToast((toast) => transfersStore.pushToast(toast));
+  }, [transfersStore]);
+
   const activeTab = tabs.find((t) => t.sessionId === activeTabId);
 
   return (
@@ -82,6 +93,12 @@ export function Main() {
             disabled={tabs.length === 0}
             title="Terminal (⌘2)">
             Terminal {tabs.length > 0 && <span className="nav-btn-badge">{tabs.length}</span>}
+          </button>
+          <button
+            className={`nav-btn ${view === 'transfers' ? 'nav-btn-active' : ''}`}
+            onClick={() => setView('transfers')}
+            title="Transfers">
+            Transfers
           </button>
         </nav>
         <div className="app-header-meta">
@@ -121,6 +138,9 @@ export function Main() {
             {/* Hosts page overlays the terminal stack when active. */}
             <div style={{ display: view === 'hosts' ? 'block' : 'none' }}>
               <HostsPage onNewVm={() => setEditing(null)} onEditVm={(vm) => setEditing(vm)} />
+            </div>
+            <div style={{ display: view === 'transfers' ? 'block' : 'none' }}>
+              <TransfersPage />
             </div>
           </div>
         </main>
