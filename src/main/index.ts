@@ -9,6 +9,8 @@ import { SessionManager } from './ssh/session-manager';
 import { ClipboardService } from './clipboard';
 import { registerIpc } from './ipc';
 import { DEFAULTS, IPC } from '@shared/constants';
+import { TransferManager } from './transfer/transfer-manager';
+import { RemoteBrowserService } from './transfer/remote-browser-service';
 
 let mainWindow: BrowserWindow | null = null;
 
@@ -42,7 +44,10 @@ app.whenReady().then(() => {
     clear: () => clipboard.clear(),
   });
 
-  registerIpc({ db, repo, vault, sessions, clip, mainWindow: () => mainWindow });
+  const transfers = new TransferManager({ chooseEngine: async () => 'sftp', startEngine: async () => undefined });
+  const remoteBrowser = new RemoteBrowserService();
+
+  registerIpc({ db, repo, vault, sessions, clip, mainWindow: () => mainWindow, transfers, remoteBrowser });
 
   mainWindow = createWindow();
 
