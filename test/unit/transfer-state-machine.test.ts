@@ -22,9 +22,9 @@ describe('transfer state machine', () => {
     expect(canStop('succeeded')).toBe(false);
   });
 
-  it('keeps partials for pause and failure but deletes them for stop', () => {
+  it('keeps partials for pause but not for failure or stop', () => {
     expect(partialsKeptForOutcome('pause')).toBe(true);
-    expect(partialsKeptForOutcome('failure')).toBe(true);
+    expect(partialsKeptForOutcome('failure')).toBe(false);
     expect(partialsKeptForOutcome('stop')).toBe(false);
   });
 });

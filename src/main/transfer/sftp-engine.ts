@@ -10,7 +10,7 @@ export interface EngineContext {
   emitLog: (line: string, level?: 'info' | 'warn' | 'error') => void;
   markRunning: () => void;
   markSucceeded: () => void;
-  markFailed: (error: string, partialsKept: boolean) => void;
+  markFailed: (error: string) => void;
 }
 
 export class SftpTransferEngine {
@@ -42,7 +42,7 @@ export class SftpTransferEngine {
       context.markSucceeded();
     } catch (err) {
       if (!this.abortedIds.has(record.id)) {
-        context.markFailed(err instanceof Error ? err.message : String(err), true);
+        context.markFailed(err instanceof Error ? err.message : String(err));
       }
     } finally {
       conn.close();

@@ -56,7 +56,7 @@ describe('TransferManager', () => {
     manager.on('state', (r: TransferRecord) => stateEvents.push(r));
 
     const record = await manager.start(request());
-    manager.fail(record.id, 'connection lost', true);
+    manager.fail(record.id, 'connection lost');
 
     const finalState = stateEvents[stateEvents.length - 1];
     expect(finalState.partialsKept).toBe(false);

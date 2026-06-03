@@ -13,5 +13,5 @@ export function canStop(status: TransferStatus): boolean {
 }
 
 export function partialsKeptForOutcome(outcome: 'pause' | 'stop' | 'failure'): boolean {
-  return outcome === 'pause' || outcome === 'failure';
+  return outcome === 'pause';
 }

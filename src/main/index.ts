@@ -65,7 +65,7 @@ app.whenReady().then(() => {
     },
     startEngine: async (record) => {
       const vm = repo.getVm(record.vmId);
-      if (!vm) { transfers.fail(record.id, 'vm-not-found', false); return; }
+      if (!vm) { transfers.fail(record.id, 'vm-not-found'); return; }
       const context = {
         vm,
         secret: vault.getSecret(vm.vaultRef),
@@ -76,7 +76,7 @@ app.whenReady().then(() => {
         emitLog: (line: string, level: 'info' | 'warn' | 'error' = 'info') => transfers.emit('log', { id: record.id, line, level, at: Date.now() }),
         markRunning: () => transfers.updateStatus(record.id, 'running'),
         markSucceeded: () => transfers.updateStatus(record.id, 'succeeded'),
-        markFailed: (error: string, partialsKept: boolean) => transfers.fail(record.id, error, partialsKept),
+        markFailed: (error: string) => transfers.fail(record.id, error),
       };
       if (record.engine === 'sftp') {
         await sftpEngine.start(record, context);
