@@ -14,6 +14,7 @@ import { RemoteBrowserService } from './transfer/remote-browser-service';
 import { chooseTransferEngine } from './transfer/engine-selection';
 import { hasLocalRsync, hasRemoteRsync } from './transfer/rsync-availability';
 import { SftpTransferEngine } from './transfer/sftp-engine';
+import { RsyncTransferEngine } from './transfer/rsync-engine';
 
 let mainWindow: BrowserWindow | null = null;
 
@@ -48,6 +49,7 @@ app.whenReady().then(() => {
   });
 
   const sftpEngine = new SftpTransferEngine();
+  const rsyncEngine = new RsyncTransferEngine();
   const transfers = new TransferManager({
     chooseEngine: async (request) => {
       const vm = repo.getVm(request.vmId);
@@ -71,6 +73,8 @@ app.whenReady().then(() => {
       };
       if (record.engine === 'sftp') {
         await sftpEngine.start(record, context);
+      } else if (record.engine === 'rsync') {
+        rsyncEngine.start(record, context);
       }
     },
   });
