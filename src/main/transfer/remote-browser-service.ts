@@ -42,4 +42,8 @@ export class RemoteBrowserService {
       conn.close();
     }
   }
+
+  async stat(_vm: Vm, _secret: VaultEntry | null, _remotePath: string): Promise<RemoteEntry | null> {
+    return null;
+  }
 }

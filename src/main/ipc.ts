@@ -1,4 +1,5 @@
-import { ipcMain, BrowserWindow, clipboard } from 'electron';
+import { ipcMain, BrowserWindow, clipboard, dialog } from 'electron';
+import fs from 'node:fs';
 import type Database from 'better-sqlite3';
 import { IPC } from '@shared/constants';
 import { Vault } from './vault/vault';
@@ -9,6 +10,10 @@ import { ClipboardService } from './clipboard';
 import { logger } from './logger';
 import { Vm, VmInput, VaultEntry, Folder, PromptType, ToastPayload } from '@shared/types';
 import { decidePromptAction, pickSecretByPrompt } from './ssh/prompt-action';
+import type { TransferManager } from './transfer/transfer-manager';
+import { RemoteBrowserService } from './transfer/remote-browser-service';
+import { basenameForPath } from './transfer/path-utils';
+import type { LocalSelection, TransferStartRequest } from '@shared/types';
 
 interface Deps {
   db: Database.Database;
@@ -17,6 +22,8 @@ interface Deps {
   sessions: SessionManager;
   clip: ClipboardService;
   mainWindow: () => BrowserWindow | null;
+  transfers: TransferManager;
+  remoteBrowser: RemoteBrowserService;
 }
 
 export function registerIpc(d: Deps): void {
@@ -152,4 +159,51 @@ export function registerIpc(d: Deps): void {
     const secret = pickSecretByPrompt(entry, type);
     if (secret) d.clip.copySecret(secret);
   });
+
+  // transfers
+  ipcMain.handle(IPC.TRANSFER_PICK_UPLOAD_SOURCE, async (): Promise<LocalSelection | null> => {
+    const result = await dialog.showOpenDialog({
+      properties: ['openFile', 'openDirectory'],
+    });
+    if (result.canceled || result.filePaths.length === 0) return null;
+    const selectedPath = result.filePaths[0];
+    const stat = fs.statSync(selectedPath);
+    return {
+      path: selectedPath,
+      name: basenameForPath(selectedPath),
+      type: stat.isDirectory() ? 'directory' : 'file',
+      sizeBytes: stat.isFile() ? stat.size : null,
+    };
+  });
+
+  ipcMain.handle(IPC.TRANSFER_PICK_DOWNLOAD_DESTINATION, async (): Promise<string | null> => {
+    const result = await dialog.showOpenDialog({ properties: ['openDirectory', 'createDirectory'] });
+    if (result.canceled || result.filePaths.length === 0) return null;
+    return result.filePaths[0];
+  });
+
+  ipcMain.handle(IPC.TRANSFER_REMOTE_LIST, async (_e, vmId: number, directory: string) => {
+    const vm = d.repo.getVm(vmId);
+    if (!vm) throw new Error('vm-not-found');
+    const entry = d.vault.getSecret(vm.vaultRef);
+    return d.remoteBrowser.list(vm, entry, directory);
+  });
+
+  ipcMain.handle(IPC.TRANSFER_REMOTE_STAT, async (_e, vmId: number, remotePath: string) => {
+    const vm = d.repo.getVm(vmId);
+    if (!vm) throw new Error('vm-not-found');
+    const entry = d.vault.getSecret(vm.vaultRef);
+    return d.remoteBrowser.stat(vm, entry, remotePath);
+  });
+
+  ipcMain.handle(IPC.TRANSFER_START, async (_e, request: TransferStartRequest) => d.transfers.start(request));
+  ipcMain.handle(IPC.TRANSFER_PAUSE, async (_e, id: string) => d.transfers.emit('pause-request', id));
+  ipcMain.handle(IPC.TRANSFER_RESUME, async (_e, id: string) => d.transfers.emit('resume-request', id));
+  ipcMain.handle(IPC.TRANSFER_STOP, async (_e, id: string) => d.transfers.emit('stop-request', id));
+  ipcMain.handle(IPC.TRANSFER_DELETE_PARTIALS, async (_e, id: string) => d.transfers.emit('delete-partials-request', id));
+
+  d.transfers.on('state', (record) => d.mainWindow()?.webContents.send(IPC.TRANSFER_STATE, record));
+  d.transfers.on('progress', (progress) => d.mainWindow()?.webContents.send(IPC.TRANSFER_PROGRESS, progress));
+  d.transfers.on('log', (log) => d.mainWindow()?.webContents.send(IPC.TRANSFER_LOG, log));
+  d.transfers.on('toast', (toast) => d.mainWindow()?.webContents.send(IPC.TRANSFER_TOAST, toast));
 }

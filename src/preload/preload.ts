@@ -1,6 +1,6 @@
 import { contextBridge, ipcRenderer } from 'electron';
 import { IPC } from '@shared/constants';
-import { Vm, VmInput, Folder, VaultEntry, SessionState, ToastPayload, PromptType } from '@shared/types';
+import { Vm, VmInput, Folder, VaultEntry, SessionState, ToastPayload, PromptType, LocalSelection, RemoteEntry, TransferStartRequest, TransferRecord, TransferProgressEvent, TransferLogEvent, TransferToastPayload } from '@shared/types';
 
 const api = {
   vault: {
@@ -42,6 +42,21 @@ const api = {
       ipcRenderer.on(IPC.SESSION_STATE, (_e, s) => cb(s)),
     onToast: (cb: (toast: ToastPayload) => void) =>
       ipcRenderer.on(IPC.SESSION_TOAST, (_e, t) => cb(t)),
+  },
+  transfer: {
+    pickUploadSource: (): Promise<LocalSelection | null> => ipcRenderer.invoke(IPC.TRANSFER_PICK_UPLOAD_SOURCE),
+    pickDownloadDestination: (): Promise<string | null> => ipcRenderer.invoke(IPC.TRANSFER_PICK_DOWNLOAD_DESTINATION),
+    remoteList: (vmId: number, directory: string): Promise<RemoteEntry[]> => ipcRenderer.invoke(IPC.TRANSFER_REMOTE_LIST, vmId, directory),
+    remoteStat: (vmId: number, remotePath: string): Promise<RemoteEntry | null> => ipcRenderer.invoke(IPC.TRANSFER_REMOTE_STAT, vmId, remotePath),
+    start: (request: TransferStartRequest): Promise<TransferRecord> => ipcRenderer.invoke(IPC.TRANSFER_START, request),
+    pause: (id: string) => ipcRenderer.invoke(IPC.TRANSFER_PAUSE, id),
+    resume: (id: string) => ipcRenderer.invoke(IPC.TRANSFER_RESUME, id),
+    stop: (id: string) => ipcRenderer.invoke(IPC.TRANSFER_STOP, id),
+    deletePartials: (id: string) => ipcRenderer.invoke(IPC.TRANSFER_DELETE_PARTIALS, id),
+    onState: (cb: (record: TransferRecord) => void) => ipcRenderer.on(IPC.TRANSFER_STATE, (_e, r) => cb(r)),
+    onProgress: (cb: (event: TransferProgressEvent) => void) => ipcRenderer.on(IPC.TRANSFER_PROGRESS, (_e, p) => cb(p)),
+    onLog: (cb: (event: TransferLogEvent) => void) => ipcRenderer.on(IPC.TRANSFER_LOG, (_e, l) => cb(l)),
+    onToast: (cb: (toast: TransferToastPayload) => void) => ipcRenderer.on(IPC.TRANSFER_TOAST, (_e, t) => cb(t)),
   },
 };
 
