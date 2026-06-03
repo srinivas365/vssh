@@ -54,10 +54,14 @@ app.whenReady().then(() => {
     chooseEngine: async (request) => {
       const vm = repo.getVm(request.vmId);
       if (!vm) throw new Error('vm-not-found');
-      return chooseTransferEngine({
+      const engine = chooseTransferEngine({
         localRsync: await hasLocalRsync(),
         remoteRsync: await hasRemoteRsync(vm),
       });
+      if (engine === 'sftp' && vm.authMethod === 'password') {
+        transfers.emit('log', { id: request.vmId.toString(), line: 'Password-based transfers use SFTP fallback for secure prompt handling', level: 'info', at: Date.now() });
+      }
+      return engine;
     },
     startEngine: async (record) => {
       const vm = repo.getVm(record.vmId);
