@@ -49,4 +49,17 @@ describe('TransferManager', () => {
     expect(finalState.transferredBytes).toBe(1024);
     expect(finalState.percent).toBe(50);
   });
+
+  it('sets partialsKept to false when transfer fails', async () => {
+    const stateEvents: TransferRecord[] = [];
+    const manager = new TransferManager({ chooseEngine: async () => 'sftp', startEngine: vi.fn() });
+    manager.on('state', (r: TransferRecord) => stateEvents.push(r));
+
+    const record = await manager.start(request());
+    manager.fail(record.id, 'connection lost', true);
+
+    const finalState = stateEvents[stateEvents.length - 1];
+    expect(finalState.partialsKept).toBe(false);
+    expect(finalState.status).toBe('failed');
+  });
 });

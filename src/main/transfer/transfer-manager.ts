@@ -63,10 +63,10 @@ export class TransferManager extends EventEmitter {
   fail(id: string, error: string, partialsKept: boolean): void {
     const record = this.records.get(id);
     if (!record) return;
-    const updated = { ...record, status: 'failed' as const, error, partialsKept, finishedAt: Date.now() };
+    const updated = { ...record, status: 'failed' as const, error, partialsKept: false, finishedAt: Date.now() };
     this.records.set(id, updated);
     this.emit('state', updated);
-    this.emit('toast', { id, vmId: updated.vmId, status: updated.status, message: error, canResume: partialsKept, canDeletePartials: partialsKept });
+    this.emit('toast', { id, vmId: updated.vmId, status: updated.status, message: error, canResume: false, canDeletePartials: false });
   }
 
   pause(id: string): void {
