@@ -13,6 +13,7 @@ import { TransferManager } from './transfer/transfer-manager';
 import { RemoteBrowserService } from './transfer/remote-browser-service';
 import { chooseTransferEngine } from './transfer/engine-selection';
 import { hasLocalRsync, hasRemoteRsync } from './transfer/rsync-availability';
+import { SftpTransferEngine } from './transfer/sftp-engine';
 
 let mainWindow: BrowserWindow | null = null;
 
@@ -46,6 +47,7 @@ app.whenReady().then(() => {
     clear: () => clipboard.clear(),
   });
 
+  const sftpEngine = new SftpTransferEngine();
   const transfers = new TransferManager({
     chooseEngine: async (request) => {
       const vm = repo.getVm(request.vmId);
@@ -55,7 +57,22 @@ app.whenReady().then(() => {
         remoteRsync: await hasRemoteRsync(vm),
       });
     },
-    startEngine: async () => undefined,
+    startEngine: async (record) => {
+      const vm = repo.getVm(record.vmId);
+      if (!vm) { transfers.fail(record.id, 'vm-not-found', false); return; }
+      const context = {
+        vm,
+        secret: vault.getSecret(vm.vaultRef),
+        emitProgress: (event: import('@shared/types').TransferProgressEvent) => transfers.emit('progress', event),
+        emitLog: (line: string, level: 'info' | 'warn' | 'error' = 'info') => transfers.emit('log', { id: record.id, line, level, at: Date.now() }),
+        markRunning: () => transfers.updateStatus(record.id, 'running'),
+        markSucceeded: () => transfers.updateStatus(record.id, 'succeeded'),
+        markFailed: (error: string, partialsKept: boolean) => transfers.fail(record.id, error, partialsKept),
+      };
+      if (record.engine === 'sftp') {
+        await sftpEngine.start(record, context);
+      }
+    },
   });
   const remoteBrowser = new RemoteBrowserService();
 
