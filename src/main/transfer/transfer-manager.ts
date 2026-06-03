@@ -60,7 +60,7 @@ export class TransferManager extends EventEmitter {
     this.emit('state', updated);
   }
 
-  fail(id: string, error: string, partialsKept: boolean): void {
+  fail(id: string, error: string): void {
     const record = this.records.get(id);
     if (!record) return;
     const updated = { ...record, status: 'failed' as const, error, partialsKept: false, finishedAt: Date.now() };

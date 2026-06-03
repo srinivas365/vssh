@@ -8,7 +8,7 @@ export interface RsyncContext {
   emitLog: (line: string, level?: 'info' | 'warn' | 'error') => void;
   markRunning: () => void;
   markSucceeded: () => void;
-  markFailed: (error: string, partialsKept: boolean) => void;
+  markFailed: (error: string) => void;
 }
 
 export class RsyncTransferEngine {
@@ -23,11 +23,11 @@ export class RsyncTransferEngine {
 
     child.stdout.on('data', (chunk) => this.handleOutput(record.id, String(chunk), context));
     child.stderr.on('data', (chunk) => context.emitLog(String(chunk), 'warn'));
-    child.once('error', (err) => context.markFailed(err.message, true));
+    child.once('error', (err) => context.markFailed(err.message));
     child.once('exit', (code) => {
       this.children.delete(record.id);
       if (code === 0) context.markSucceeded();
-      else context.markFailed(`rsync exited with code ${code}`, true);
+      else context.markFailed(`rsync exited with code ${code}`);
     });
   }
 
