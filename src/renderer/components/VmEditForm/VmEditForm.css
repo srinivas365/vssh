@@ -34,7 +34,7 @@
   gap: 4px;
   color: var(--text-muted);
 }
-.vm-form input {
+.vm-form input:not([type='checkbox']):not([type='radio']) {
   padding: 8px 10px;
   background: var(--bg-panel);
   border: 1px solid var(--border-strong);
@@ -44,10 +44,25 @@
   font-family: inherit;
   transition: border-color 0.1s, box-shadow 0.1s;
 }
-.vm-form input:focus {
+.vm-form input:not([type='checkbox']):not([type='radio']):focus {
   outline: none;
   border-color: var(--accent);
   box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+}
+
+.vm-form .checkbox-label {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  color: var(--text);
+}
+
+.vm-form .checkbox-label input[type='checkbox'] {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: var(--accent);
+  cursor: pointer;
 }
 
 .form-actions {
