@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { TransferManager } from '../../src/main/transfer/transfer-manager';
-import type { TransferStartRequest } from '../../src/shared/types';
+import type { TransferRecord, TransferStartRequest } from '../../src/shared/types';
 
 function request(vmId = 1): TransferStartRequest {
   return {
@@ -34,5 +34,19 @@ describe('TransferManager', () => {
     const manager = new TransferManager({ chooseEngine: async () => 'sftp', startEngine: vi.fn() });
     await manager.start(request(1));
     await expect(manager.start(request(2))).resolves.toMatchObject({ vmId: 2 });
+  });
+
+  it('preserves transferredBytes in state event after progress applied', async () => {
+    const stateEvents: TransferRecord[] = [];
+    const manager = new TransferManager({ chooseEngine: async () => 'sftp', startEngine: vi.fn() });
+    manager.on('state', (r: TransferRecord) => stateEvents.push(r));
+
+    const record = await manager.start(request());
+    manager.applyProgress({ id: record.id, transferredBytes: 1024, totalBytes: 2048, percent: 50 });
+    manager.updateStatus(record.id, 'succeeded');
+
+    const finalState = stateEvents[stateEvents.length - 1];
+    expect(finalState.transferredBytes).toBe(1024);
+    expect(finalState.percent).toBe(50);
   });
 });
