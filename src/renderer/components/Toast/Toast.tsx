@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { ArrowUpDown, KeyRound } from 'lucide-react';
 import { useSessionsStore } from '../../state/sessions-store';
 import { useTransfersStore } from '../../state/transfers-store';
 import { PromptType } from '@shared/types';
@@ -51,7 +52,7 @@ export function TransferToastOverlay() {
   return (
     <div className="toast transfer-toast">
       <div className="toast-title">
-        <span className="toast-icon">⇅</span>
+        <span className="toast-icon"><ArrowUpDown size={14} strokeWidth={2} /></span>
         {title}
       </div>
       {toast.status === 'failed' && toast.message && (
@@ -80,7 +81,7 @@ export function ToastOverlay() {
   return (
     <div className="toast">
       <div className="toast-title">
-        <span className="toast-icon">🔑</span>
+        <span className="toast-icon"><KeyRound size={14} strokeWidth={2} /></span>
         {toastTitle(toast)}
       </div>
       {toastSubtext(toast) && <div className="toast-sub">{toastSubtext(toast)}</div>}

@@ -36,8 +36,9 @@
 .rselect-placeholder { color: var(--text-faint); }
 
 .rselect-chev {
+  display: inline-flex;
+  align-items: center;
   color: var(--text-muted);
-  font-size: 11px;
   margin-left: 8px;
   transition: transform 0.12s;
 }

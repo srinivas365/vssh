@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { ChevronDown, Pencil, X } from 'lucide-react';
 import { Folder } from '@shared/types';
 import { useVmsStore } from '../../state/vms-store';
 import { useUiStore } from '../../state/ui-store';
@@ -70,20 +71,28 @@ export function WorkspaceSection({ folder, count, canDelete, children }: Props) 
          onDrop={onDrop}>
       {mode === 'view' && (
         <div className="ws-header" onClick={() => toggle(folder.id)}>
-          <span className={`ws-chev ${collapsed ? 'ws-chev-collapsed' : ''}`}>▾</span>
+          <span className={`ws-chev ${collapsed ? 'ws-chev-collapsed' : ''}`}>
+            <ChevronDown size={14} strokeWidth={2.2} />
+          </span>
           <span className="ws-name">{folder.name}</span>
           <span className="ws-count">{count}</span>
           <span className="ws-actions" onClick={(e) => e.stopPropagation()}>
-            <button title="Rename" aria-label="Rename" onClick={() => setMode('rename')}>✎</button>
+            <button title="Rename" aria-label="Rename" onClick={() => setMode('rename')}>
+              <Pencil size={12} strokeWidth={2} />
+            </button>
             {canDelete && (
-              <button title="Delete" aria-label="Delete" onClick={() => setMode('delete-confirm')}>✕</button>
+              <button title="Delete" aria-label="Delete" onClick={() => setMode('delete-confirm')}>
+                <X size={12} strokeWidth={2.2} />
+              </button>
             )}
           </span>
         </div>
       )}
       {mode === 'rename' && (
         <div className="ws-header" onClick={(e) => e.stopPropagation()}>
-          <span className={`ws-chev ${collapsed ? 'ws-chev-collapsed' : ''}`}>▾</span>
+          <span className={`ws-chev ${collapsed ? 'ws-chev-collapsed' : ''}`}>
+            <ChevronDown size={14} strokeWidth={2.2} />
+          </span>
           <input
             ref={inputRef}
             className="ws-rename-input"

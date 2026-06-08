@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Download, Copy, Pencil, Search, Server, Trash2, Upload, FileUp, FileDown } from 'lucide-react';
+import { Download, Copy, Pencil, Search, Server, Trash2, Upload, FileUp, FileDown, Play, Plus } from 'lucide-react';
 import { useVmsStore } from '../state/vms-store';
 import { useSessionsStore } from '../state/sessions-store';
 import { Vm } from '@shared/types';
@@ -53,7 +53,9 @@ export function HostsPage({ onNewVm, onEditVm, onCloneVm, onUploadVm, onDownload
       <header className="hosts-header">
         <div>
           <h1 className="hosts-title">Hosts</h1>
-          <p className="hosts-sub">{vms.length} saved · double-click or hit ▶ to connect</p>
+          <p className="hosts-sub">
+            {vms.length} saved · double-click or hit <Play size={12} strokeWidth={2.2} className="hosts-sub-icon" /> to connect
+          </p>
         </div>
         <div className="hosts-header-actions">
           <div className="hosts-search-wrap">
@@ -71,7 +73,7 @@ export function HostsPage({ onNewVm, onEditVm, onCloneVm, onUploadVm, onDownload
           <button className="btn" onClick={() => setTransferMode('export')} title="Export hosts">
             <FileDown size={14} /> Export
           </button>
-          <button className="btn btn-primary" onClick={onNewVm}>+ New host</button>
+          <button className="btn btn-primary" onClick={onNewVm}><Plus size={14} strokeWidth={2.2} /> New host</button>
         </div>
       </header>
 
@@ -117,7 +119,7 @@ export function HostsPage({ onNewVm, onEditVm, onCloneVm, onUploadVm, onDownload
                 <div className="hosts-empty-icon"><Server size={26} /></div>
                 <h3>No hosts yet</h3>
                 <p>Add your first host to get started.</p>
-                <button className="btn btn-primary" onClick={onNewVm}>+ New host</button>
+                <button className="btn btn-primary" onClick={onNewVm}><Plus size={14} strokeWidth={2.2} /> New host</button>
               </>
             ) : (
               <p>No hosts match your search.</p>

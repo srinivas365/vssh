@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
+import { ChevronDown } from 'lucide-react';
 import './Select.css';
 
 export interface SelectOption<T extends string> {
@@ -90,7 +91,7 @@ export function Select<T extends string>({ value, options, onChange, placeholder
         <span className={`rselect-value ${!selected ? 'rselect-placeholder' : ''}`}>
           {selected?.label ?? placeholder ?? 'Select…'}
         </span>
-        <span className="rselect-chev" aria-hidden>▾</span>
+        <span className="rselect-chev" aria-hidden><ChevronDown size={14} strokeWidth={2.2} /></span>
       </button>
       {open && (
         <ul ref={listRef} className="rselect-menu" role="listbox">

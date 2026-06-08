@@ -10,3 +10,4 @@ test-results/
 playwright-report/
 build/icon.iconset/
 .worktrees/
+session.txt

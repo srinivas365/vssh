@@ -46,7 +46,7 @@ export function VmEditForm({ initial, cloneFrom, onClose }: Props) {
 
   const workspaceOptions: SelectOption<string>[] = [
     ...folders.map((f) => ({ value: String(f.id), label: f.name })),
-    { value: NEW_FOLDER_VALUE, label: '+ Create new workspace…' },
+    { value: NEW_FOLDER_VALUE, label: 'Create new workspace…' },
   ];
 
   function onWorkspaceChange(v: string) {

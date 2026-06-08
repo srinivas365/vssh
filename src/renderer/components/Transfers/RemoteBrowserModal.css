@@ -33,15 +33,18 @@
 }
 
 .rbm-title-icon {
-  font-size: 16px;
+  display: inline-flex;
+  align-items: center;
   color: var(--accent);
 }
 
 .rbm-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   background: transparent;
   border: none;
   color: var(--text-muted);
-  font-size: 13px;
   cursor: pointer;
   padding: 4px 6px;
   border-radius: var(--radius);
@@ -80,14 +83,18 @@
 .rbm-crumb-active:hover { background: transparent; color: var(--text); }
 
 .rbm-sep {
+  display: inline-flex;
+  align-items: center;
   color: var(--text-faint);
-  font-size: 12px;
   user-select: none;
   flex-shrink: 0;
 }
 
 /* Error */
 .rbm-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   padding: 8px 16px;
   background: #fef2f2;
   color: var(--danger);
@@ -140,10 +147,12 @@
 }
 
 .rbm-entry-icon {
-  font-size: 15px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
   width: 20px;
-  text-align: center;
+  color: var(--text-muted);
 }
 
 .rbm-entry-name {
@@ -156,8 +165,9 @@
 .rbm-entry-dir .rbm-entry-name { font-weight: 500; }
 
 .rbm-entry-arrow {
+  display: inline-flex;
+  align-items: center;
   color: var(--text-faint);
-  font-size: 14px;
   flex-shrink: 0;
   margin-left: auto;
 }

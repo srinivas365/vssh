@@ -28,8 +28,9 @@
   top: 50%;
   transform: translateY(-50%);
   color: var(--text-faint);
-  font-size: 14px;
   pointer-events: none;
+  display: inline-flex;
+  align-items: center;
 }
 .sidebar-search {
   width: 100%;
@@ -122,13 +123,15 @@
 .vm-actions { display: none; gap: 2px; flex-shrink: 0; }
 .vm-row:hover .vm-actions { display: flex; }
 .vm-actions button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   background: none;
   border: none;
   color: var(--text-muted);
   cursor: pointer;
   padding: 4px 6px;
   border-radius: 4px;
-  font-size: 11px;
 }
 .vm-actions button:hover { background: var(--bg-panel); color: var(--text); }
 
@@ -164,7 +167,6 @@
   transition: background 0.1s, border-color 0.1s;
 }
 .sidebar-new:hover { background: var(--bg-muted); border-color: var(--accent); color: var(--accent); }
-.sidebar-new-plus { font-weight: 700; font-size: 14px; }
 
 .sidebar-settings-button {
   border-style: dashed;

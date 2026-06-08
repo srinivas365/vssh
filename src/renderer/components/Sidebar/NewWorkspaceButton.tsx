@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { Plus } from 'lucide-react';
 import { useVmsStore } from '../../state/vms-store';
 
 export function NewWorkspaceButton() {
@@ -32,7 +33,7 @@ export function NewWorkspaceButton() {
 
   return (
     <button className="sidebar-new" onClick={() => setEditing(true)}>
-      <span className="sidebar-new-plus">+</span> New workspace
+      <Plus size={14} strokeWidth={2.2} /> New workspace
     </button>
   );
 }

@@ -1,4 +1,15 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import {
+  Copy,
+  Pencil,
+  Play,
+  Plus,
+  Search,
+  Server,
+  Settings,
+  Trash2,
+  X,
+} from 'lucide-react';
 import { useVmsStore } from '../../state/vms-store';
 import { useSessionsStore } from '../../state/sessions-store';
 import { useUiStore } from '../../state/ui-store';
@@ -60,7 +71,7 @@ export function Sidebar({ onNewVm, onEditVm, onCloneVm, onOpenSettings }: Props)
     <aside className="sidebar">
       <div className="sidebar-section-label">Workspaces</div>
       <div className="sidebar-search-wrap">
-        <span className="sidebar-search-icon">⌕</span>
+        <span className="sidebar-search-icon"><Search size={14} strokeWidth={2} /></span>
         <input
           className="sidebar-search"
           placeholder="Search hosts…"
@@ -113,10 +124,10 @@ export function Sidebar({ onNewVm, onEditVm, onCloneVm, onOpenSettings }: Props)
       <div className="sidebar-footer">
         <NewWorkspaceButton />
         <button className="sidebar-new" onClick={onNewVm}>
-          <span className="sidebar-new-plus">+</span> New host
+          <Plus size={14} strokeWidth={2.2} /> New host
         </button>
         <button className="sidebar-new sidebar-settings-button" onClick={onOpenSettings}>
-          <span className="sidebar-new-plus">⚙</span> Settings
+          <Settings size={14} strokeWidth={2} /> Settings
         </button>
       </div>
     </aside>
@@ -142,17 +153,17 @@ function VmRow({ vm, onConnect, onEdit, onClone, onDelete }: {
          onDoubleClick={onConnect}
          title={`${vm.username}@${vm.host}:${vm.port}`}>
       <div className="vm-row-main">
-        <span className="vm-row-icon">⊟</span>
+        <span className="vm-row-icon"><Server size={14} strokeWidth={2} /></span>
         <div className="vm-row-text">
           <div className="vm-row-label">{vm.label}</div>
           <div className="vm-row-host">{vm.username}@{vm.host}</div>
         </div>
       </div>
       <div className="vm-actions">
-        <button onClick={onConnect} title="Connect">▶</button>
-        <button onClick={onClone} title="Clone">⎘</button>
-        <button onClick={onEdit} title="Edit">✎</button>
-        <button onClick={onDelete} title="Delete">✕</button>
+        <button onClick={onConnect} title="Connect"><Play size={12} strokeWidth={2.2} /></button>
+        <button onClick={onClone} title="Clone"><Copy size={12} strokeWidth={2} /></button>
+        <button onClick={onEdit} title="Edit"><Pencil size={12} strokeWidth={2} /></button>
+        <button onClick={onDelete} title="Delete"><X size={12} strokeWidth={2.2} /></button>
       </div>
     </div>
   );

@@ -1,4 +1,5 @@
 import React from 'react';
+import { X } from 'lucide-react';
 import { useSessionsStore } from '../../state/sessions-store';
 import './TabBar.css';
 
@@ -26,7 +27,9 @@ export function TabBar() {
              onClick={() => setActive(t.sessionId)}>
           <span className="tab-dot" style={{ background: stateColor(t.state) }} />
           <span className="tab-label">{t.label}</span>
-          <button className="tab-close" onClick={(e) => { e.stopPropagation(); close(t.sessionId); }}>×</button>
+          <button className="tab-close" onClick={(e) => { e.stopPropagation(); close(t.sessionId); }} aria-label="Close tab">
+            <X size={12} strokeWidth={2.2} />
+          </button>
         </div>
       ))}
     </div>

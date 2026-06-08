@@ -1,4 +1,12 @@
 import React, { useEffect, useState } from 'react';
+import {
+  AlertTriangle,
+  ChevronRight,
+  File,
+  Folder,
+  Server,
+  X,
+} from 'lucide-react';
 import type { RemoteEntry } from '@shared/types';
 import './RemoteBrowserModal.css';
 
@@ -63,16 +71,18 @@ export function RemoteBrowserModal({ vmId, select, onCancel, onSelect }: Props) 
       <div className="rbm-panel">
         <div className="rbm-header">
           <div className="rbm-title">
-            <span className="rbm-title-icon">⊟</span>
+            <span className="rbm-title-icon"><Server size={16} strokeWidth={2} /></span>
             <span>{select === 'folder' ? 'Choose destination folder' : 'Choose file or folder'}</span>
           </div>
-          <button className="rbm-close" onClick={onCancel} title="Cancel">✕</button>
+          <button className="rbm-close" onClick={onCancel} title="Cancel" aria-label="Cancel">
+            <X size={16} strokeWidth={2.2} />
+          </button>
         </div>
 
         <div className="rbm-breadcrumb">
           {breadcrumbs.map((crumb, i) => (
             <React.Fragment key={crumb.path}>
-              {i > 0 && <span className="rbm-sep">›</span>}
+              {i > 0 && <span className="rbm-sep"><ChevronRight size={12} strokeWidth={2} /></span>}
               <button
                 className={`rbm-crumb ${i === breadcrumbs.length - 1 ? 'rbm-crumb-active' : ''}`}
                 onClick={() => navigate(crumb.path)}
@@ -84,7 +94,12 @@ export function RemoteBrowserModal({ vmId, select, onCancel, onSelect }: Props) 
           ))}
         </div>
 
-        {error && <div className="rbm-error">⚠ {error}</div>}
+        {error && (
+          <div className="rbm-error">
+            <AlertTriangle size={14} strokeWidth={2} />
+            <span>{error}</span>
+          </div>
+        )}
 
         <div className="rbm-list">
           {loading && (
@@ -104,9 +119,13 @@ export function RemoteBrowserModal({ vmId, select, onCancel, onSelect }: Props) 
                 disabled={!clickable}
                 title={entry.path}
               >
-                <span className="rbm-entry-icon">{isDir ? '📁' : '📄'}</span>
+                <span className="rbm-entry-icon">
+                  {isDir ? <Folder size={16} strokeWidth={2} /> : <File size={16} strokeWidth={2} />}
+                </span>
                 <span className="rbm-entry-name">{entry.name}</span>
-                {isDir && <span className="rbm-entry-arrow">›</span>}
+                {isDir && (
+                  <span className="rbm-entry-arrow"><ChevronRight size={14} strokeWidth={2} /></span>
+                )}
               </button>
             );
           })}

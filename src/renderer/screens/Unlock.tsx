@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Terminal as TerminalIcon } from 'lucide-react';
+import { KeyRound, Lock, Terminal as TerminalIcon, Zap } from 'lucide-react';
 import { useVaultStore } from '../state/vault-store';
 
 export function Unlock() {
@@ -61,21 +61,21 @@ export function Unlock() {
 
           <div className="unlock-bullets">
             <div className="unlock-bullet">
-              <span className="unlock-bullet-icon unlock-bullet-icon-1">🔒</span>
+              <span className="unlock-bullet-icon unlock-bullet-icon-1"><Lock size={16} strokeWidth={2} /></span>
               <div>
                 <div className="unlock-bullet-title">Local only</div>
                 <div className="unlock-bullet-sub">Vault never leaves your Mac</div>
               </div>
             </div>
             <div className="unlock-bullet">
-              <span className="unlock-bullet-icon unlock-bullet-icon-2">🔑</span>
+              <span className="unlock-bullet-icon unlock-bullet-icon-2"><KeyRound size={16} strokeWidth={2} /></span>
               <div>
                 <div className="unlock-bullet-title">AES-256 + Argon2id</div>
                 <div className="unlock-bullet-sub">Hardened modern crypto</div>
               </div>
             </div>
             <div className="unlock-bullet">
-              <span className="unlock-bullet-icon unlock-bullet-icon-3">⚡</span>
+              <span className="unlock-bullet-icon unlock-bullet-icon-3"><Zap size={16} strokeWidth={2} /></span>
               <div>
                 <div className="unlock-bullet-title">One paste away</div>
                 <div className="unlock-bullet-sub">Passwords copied automatically</div>
@@ -186,7 +186,10 @@ function HeroIllustration() {
         <path d="M 220 120 Q 250 80, 280 120 T 340 120"
           stroke="url(#lineGrad)" strokeWidth="2.5" fill="none" strokeDasharray="6 5"/>
         <circle cx="280" cy="96" r="20" fill="var(--bg-panel)" stroke="var(--border)" strokeWidth="2"/>
-        <text x="280" y="103" textAnchor="middle" fontSize="16" fill="var(--accent)">🔒</text>
+        <g transform="translate(272 88)" stroke="var(--accent)" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round">
+          <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+        </g>
       </g>
 
       {/* Server stack — right */}
@@ -337,14 +340,15 @@ const UNLOCK_CSS = `
   width: 36px;
   height: 36px;
   border-radius: 10px;
-  display: grid;
-  place-items: center;
-  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
+  color: var(--accent);
 }
 .unlock-bullet-icon-1 { background: var(--accent-soft); }
-.unlock-bullet-icon-2 { background: var(--bg-hover); }
-.unlock-bullet-icon-3 { background: var(--bg-muted); }
+.unlock-bullet-icon-2 { background: var(--bg-hover); color: var(--text-muted); }
+.unlock-bullet-icon-3 { background: var(--bg-muted); color: var(--warn); }
 .unlock-bullet-title { font-size: 13px; font-weight: 600; color: var(--text); }
 .unlock-bullet-sub   { font-size: 12px; color: var(--text-muted); margin-top: 1px; }
 
