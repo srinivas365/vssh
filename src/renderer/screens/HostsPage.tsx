@@ -1,23 +1,27 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Download, Pencil, Search, Server, Trash2, Upload } from 'lucide-react';
+import { Download, Copy, Pencil, Search, Server, Trash2, Upload, FileUp, FileDown } from 'lucide-react';
 import { useVmsStore } from '../state/vms-store';
 import { useSessionsStore } from '../state/sessions-store';
 import { Vm } from '@shared/types';
 import { connectVm } from '../connect-vm';
+import { HostsTransferModal } from '../components/HostsTransfer/HostsTransferModal';
 import './HostsPage.css';
 
 interface Props {
   onNewVm: () => void;
   onEditVm: (vm: Vm) => void;
+  onCloneVm: (vm: Vm) => void;
   onUploadVm: (vm: Vm) => void;
   onDownloadVm: (vm: Vm) => void;
 }
 
-export function HostsPage({ onNewVm, onEditVm, onUploadVm, onDownloadVm }: Props) {
+export function HostsPage({ onNewVm, onEditVm, onCloneVm, onUploadVm, onDownloadVm }: Props) {
   const { vms, folders, refresh, remove } = useVmsStore();
   const addTab = useSessionsStore((s) => s.addTab);
   const [query, setQuery] = useState('');
   const [folderId, setFolderId] = useState<number | 'all'>('all');
+  const [transferMode, setTransferMode] = useState<'export' | 'import' | null>(null);
+  const [statusMessage, setStatusMessage] = useState<string | null>(null);
 
   useEffect(() => { refresh(); }, [refresh]);
 
@@ -43,6 +47,9 @@ export function HostsPage({ onNewVm, onEditVm, onUploadVm, onDownloadVm }: Props
 
   return (
     <div className="hosts-page">
+      {statusMessage && (
+        <div className="hosts-toast-banner">{statusMessage}</div>
+      )}
       <header className="hosts-header">
         <div>
           <h1 className="hosts-title">Hosts</h1>
@@ -58,6 +65,12 @@ export function HostsPage({ onNewVm, onEditVm, onUploadVm, onDownloadVm }: Props
               onChange={(e) => setQuery(e.target.value)}
             />
           </div>
+          <button className="btn" onClick={() => setTransferMode('import')} title="Import hosts">
+            <FileUp size={14} /> Import
+          </button>
+          <button className="btn" onClick={() => setTransferMode('export')} title="Export hosts">
+            <FileDown size={14} /> Export
+          </button>
           <button className="btn btn-primary" onClick={onNewVm}>+ New host</button>
         </div>
       </header>
@@ -89,7 +102,7 @@ export function HostsPage({ onNewVm, onEditVm, onUploadVm, onDownloadVm }: Props
           <div className="hosts-grid">
             {recent.map((vm) => (
               <HostCard key={`recent-${vm.id}`} vm={vm}
-                onConnect={() => connect(vm)} onEdit={() => onEditVm(vm)} onDelete={() => remove(vm.id)} onUpload={() => onUploadVm(vm)} onDownload={() => onDownloadVm(vm)} />
+                onConnect={() => connect(vm)} onEdit={() => onEditVm(vm)} onClone={() => onCloneVm(vm)} onDelete={() => remove(vm.id)} onUpload={() => onUploadVm(vm)} onDownload={() => onDownloadVm(vm)} />
             ))}
           </div>
         </section>
@@ -114,19 +127,32 @@ export function HostsPage({ onNewVm, onEditVm, onUploadVm, onDownloadVm }: Props
           <div className="hosts-grid">
             {filtered.map((vm) => (
               <HostCard key={vm.id} vm={vm}
-                onConnect={() => connect(vm)} onEdit={() => onEditVm(vm)} onDelete={() => remove(vm.id)} onUpload={() => onUploadVm(vm)} onDownload={() => onDownloadVm(vm)} />
+                onConnect={() => connect(vm)} onEdit={() => onEditVm(vm)} onClone={() => onCloneVm(vm)} onDelete={() => remove(vm.id)} onUpload={() => onUploadVm(vm)} onDownload={() => onDownloadVm(vm)} />
             ))}
           </div>
         )}
       </section>
+
+      {transferMode && (
+        <HostsTransferModal
+          mode={transferMode}
+          hostCount={vms.length}
+          onClose={() => setTransferMode(null)}
+          onComplete={async (message) => {
+            setStatusMessage(message);
+            await refresh();
+          }}
+        />
+      )}
     </div>
   );
 }
 
-function HostCard({ vm, onConnect, onEdit, onDelete, onUpload, onDownload }: {
+function HostCard({ vm, onConnect, onEdit, onClone, onDelete, onUpload, onDownload }: {
   vm: Vm;
   onConnect: () => void;
   onEdit: () => void;
+  onClone: () => void;
   onDelete: () => void;
   onUpload: () => void;
   onDownload: () => void;
@@ -155,6 +181,7 @@ function HostCard({ vm, onConnect, onEdit, onDelete, onUpload, onDownload }: {
         <button className="btn btn-primary host-card-connect" onClick={onConnect}>Connect</button>
         <button className="host-card-icon-btn" onClick={onUpload} title="Upload"><Upload size={14} /></button>
         <button className="host-card-icon-btn" onClick={onDownload} title="Download"><Download size={14} /></button>
+        <button className="host-card-icon-btn" onClick={onClone} title="Clone"><Copy size={14} /></button>
         <button className="host-card-icon-btn" onClick={onEdit} title="Edit"><Pencil size={14} /></button>
         <button className="host-card-icon-btn" onClick={() => setConfirmDelete(true)} title="Delete"><Trash2 size={14} /></button>
       </div>

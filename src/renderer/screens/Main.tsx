@@ -22,6 +22,7 @@ export function Main() {
   const { tabs, activeTabId, updateState, pushToast, removeTab, addTab } = useSessionsStore();
   const lock = useVaultStore((s) => s.lock);
   const [editing, setEditing] = useState<Vm | null | undefined>(undefined);
+  const [cloning, setCloning] = useState<Vm | null>(null);
   const [quickOpen, setQuickOpen] = useState(false);
   const [view, setView] = useState<View>('hosts');
   const [transferWizard, setTransferWizard] = useState<{ vm: Vm; direction: TransferDirection } | null>(null);
@@ -125,6 +126,7 @@ export function Main() {
         <Sidebar
           onNewVm={() => setEditing(null)}
           onEditVm={(vm) => setEditing(vm)}
+          onCloneVm={(vm) => setCloning(vm)}
           onOpenSettings={() => setView('settings')}
         />
         <main className="app-main">
@@ -149,6 +151,7 @@ export function Main() {
               <HostsPage
                 onNewVm={() => setEditing(null)}
                 onEditVm={(vm) => setEditing(vm)}
+                onCloneVm={(vm) => setCloning(vm)}
                 onUploadVm={(vm) => setTransferWizard({ vm, direction: 'upload' })}
                 onDownloadVm={(vm) => setTransferWizard({ vm, direction: 'download' })}
               />
@@ -163,7 +166,8 @@ export function Main() {
         </main>
       </div>
 
-      {editing !== undefined && <VmEditForm initial={editing} onClose={() => setEditing(undefined)} />}
+      {editing !== undefined && !cloning && <VmEditForm initial={editing} onClose={() => setEditing(undefined)} />}
+      {cloning && <VmEditForm initial={null} cloneFrom={cloning} onClose={() => setCloning(null)} />}
       {quickOpen && <QuickConnect onClose={() => setQuickOpen(false)} />}
       {transferWizard && (
         <TransferWizard

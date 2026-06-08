@@ -1,6 +1,7 @@
 import { contextBridge, ipcRenderer } from 'electron';
 import { IPC } from '@shared/constants';
 import { Vm, VmInput, Folder, VaultEntry, SessionState, ToastPayload, PromptType, LocalSelection, RemoteEntry, TransferStartRequest, TransferRecord, TransferProgressEvent, TransferLogEvent, TransferToastPayload, VmConnectionTestResult, AppSettings, AppSettingsPatch } from '@shared/types';
+import type { HostsExportResult, HostsImportResult } from '@shared/hosts-export';
 
 const api = {
   vault: {
@@ -23,6 +24,8 @@ const api = {
     create: (input: VmInput, secret: VaultEntry): Promise<Vm> => ipcRenderer.invoke(IPC.VMS_CREATE, input, secret),
     update: (id: number, input: VmInput, secret: VaultEntry) => ipcRenderer.invoke(IPC.VMS_UPDATE, id, input, secret),
     delete: (id: number) => ipcRenderer.invoke(IPC.VMS_DELETE, id),
+    clone: (sourceId: number, input: VmInput): Promise<Vm> =>
+      ipcRenderer.invoke(IPC.VMS_CLONE, sourceId, input),
     touchUsed: (id: number) => ipcRenderer.invoke(IPC.VMS_TOUCH_USED, id),
     testConnection: (input: VmInput, secret: VaultEntry): Promise<VmConnectionTestResult> =>
       ipcRenderer.invoke(IPC.VMS_TEST_CONNECTION, input, secret),
@@ -69,6 +72,10 @@ const api = {
   clipboard: {
     readText: (): Promise<string> => ipcRenderer.invoke(IPC.CLIPBOARD_READ_TEXT),
     writeText: (text: string): Promise<void> => ipcRenderer.invoke(IPC.CLIPBOARD_WRITE_TEXT, text),
+  },
+  hosts: {
+    export: (exportKey: string): Promise<HostsExportResult> => ipcRenderer.invoke(IPC.HOSTS_EXPORT, exportKey),
+    import: (exportKey: string): Promise<HostsImportResult> => ipcRenderer.invoke(IPC.HOSTS_IMPORT, exportKey),
   },
 };
 

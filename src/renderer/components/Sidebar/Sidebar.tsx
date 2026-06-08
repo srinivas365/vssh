@@ -11,10 +11,11 @@ import './Sidebar.css';
 interface Props {
   onNewVm: () => void;
   onEditVm: (vm: Vm) => void;
+  onCloneVm: (vm: Vm) => void;
   onOpenSettings: () => void;
 }
 
-export function Sidebar({ onNewVm, onEditVm, onOpenSettings }: Props) {
+export function Sidebar({ onNewVm, onEditVm, onCloneVm, onOpenSettings }: Props) {
   const { vms, folders, refresh, remove } = useVmsStore();
   const addTab = useSessionsStore((s) => s.addTab);
   const [query, setQuery] = useState('');
@@ -81,6 +82,7 @@ export function Sidebar({ onNewVm, onEditVm, onOpenSettings }: Props) {
                 <VmRow key={vm.id} vm={vm}
                   onConnect={() => connect(vm)}
                   onEdit={() => onEditVm(vm)}
+                  onClone={() => onCloneVm(vm)}
                   onDelete={() => remove(vm.id)} />
               ))}
             </WorkspaceSection>
@@ -94,6 +96,7 @@ export function Sidebar({ onNewVm, onEditVm, onOpenSettings }: Props) {
               <VmRow key={vm.id} vm={vm}
                 onConnect={() => connect(vm)}
                 onEdit={() => onEditVm(vm)}
+                onClone={() => onCloneVm(vm)}
                 onDelete={() => remove(vm.id)} />
             ))}
           </div>
@@ -120,10 +123,11 @@ export function Sidebar({ onNewVm, onEditVm, onOpenSettings }: Props) {
   );
 }
 
-function VmRow({ vm, onConnect, onEdit, onDelete }: {
+function VmRow({ vm, onConnect, onEdit, onClone, onDelete }: {
   vm: Vm;
   onConnect: () => void;
   onEdit: () => void;
+  onClone: () => void;
   onDelete: () => void;
 }) {
   function onDragStart(e: React.DragEvent) {
@@ -146,6 +150,7 @@ function VmRow({ vm, onConnect, onEdit, onDelete }: {
       </div>
       <div className="vm-actions">
         <button onClick={onConnect} title="Connect">▶</button>
+        <button onClick={onClone} title="Clone">⎘</button>
         <button onClick={onEdit} title="Edit">✎</button>
         <button onClick={onDelete} title="Delete">✕</button>
       </div>

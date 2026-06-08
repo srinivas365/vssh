@@ -6,6 +6,7 @@ interface VmsStore {
   folders: Folder[];
   refresh: () => Promise<void>;
   create: (input: VmInput, secret: VaultEntry) => Promise<Vm>;
+  clone: (sourceId: number, input: VmInput) => Promise<Vm>;
   update: (id: number, input: VmInput, secret: VaultEntry) => Promise<void>;
   remove: (id: number) => Promise<void>;
   createFolder: (name: string) => Promise<Folder>;
@@ -26,6 +27,11 @@ export const useVmsStore = create<VmsStore>((set, get) => ({
   },
   create: async (input, secret) => {
     const vm = await window.api.vms.create(input, secret);
+    await get().refresh();
+    return vm;
+  },
+  clone: async (sourceId, input) => {
+    const vm = await window.api.vms.clone(sourceId, input);
     await get().refresh();
     return vm;
   },

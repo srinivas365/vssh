@@ -1,5 +1,6 @@
 import { ipcMain, BrowserWindow, clipboard, dialog } from 'electron';
-import fs from 'node:fs';
+import fs from 'node:fs/promises';
+import fsSync from 'node:fs';
 import type Database from 'better-sqlite3';
 import { IPC } from '@shared/constants';
 import { Vault } from './vault/vault';
@@ -16,6 +17,14 @@ import { basenameForPath } from './transfer/path-utils';
 import { testVmConnection } from './ssh/test-connection';
 import type { LocalSelection, TransferStartRequest, AppSettingsPatch } from '@shared/types';
 import type { SettingsStore } from './settings/store';
+import {
+  buildExportPayload,
+  decryptExportFile,
+  encryptExportPayload,
+  importHostsPayload,
+  parseExportFile,
+} from './export/hosts-transfer';
+import { MIN_EXPORT_KEY_LEN, type HostsExportResult, type HostsImportResult } from '@shared/hosts-export';
 
 interface Deps {
   db: Database.Database;
@@ -65,6 +74,14 @@ export function registerIpc(d: Deps): void {
     if (!vm) return;
     await d.vault.deleteSecret(vm.vaultRef);
     d.repo.deleteVm(id);
+  });
+  ipcMain.handle(IPC.VMS_CLONE, async (_e, sourceId: number, input: VmInput): Promise<Vm> => {
+    const source = d.repo.getVm(sourceId);
+    if (!source) throw new Error('vm not found');
+    const secret = d.vault.getSecret(source.vaultRef);
+    const vm = d.repo.createVm(input);
+    await d.vault.setSecret(vm.vaultRef, { ...secret });
+    return vm;
   });
   ipcMain.handle(IPC.VMS_TOUCH_USED, (_e, id: number) => d.repo.touchUsed(id));
   ipcMain.handle(IPC.VMS_TEST_CONNECTION, async (_e, input: VmInput, secret: VaultEntry) =>
@@ -178,7 +195,7 @@ export function registerIpc(d: Deps): void {
     });
     if (result.canceled || result.filePaths.length === 0) return null;
     const selectedPath = result.filePaths[0];
-    const stat = fs.statSync(selectedPath);
+    const stat = fsSync.statSync(selectedPath);
     return {
       path: selectedPath,
       name: basenameForPath(selectedPath),
@@ -215,6 +232,45 @@ export function registerIpc(d: Deps): void {
 
   ipcMain.handle(IPC.CLIPBOARD_READ_TEXT, () => clipboard.readText());
   ipcMain.handle(IPC.CLIPBOARD_WRITE_TEXT, (_e, text: string) => { clipboard.writeText(text); });
+
+  ipcMain.handle(IPC.HOSTS_EXPORT, async (_e, exportKey: string): Promise<HostsExportResult> => {
+    if (d.vault.state() !== 'unlocked') throw new Error('vault-locked');
+    if (!exportKey || exportKey.length < MIN_EXPORT_KEY_LEN) throw new Error('export-key-too-short');
+
+    const payload = buildExportPayload(d.repo, d.vault);
+    const file = await encryptExportPayload(payload, exportKey);
+    const stamp = new Date().toISOString().slice(0, 10);
+    const result = await dialog.showSaveDialog({
+      defaultPath: `vssh-hosts-${stamp}.vssh`,
+      filters: [{ name: 'vssh host export', extensions: ['vssh'] }],
+    });
+    if (result.canceled || !result.filePath) return { cancelled: true };
+
+    await fs.writeFile(result.filePath, JSON.stringify(file, null, 2), { mode: 0o600 });
+    return { path: result.filePath, hostCount: payload.hosts.length };
+  });
+
+  ipcMain.handle(IPC.HOSTS_IMPORT, async (_e, exportKey: string): Promise<HostsImportResult> => {
+    if (d.vault.state() !== 'unlocked') throw new Error('vault-locked');
+    if (!exportKey || exportKey.length < MIN_EXPORT_KEY_LEN) throw new Error('export-key-too-short');
+
+    const result = await dialog.showOpenDialog({
+      properties: ['openFile'],
+      filters: [{ name: 'vssh host export', extensions: ['vssh', 'json'] }],
+    });
+    if (result.canceled || result.filePaths.length === 0) return { cancelled: true };
+
+    const raw = await fs.readFile(result.filePaths[0], 'utf8');
+    const file = parseExportFile(raw);
+    let payload;
+    try {
+      payload = await decryptExportFile(file, exportKey);
+    } catch {
+      throw new Error('invalid-export-key');
+    }
+    const summary = await importHostsPayload(d.repo, d.vault, payload);
+    return { importedHosts: summary.importedHosts, createdFolders: summary.createdFolders };
+  });
 
   d.transfers.on('state', (record) => d.mainWindow()?.webContents.send(IPC.TRANSFER_STATE, record));
   d.transfers.on('progress', (progress) => d.mainWindow()?.webContents.send(IPC.TRANSFER_PROGRESS, progress));

@@ -12,6 +12,7 @@ export const IPC = {
   VMS_CREATE: 'vms:create',
   VMS_UPDATE: 'vms:update',
   VMS_DELETE: 'vms:delete',
+  VMS_CLONE: 'vms:clone',
   VMS_TOUCH_USED: 'vms:touch-used',
   VMS_TEST_CONNECTION: 'vms:test-connection',
   // settings
@@ -51,6 +52,8 @@ export const IPC = {
   VAULT_STATE_CHANGED: 'vault:state-changed', // main → renderer broadcast
   CLIPBOARD_READ_TEXT: 'clipboard:read-text',
   CLIPBOARD_WRITE_TEXT: 'clipboard:write-text',
+  HOSTS_EXPORT: 'hosts:export',
+  HOSTS_IMPORT: 'hosts:import',
 } as const;
 
 export const DEFAULTS = {

@@ -26,6 +26,12 @@
   font-size: 17px;
   font-weight: 600;
 }
+.vm-form-hint {
+  margin: -4px 0 4px;
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
 .vm-form label {
   display: flex;
   flex-direction: column;

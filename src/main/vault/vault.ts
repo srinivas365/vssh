@@ -55,6 +55,12 @@ export class Vault {
     await this.persist();
   }
 
+  async setSecretsBatch(entries: Record<string, VaultEntry>): Promise<void> {
+    if (!this.contents || !this.masterPassword) throw new Error('vault: locked');
+    Object.assign(this.contents, entries);
+    await this.persist();
+  }
+
   private async persist(): Promise<void> {
     if (!this.contents || !this.masterPassword) throw new Error('vault: cannot persist while locked');
     const plaintext = Buffer.from(JSON.stringify(this.contents), 'utf8');

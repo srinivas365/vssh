@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Vm, VmInput, VaultEntry, AuthMethod, VmConnectionTestResult } from '@shared/types';
+import { buildCloneInput } from '@shared/vm-clone';
 import { useVmsStore } from '../../state/vms-store';
 import { Select, SelectOption } from '../Select/Select';
 import './VmEditForm.css';
@@ -14,28 +15,32 @@ const NEW_FOLDER_VALUE = '__new__';
 
 interface Props {
   initial: Vm | null;
+  cloneFrom?: Vm;
   onClose: () => void;
 }
 
-export function VmEditForm({ initial, onClose }: Props) {
-  const { create, update, folders, createFolder } = useVmsStore();
+export function VmEditForm({ initial, cloneFrom, onClose }: Props) {
+  const { create, clone, update, folders, createFolder } = useVmsStore();
+  const draft = cloneFrom ? buildCloneInput(cloneFrom) : null;
   const defaultFolderId =
-    initial?.folderId ?? folders.find((f) => f.name === 'Default')?.id ?? folders[0]?.id ?? null;
+    draft?.folderId ?? initial?.folderId ?? folders.find((f) => f.name === 'Default')?.id ?? folders[0]?.id ?? null;
 
   const [folderId, setFolderId] = useState<number | null>(defaultFolderId);
   const [creatingFolder, setCreatingFolder] = useState(false);
   const [newFolderName, setNewFolderName] = useState('');
 
-  const [label, setLabel] = useState(initial?.label ?? '');
-  const [host, setHost] = useState(initial?.host ?? '');
-  const [port, setPort] = useState(initial?.port ?? 22);
-  const [username, setUsername] = useState(initial?.username ?? '');
-  const [authMethod, setAuthMethod] = useState<AuthMethod>(initial?.authMethod ?? 'password');
-  const [keyPath, setKeyPath] = useState(initial?.keyPath ?? '');
+  const [label, setLabel] = useState(draft?.label ?? initial?.label ?? '');
+  const [host, setHost] = useState(draft?.host ?? initial?.host ?? '');
+  const [port, setPort] = useState(draft?.port ?? initial?.port ?? 22);
+  const [username, setUsername] = useState(draft?.username ?? initial?.username ?? '');
+  const [authMethod, setAuthMethod] = useState<AuthMethod>(draft?.authMethod ?? initial?.authMethod ?? 'password');
+  const [keyPath, setKeyPath] = useState(draft?.keyPath ?? initial?.keyPath ?? '');
   const [password, setPassword] = useState('');
   const [sudoPassword, setSudoPassword] = useState('');
   const [keyPassphrase, setKeyPassphrase] = useState('');
-  const [autoSubmitEnabled, setAutoSubmitEnabled] = useState(initial?.autoSubmitEnabled ?? true);
+  const [autoSubmitEnabled, setAutoSubmitEnabled] = useState(
+    draft?.autoSubmitEnabled ?? initial?.autoSubmitEnabled ?? true,
+  );
   const [isTestingConnection, setIsTestingConnection] = useState(false);
   const [connectionTestResult, setConnectionTestResult] = useState<VmConnectionTestResult | null>(null);
 
@@ -68,7 +73,8 @@ export function VmEditForm({ initial, onClose }: Props) {
     e.preventDefault();
     const input = buildVmInput();
     const secret = buildVaultEntry();
-    if (initial) await update(initial.id, input, secret);
+    if (cloneFrom) await clone(cloneFrom.id, input);
+    else if (initial) await update(initial.id, input, secret);
     else await create(input, secret);
     onClose();
   }
@@ -118,7 +124,10 @@ export function VmEditForm({ initial, onClose }: Props) {
   return (
     <div className="modal-backdrop" onClick={onClose}>
       <form className="vm-form" onClick={(e) => e.stopPropagation()} onSubmit={submit}>
-        <h2>{initial ? 'Edit VM' : 'New VM'}</h2>
+        <h2>{cloneFrom ? 'Clone host' : initial ? 'Edit VM' : 'New VM'}</h2>
+        {cloneFrom && (
+          <p className="vm-form-hint">Credentials are copied from {cloneFrom.label}. Adjust the host if needed.</p>
+        )}
         <label>
           Workspace
           <Select<string>
@@ -155,13 +164,17 @@ export function VmEditForm({ initial, onClose }: Props) {
         {authMethod !== 'password' && (
           <>
             <label>Key path <input value={keyPath} onChange={(e) => setKeyPath(e.target.value)} placeholder="~/.ssh/id_rsa" /></label>
-            <label>Key passphrase <input type="password" value={keyPassphrase} onChange={(e) => setKeyPassphrase(e.target.value)} /></label>
+            {!cloneFrom && (
+              <label>Key passphrase <input type="password" value={keyPassphrase} onChange={(e) => setKeyPassphrase(e.target.value)} /></label>
+            )}
           </>
         )}
-        {authMethod !== 'key' && (
+        {authMethod !== 'key' && !cloneFrom && (
           <label>Password <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} /></label>
         )}
-        <label>Sudo password <input type="password" value={sudoPassword} onChange={(e) => setSudoPassword(e.target.value)} /></label>
+        {!cloneFrom && (
+          <label>Sudo password <input type="password" value={sudoPassword} onChange={(e) => setSudoPassword(e.target.value)} /></label>
+        )}
         <label className="checkbox-label">
           <input
             type="checkbox"
@@ -174,7 +187,7 @@ export function VmEditForm({ initial, onClose }: Props) {
           <button
             type="button"
             className="connection-test-button"
-            disabled={!canTestConnection || isTestingConnection}
+            disabled={!canTestConnection || isTestingConnection || !!cloneFrom}
             onClick={() => { void testConnection(); }}
           >
             {isTestingConnection ? 'Testing...' : 'Test connection'}
@@ -190,7 +203,7 @@ export function VmEditForm({ initial, onClose }: Props) {
         </div>
         <div className="form-actions">
           <button type="button" onClick={onClose}>Cancel</button>
-          <button type="submit">{initial ? 'Save' : 'Create'}</button>
+          <button type="submit">{cloneFrom ? 'Clone' : initial ? 'Save' : 'Create'}</button>
         </div>
       </form>
     </div>
