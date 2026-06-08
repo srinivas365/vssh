@@ -13,7 +13,7 @@ A Termius-alternative SSH client for macOS, Linux, and Windows that remembers yo
 
 ## Why
 
-Working across a fleet of VMs means typing — or worse, pasting — the same passwords every day. vssh stores them in an encrypted local vault, watches the SSH session for a password prompt, and copies the right secret to the clipboard so all you do is `⌘V`. No vendor account, no cloud sync, no telemetry.
+Working across a fleet of VMs means typing — or worse, pasting — the same passwords every day. vssh stores them in an encrypted local vault, watches the SSH session for a password prompt, and either auto-submits the secret or copies it to the clipboard so you can paste (`⌘V` / `Ctrl+V`). No vendor account, no cloud sync, no telemetry.
 
 ## Features
 
@@ -25,23 +25,31 @@ Working across a fleet of VMs means typing — or worse, pasting — the same pa
 
 ### Password automation
 - **Prompt detection** — a regex matrix watches PTY output for SSH login prompts, `[sudo]` prompts, and key passphrase prompts.
-- **Auto clipboard copy + toast** — when a prompt is matched, the right secret is copied and a toast appears: "🔑 Login password copied — Press ⌘V to paste".
+- **Auto-submit (per host)** — login passwords and key passphrases can be sent directly to the PTY with Enter when `Automatically submit login/key secrets` is enabled. Sudo prompts always stay on the clipboard/manual flow.
+- **Auto clipboard copy + toast** — when auto-submit is off (or for sudo), the matched secret is copied and a toast appears with a platform-aware paste hint (`⌘V` on macOS, `Ctrl+V` on Windows).
 - **Clipboard auto-clear** — secrets are wiped from the clipboard after 30 s (configurable).
-- **Manual fallback** — `⌘⇧P` copies the saved login password into the active session even if detection misses (custom sudo prompts, etc.).
+- **Manual fallback** — `⌘⇧P` / `Ctrl+Shift+P` copies the saved login password into the active session even if detection misses.
 - **Per-host opt-out** — disable auto-copy on hosts where the heuristic gets it wrong.
 
+### Host management
+- **Workspaces** — organize hosts into folders; drag hosts between workspaces in the sidebar.
+- **Clone host** — duplicate a saved host (credentials included); edit the IP or label before saving. Handy for fleets where hosts differ by one octet.
+- **Export / import** — backup or move hosts to another machine via an encrypted `.vssh` file. Choose workspaces to include; set a separate **export encryption key** (not your vault master password). On import, enter the same key to restore hosts and credentials.
+- **Connection test** — verify host, port, username, and credentials from the host edit form before saving.
+
 ### UI
-- **Hosts page** — a Termius-style grid of every saved host with auth badges, last-used timestamps, and primary "Connect" buttons.
-- **Sidebar** — folders, search, hover-only actions, host subtext (`user@host`).
-- **Settings tab (sidebar)** — configure themes, app/terminal fonts, terminal font size, and idle lock timeout.
-- **Quick connect** — `⌘K` Spotlight-style picker, keyboard-driven.
+- **Hosts page** — Termius-style grid with auth badges, last-used timestamps, per-card connect/edit/clone/upload/download actions, plus header **Import** / **Export** for encrypted host backups.
+- **Sidebar** — workspaces, search, hover actions (connect, clone, edit, delete), host subtext (`user@host`).
+- **Settings** — themes, app/terminal fonts, terminal font size, and idle lock timeout (sidebar footer or header lock button).
+- **Quick connect** — `⌘K` / `Ctrl+K` Spotlight-style picker, keyboard-driven.
 - **Multiple built-in themes** — Light, Dark, Claude, Dracula, Nord, and Solarized Dark.
+- **Lucide icons** — consistent iconography across hosts, sidebar, tabs, toasts, and modals.
 - **Custom React dropdowns** — fully keyboard-navigable Select component (no native widgets).
 
 ### Security
 - **Encrypted vault** — AES-256-GCM blob with an Argon2id-derived key (m=64 MiB, t=3, p=1).
 - **Master password on first launch** — no recovery; vault is yours alone.
-- **Auto-lock** — configurable idle timeout (default 15 min), plus lock on system sleep, lock-screen, or `⌘L`. The vault is wiped from memory; existing sessions keep running but new secret access requires re-unlock.
+- **Auto-lock** — configurable idle timeout (default 15 min), plus lock on system sleep, lock-screen, or `⌘L` / `Ctrl+L`. The vault is wiped from memory; existing sessions keep running but new secret access requires re-unlock.
 - **Renderer never sees plaintext secrets** — they flow main process → clipboard via a typed IPC surface.
 - **Sandboxed renderer** — `contextIsolation: true`, `nodeIntegration: false`, `sandbox: true`, strict CSP, preload bundled with `esbuild` so there are no runtime `require()` calls.
 
@@ -50,10 +58,15 @@ Working across a fleet of VMs means typing — or worse, pasting — the same pa
 - **SFTP browsing + rsync transfers** — browse remote directories with SFTP; transfers use rsync when available on both ends and fall back to SFTP otherwise.
 - **Transfers page** — track progress, bytes transferred, logs, pause/resume, stop, and partial-file recovery for all current-session transfers.
 
+### Terminal
+- **xterm.js sessions** — full scrollback, multiple tabs, per-tab connection status.
+- **Scrollback preserved** — switching between Hosts and Terminal views keeps every session's buffer alive; only visibility toggles.
+- **Windows clipboard** — `Ctrl+C` copies selected text; `Ctrl+V` pastes (terminal-to-terminal or from other apps). Also supports `Ctrl+Shift+C/V` and `Shift+Insert`.
+- **macOS clipboard** — standard `⌘C` / `⌘V` with selection.
+
 ### Productivity
-- **Keyboard-first** — `⌘1`/`⌘2` Hosts/Terminal view, `⌘K` quick-connect, `⌘T` new tab, `⌘W` close tab, `⌘⇧[`/`⌘⇧]` switch tabs, `⌘L` lock, `⌘⇧P` paste password.
-- **Terminal scrollback preserved** — switching between Hosts and Terminal views keeps every session's xterm buffer alive; only visibility toggles.
-- **Folders + last-used sort** — VMs in the sidebar bubble up by recency.
+- **Keyboard-first** — `⌘1`/`⌘2` (Hosts/Terminal), `⌘K`/`Ctrl+K` quick-connect, `⌘W`/`Ctrl+W` close tab, `⌘L`/`Ctrl+L` lock, `⌘⇧P`/`Ctrl+Shift+P` paste password.
+- **Folders + last-used sort** — hosts in the sidebar bubble up by recency.
 
 ## Quick start
 
@@ -165,7 +178,7 @@ Two-process Electron app:
 └────────────────────────────────────────────────────┘
 ```
 
-The renderer never receives plaintext secrets. When a prompt is detected, the main process pushes the secret directly to the clipboard and only notifies the renderer "a login password was copied" — the value itself never crosses the IPC boundary.
+The renderer never receives plaintext secrets. When a prompt is detected, the main process either types the secret into the PTY (auto-submit) or pushes it to the clipboard and notifies the renderer — the value itself never crosses the IPC boundary.
 
 ## Stack
 
@@ -224,20 +237,21 @@ src/
 │   ├── vault/           # Argon2id + AES-GCM + lifecycle
 │   ├── ssh/             # node-pty session, manager, prompt detector
 │   ├── clipboard.ts     # auto-clearing clipboard service
+│   ├── export/          # encrypted host export/import
 │   ├── ipc.ts           # typed IPC handlers
 │   ├── logger.ts        # redaction-aware logger
 │   └── index.ts         # app entry, auto-lock, IPC registration
 ├── preload/             # contextBridge → window.api (bundled with esbuild)
 ├── renderer/            # React app
 │   ├── components/      # Sidebar, TabBar, Terminal, Toast, VmEditForm,
-│   │                    # QuickConnect, Select
+│   │                    # QuickConnect, HostsTransfer, Select, Transfers
 │   ├── screens/         # Unlock, Main, HostsPage, TransfersPage, SettingsPage
 │   ├── state/           # Zustand stores
 │   └── styles/          # design tokens (app.css)
-└── shared/              # cross-process types and constants
+└── shared/              # types, constants, vm-clone, hosts-export helpers
 
 test/
-├── unit/                # Vitest — 34 tests across vault, repo, detector, etc.
+├── unit/                # Vitest — vault, repo, detector, export, clone, clipboard, etc.
 └── e2e/                 # Playwright spec + sshd Docker compose
 
 build/                   # Icon source + generated .icns/.png
@@ -251,23 +265,25 @@ docs/superpowers/        # Design spec and implementation plan
 ### CI
 
 `.github/workflows/ci.yml` runs on every push and PR:
-1. **`test`** (Ubuntu): typecheck → build → unit tests
+1. **`test`** (Ubuntu): typecheck → build → unit tests (with Electron cache + retry on transient download failures)
 2. **`e2e`** (Ubuntu): builds + rebuilds native modules + spins up Dockerized sshd + runs Playwright under `xvfb`
 
 ### Cross-platform releases
 
-`.github/workflows/release.yml` fires on a `v*` tag push and produces installers for all supported platforms.
+`.github/workflows/release.yml` fires on a `v*` tag push and produces installers for all supported platforms. **Installer version comes from the git tag** (e.g. tag `v0.2.2` → binaries labeled `0.2.2`), not from `package.json`.
 
 ```bash
-git tag v0.1.0
-git push origin v0.1.0
+git tag v0.2.2
+git push origin v0.2.2
 ```
 
 GitHub Actions:
 1. Builds a macOS Apple Silicon DMG (`*.dmg`) on `macos-14`
 2. Builds a Linux x64 AppImage (`*.AppImage`) on `ubuntu-latest`
 3. Builds a Windows x64 NSIS installer (`*.exe`) on `windows-latest`
-4. Creates a GitHub Release at `/releases/tag/v0.1.0` with those assets attached and auto-generated notes
+4. Creates a GitHub Release at `/releases/tag/v0.2.2` with those assets attached and auto-generated notes
+
+The workflow caches Electron downloads and retries `npm ci` / `electron-builder` on transient CDN timeouts (504s).
 
 ### macOS code signing (optional)
 
@@ -298,7 +314,7 @@ vault.enc     # All passwords — AES-256-GCM blob
 
 **Updates preserve data.** Installing a newer release replaces app binaries only; the user data directory is not touched. Your hosts and saved passwords carry over.
 
-**Backups.** Copy that folder somewhere safe. The vault is portable across machines (same password unlocks it on any machine with vssh installed).
+**Backups.** Copy that folder somewhere safe. The vault is portable across machines (same password unlocks it on any machine with vssh installed). You can also use **Hosts → Export** to write an encrypted `.vssh` file (separate export key) and **Import** on another machine.
 
 **Lost master password = lost vault.** This is by design — there's no escrow, no recovery key, no support form. Choose a password you can remember or write down somewhere offline.
 
@@ -320,10 +336,10 @@ Concrete measures: AES-256-GCM + Argon2id, master-password min 12 chars, vault f
 Deferred from v1, candidates for v1.x:
 - Auto-update via `electron-updater` reading the GitHub Releases this CI already produces
 - Touch ID unlock (store the Argon2 key in Keychain, secured by biometric)
-- Auto-type directly into PTY (skip clipboard)
-- SFTP and port forwarding
+- SFTP and port forwarding (file transfer via rsync/SFTP exists; interactive SFTP sessions do not)
 - Cloud sync (E2E encrypted, BYO-storage)
 - Versioned vault format + SQLite migration framework (currently `CREATE TABLE IF NOT EXISTS` only)
+- Selective import (merge/skip duplicates) for host exports
 
 ## Contributing
 
