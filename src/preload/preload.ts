@@ -66,6 +66,10 @@ const api = {
     onLog: (cb: (event: TransferLogEvent) => void) => ipcRenderer.on(IPC.TRANSFER_LOG, (_e, l) => cb(l)),
     onToast: (cb: (toast: TransferToastPayload) => void) => ipcRenderer.on(IPC.TRANSFER_TOAST, (_e, t) => cb(t)),
   },
+  clipboard: {
+    readText: (): Promise<string> => ipcRenderer.invoke(IPC.CLIPBOARD_READ_TEXT),
+    writeText: (text: string): Promise<void> => ipcRenderer.invoke(IPC.CLIPBOARD_WRITE_TEXT, text),
+  },
 };
 
 contextBridge.exposeInMainWorld('api', api);

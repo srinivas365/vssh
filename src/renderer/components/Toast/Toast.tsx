@@ -17,10 +17,18 @@ function toastTitle(toast: { promptType: PromptType; hasSecret: boolean; deliver
   return `${label[toast.promptType]} copied`;
 }
 
+function pasteHint(): string {
+  const isWindows = navigator.platform.toLowerCase().includes('win')
+    || navigator.userAgent.toLowerCase().includes('windows');
+  return isWindows
+    ? 'Press Ctrl+V to paste into the terminal'
+    : 'Press ⌘V to paste into the terminal';
+}
+
 function toastSubtext(toast: { hasSecret: boolean; delivery: 'copied' | 'sent' | 'none' }): string | null {
   if (!toast.hasSecret) return null;
   if (toast.delivery === 'sent') return 'Submitted automatically';
-  return 'Press ⌘V to paste into the terminal';
+  return pasteHint();
 }
 
 export function TransferToastOverlay() {

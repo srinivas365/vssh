@@ -49,6 +49,8 @@ export const IPC = {
   // misc
   PASTE_PASSWORD: 'session:paste-password',   // ⌘⇧P manual fallback
   VAULT_STATE_CHANGED: 'vault:state-changed', // main → renderer broadcast
+  CLIPBOARD_READ_TEXT: 'clipboard:read-text',
+  CLIPBOARD_WRITE_TEXT: 'clipboard:write-text',
 } as const;
 
 export const DEFAULTS = {

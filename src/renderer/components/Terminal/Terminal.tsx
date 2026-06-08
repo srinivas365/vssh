@@ -4,6 +4,7 @@ import { FitAddon } from '@xterm/addon-fit';
 import '@xterm/xterm/css/xterm.css';
 import type { ThemeName } from '@shared/types';
 import { useSettingsStore } from '../../state/settings-store';
+import { attachTerminalClipboard } from './terminal-clipboard';
 
 interface Props {
   sessionId: string;
@@ -172,6 +173,7 @@ export function Terminal({ sessionId, active }: Props) {
     term.loadAddon(fit);
     term.open(ref.current);
     fit.fit();
+    attachTerminalClipboard(term);
     xtermRef.current = term;
     fitRef.current = fit;
 

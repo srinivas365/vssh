@@ -213,6 +213,9 @@ export function registerIpc(d: Deps): void {
   ipcMain.handle(IPC.TRANSFER_STOP, async (_e, id: string) => d.transfers.stop(id));
   ipcMain.handle(IPC.TRANSFER_DELETE_PARTIALS, async (_e, id: string) => d.transfers.deletePartials(id));
 
+  ipcMain.handle(IPC.CLIPBOARD_READ_TEXT, () => clipboard.readText());
+  ipcMain.handle(IPC.CLIPBOARD_WRITE_TEXT, (_e, text: string) => { clipboard.writeText(text); });
+
   d.transfers.on('state', (record) => d.mainWindow()?.webContents.send(IPC.TRANSFER_STATE, record));
   d.transfers.on('progress', (progress) => d.mainWindow()?.webContents.send(IPC.TRANSFER_PROGRESS, progress));
   d.transfers.on('log', (log) => d.mainWindow()?.webContents.send(IPC.TRANSFER_LOG, log));
