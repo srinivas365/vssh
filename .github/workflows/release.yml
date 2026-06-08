@@ -48,6 +48,9 @@ jobs:
     if: needs.ensure_main.outputs.on_main == 'true'
     runs-on: ${{ matrix.target.os }}
     timeout-minutes: 40
+    env:
+      ELECTRON_CACHE: ${{ github.workspace }}/.electron-cache
+      ELECTRON_BUILDER_CACHE: ${{ github.workspace }}/.electron-builder-cache
     strategy:
       fail-fast: false
       matrix:
@@ -83,6 +86,16 @@ jobs:
           node-version: '20'
           cache: npm
 
+      - name: Cache Electron and builder downloads
+        uses: actions/cache@v4
+        with:
+          path: |
+            .electron-cache
+            .electron-builder-cache
+          key: ${{ runner.os }}-electron-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-electron-
+
       - name: Install build tools (Linux)
         if: runner.os == 'Linux'
         run: sudo apt-get update && sudo apt-get install -y build-essential python3
@@ -92,7 +105,20 @@ jobs:
         run: brew install librsvg
 
       - name: Install dependencies
-        run: npm ci
+        shell: bash
+        run: |
+          set -euo pipefail
+          for attempt in 1 2 3 4 5; do
+            echo "npm ci attempt ${attempt}/5"
+            if npm ci; then
+              exit 0
+            fi
+            if [ "${attempt}" -eq 5 ]; then
+              echo "npm ci failed after 5 attempts" >&2
+              exit 1
+            fi
+            sleep $((attempt * 20))
+          done
 
       - name: Build app icon
         if: runner.os == 'macOS'
@@ -143,7 +169,17 @@ jobs:
               export CSC_IDENTITY_AUTO_DISCOVERY=false
             fi
           fi
-          npx electron-builder ${{ matrix.target.electron_args }} --publish never --config.extraMetadata.version="$VERSION"
+          for attempt in 1 2 3 4 5; do
+            echo "electron-builder attempt ${attempt}/5"
+            if npx electron-builder ${{ matrix.target.electron_args }} --publish never --config.extraMetadata.version="$VERSION"; then
+              exit 0
+            fi
+            if [ "${attempt}" -eq 5 ]; then
+              echo "electron-builder failed after 5 attempts" >&2
+              exit 1
+            fi
+            sleep $((attempt * 20))
+          done
 
       - name: Inspect release output (Unix)
         if: runner.os != 'Windows'

@@ -15,6 +15,9 @@ jobs:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    env:
+      ELECTRON_CACHE: ${{ github.workspace }}/.electron-cache
+      ELECTRON_BUILDER_CACHE: ${{ github.workspace }}/.electron-builder-cache
     steps:
       - uses: actions/checkout@v4
 
@@ -24,11 +27,34 @@ jobs:
           node-version: '20'
           cache: npm
 
+      - name: Cache Electron downloads
+        uses: actions/cache@v4
+        with:
+          path: |
+            .electron-cache
+            .electron-builder-cache
+          key: ${{ runner.os }}-electron-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-electron-
+
       - name: Install build tools for native modules
         run: sudo apt-get update && sudo apt-get install -y build-essential python3
 
       - name: Install dependencies
-        run: npm ci
+        shell: bash
+        run: |
+          set -euo pipefail
+          for attempt in 1 2 3 4 5; do
+            echo "npm ci attempt ${attempt}/5"
+            if npm ci; then
+              exit 0
+            fi
+            if [ "${attempt}" -eq 5 ]; then
+              echo "npm ci failed after 5 attempts" >&2
+              exit 1
+            fi
+            sleep $((attempt * 20))
+          done
 
       - name: Typecheck (main + preload + renderer)
         run: npm run typecheck
@@ -45,6 +71,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     needs: test
+    env:
+      ELECTRON_CACHE: ${{ github.workspace }}/.electron-cache
+      ELECTRON_BUILDER_CACHE: ${{ github.workspace }}/.electron-builder-cache
     steps:
       - uses: actions/checkout@v4
 
@@ -54,11 +83,34 @@ jobs:
           node-version: '20'
           cache: npm
 
+      - name: Cache Electron downloads
+        uses: actions/cache@v4
+        with:
+          path: |
+            .electron-cache
+            .electron-builder-cache
+          key: ${{ runner.os }}-electron-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-electron-
+
       - name: Install build tools
         run: sudo apt-get update && sudo apt-get install -y build-essential python3 xvfb
 
       - name: Install dependencies
-        run: npm ci
+        shell: bash
+        run: |
+          set -euo pipefail
+          for attempt in 1 2 3 4 5; do
+            echo "npm ci attempt ${attempt}/5"
+            if npm ci; then
+              exit 0
+            fi
+            if [ "${attempt}" -eq 5 ]; then
+              echo "npm ci failed after 5 attempts" >&2
+              exit 1
+            fi
+            sleep $((attempt * 20))
+          done
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium

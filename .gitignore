@@ -1,4 +1,6 @@
 node_modules/
+.electron-cache/
+.electron-builder-cache/
 dist/
 out/
 release/
