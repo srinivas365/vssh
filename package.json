@@ -1,6 +1,6 @@
 {
   "name": "vssh",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Termius-alternative SSH client with encrypted credential vault and automatic password-prompt detection",
   "license": "MIT",
   "author": "Srinivas Mannem",
