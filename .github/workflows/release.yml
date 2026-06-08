@@ -123,6 +123,16 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: bash
         run: |
+          if [[ ! "$GITHUB_REF" =~ ^refs/tags/v ]]; then
+            echo "Release binaries must be built from a v* tag (got: $GITHUB_REF)" >&2
+            exit 1
+          fi
+          VERSION="${GITHUB_REF_NAME#v}"
+          if [[ -z "$VERSION" ]]; then
+            echo "Could not parse version from tag: $GITHUB_REF_NAME" >&2
+            exit 1
+          fi
+          echo "Packaging version $VERSION from tag $GITHUB_REF_NAME"
           if [ "$RUNNER_OS" = "macOS" ]; then
             for v in CSC_LINK CSC_KEY_PASSWORD APPLE_ID APPLE_APP_SPECIFIC_PASSWORD APPLE_TEAM_ID; do
               if [ -z "${!v}" ]; then unset "$v"; fi
@@ -133,7 +143,7 @@ jobs:
               export CSC_IDENTITY_AUTO_DISCOVERY=false
             fi
           fi
-          npx electron-builder ${{ matrix.target.electron_args }} --publish never
+          npx electron-builder ${{ matrix.target.electron_args }} --publish never --config.version="$VERSION"
 
       - name: Inspect release output (Unix)
         if: runner.os != 'Windows'
