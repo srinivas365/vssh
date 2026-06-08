@@ -24,7 +24,8 @@ import {
   importHostsPayload,
   parseExportFile,
 } from './export/hosts-transfer';
-import { MIN_EXPORT_KEY_LEN, type HostsExportResult, type HostsImportResult } from '@shared/hosts-export';
+import { MIN_EXPORT_KEY_LEN, type HostsExportResult, type HostsImportResult, type HostsExportRequest } from '@shared/hosts-export';
+import { countExportHosts } from '@shared/hosts-export-selection';
 
 interface Deps {
   db: Database.Database;
@@ -233,11 +234,16 @@ export function registerIpc(d: Deps): void {
   ipcMain.handle(IPC.CLIPBOARD_READ_TEXT, () => clipboard.readText());
   ipcMain.handle(IPC.CLIPBOARD_WRITE_TEXT, (_e, text: string) => { clipboard.writeText(text); });
 
-  ipcMain.handle(IPC.HOSTS_EXPORT, async (_e, exportKey: string): Promise<HostsExportResult> => {
+  ipcMain.handle(IPC.HOSTS_EXPORT, async (_e, request: HostsExportRequest): Promise<HostsExportResult> => {
     if (d.vault.state() !== 'unlocked') throw new Error('vault-locked');
+    const { exportKey, folderIds, includeUnassigned } = request;
     if (!exportKey || exportKey.length < MIN_EXPORT_KEY_LEN) throw new Error('export-key-too-short');
+    if (!Array.isArray(folderIds)) throw new Error('invalid-export-selection');
 
-    const payload = buildExportPayload(d.repo, d.vault);
+    const hostCount = countExportHosts(d.repo.listVms(), { folderIds, includeUnassigned });
+    if (hostCount === 0) throw new Error('export-empty');
+
+    const payload = buildExportPayload(d.repo, d.vault, { folderIds, includeUnassigned });
     const file = await encryptExportPayload(payload, exportKey);
     const stamp = new Date().toISOString().slice(0, 10);
     const result = await dialog.showSaveDialog({

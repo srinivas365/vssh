@@ -1,7 +1,7 @@
 import { contextBridge, ipcRenderer } from 'electron';
 import { IPC } from '@shared/constants';
 import { Vm, VmInput, Folder, VaultEntry, SessionState, ToastPayload, PromptType, LocalSelection, RemoteEntry, TransferStartRequest, TransferRecord, TransferProgressEvent, TransferLogEvent, TransferToastPayload, VmConnectionTestResult, AppSettings, AppSettingsPatch } from '@shared/types';
-import type { HostsExportResult, HostsImportResult } from '@shared/hosts-export';
+import type { HostsExportResult, HostsImportResult, HostsExportRequest } from '@shared/hosts-export';
 
 const api = {
   vault: {
@@ -74,7 +74,8 @@ const api = {
     writeText: (text: string): Promise<void> => ipcRenderer.invoke(IPC.CLIPBOARD_WRITE_TEXT, text),
   },
   hosts: {
-    export: (exportKey: string): Promise<HostsExportResult> => ipcRenderer.invoke(IPC.HOSTS_EXPORT, exportKey),
+    export: (request: HostsExportRequest): Promise<HostsExportResult> =>
+      ipcRenderer.invoke(IPC.HOSTS_EXPORT, request),
     import: (exportKey: string): Promise<HostsImportResult> => ipcRenderer.invoke(IPC.HOSTS_IMPORT, exportKey),
   },
 };

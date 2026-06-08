@@ -136,7 +136,8 @@ export function HostsPage({ onNewVm, onEditVm, onCloneVm, onUploadVm, onDownload
       {transferMode && (
         <HostsTransferModal
           mode={transferMode}
-          hostCount={vms.length}
+          folders={folders}
+          vms={vms}
           onClose={() => setTransferMode(null)}
           onComplete={async (message) => {
             setStatusMessage(message);

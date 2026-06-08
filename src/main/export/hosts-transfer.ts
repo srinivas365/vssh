@@ -8,10 +8,22 @@ import {
   type HostsExportPayload,
 } from '@shared/hosts-export';
 
-export function buildExportPayload(repo: VmsRepo, vault: Vault): HostsExportPayload {
-  const folders = repo.listFolders();
+export function buildExportPayload(
+  repo: VmsRepo,
+  vault: Vault,
+  selection?: import('@shared/hosts-export').HostsExportSelection,
+): HostsExportPayload {
+  const allFolders = repo.listFolders();
+  const allVms = repo.listVms();
+  const folderIdSet = new Set(selection?.folderIds ?? allFolders.map((f) => f.id));
+  const includeUnassigned = selection?.includeUnassigned ?? allVms.some((v) => v.folderId === null);
+
+  const folders = allFolders.filter((f) => folderIdSet.has(f.id));
   const folderNameById = new Map(folders.map((f) => [f.id, f.name]));
-  const vms = repo.listVms();
+  const vms = allVms.filter((vm) => {
+    if (vm.folderId === null) return includeUnassigned;
+    return folderIdSet.has(vm.folderId);
+  });
 
   return {
     version: HOSTS_EXPORT_VERSION,

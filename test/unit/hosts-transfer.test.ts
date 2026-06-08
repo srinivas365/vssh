@@ -70,6 +70,38 @@ describe('hosts export/import', () => {
     expect(importVault.getSecret(imported.vaultRef).password).toBe('secret-pass');
   });
 
+  it('exports only selected workspaces', async () => {
+    const prod = repo.createFolder({ name: 'Production', parentId: null, sortOrder: 0 });
+    const staging = repo.createFolder({ name: 'Staging', parentId: null, sortOrder: 1 });
+    const prodVm = repo.createVm({
+      folderId: prod.id,
+      label: 'prod',
+      host: '10.0.0.1',
+      port: 22,
+      username: 'u',
+      authMethod: 'password',
+      keyPath: null,
+      autoSubmitEnabled: true,
+    });
+    repo.createVm({
+      folderId: staging.id,
+      label: 'stage',
+      host: '10.0.0.2',
+      port: 22,
+      username: 'u',
+      authMethod: 'password',
+      keyPath: null,
+      autoSubmitEnabled: true,
+    });
+    await vault.setSecret(prodVm.vaultRef, { password: 'x' });
+
+    const payload = buildExportPayload(repo, vault, { folderIds: [prod.id], includeUnassigned: false });
+    expect(payload.hosts).toHaveLength(1);
+    expect(payload.hosts[0].label).toBe('prod');
+    expect(payload.folders).toHaveLength(1);
+    expect(payload.folders[0].name).toBe('Production');
+  });
+
   it('fails decrypt with the wrong export key', async () => {
     const vm = repo.createVm({
       folderId: null,

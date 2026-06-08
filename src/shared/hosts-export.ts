@@ -40,6 +40,15 @@ export interface HostsExportResult {
   hostCount?: number;
 }
 
+export interface HostsExportSelection {
+  folderIds: number[];
+  includeUnassigned: boolean;
+}
+
+export interface HostsExportRequest extends HostsExportSelection {
+  exportKey: string;
+}
+
 export interface HostsImportResult {
   cancelled?: boolean;
   importedHosts?: number;
