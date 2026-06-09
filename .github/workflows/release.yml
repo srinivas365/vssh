@@ -70,7 +70,9 @@ jobs:
               release/*.AppImage
               release/*.blockmap
           - name: Windows (x64 NSIS)
-            os: windows-latest
+            # Pin to VS 2022 — windows-latest ships VS 2026 (v18) which @electron/rebuild
+            # v3's node-gyp cannot detect (unknown version "undefined").
+            os: windows-2022
             electron_args: --win nsis --x64
             artifact_name: vssh-windows-x64-nsis
             artifact_paths: |
