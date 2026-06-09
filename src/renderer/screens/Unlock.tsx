@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Fingerprint, KeyRound, Lock, Terminal as TerminalIcon, Zap } from 'lucide-react';
 import type { TouchIdStatus } from '@shared/types';
+import { DEFAULTS } from '@shared/constants';
 import { useVaultStore } from '../state/vault-store';
 
 export function Unlock() {
@@ -58,7 +59,10 @@ export function Unlock() {
     const shouldEnrollTouchId = enableTouchIdAfterUnlock && canEnrollTouchId;
     try {
       if (isInit) {
-        if (pw.length < 12) { setErr('Master password must be at least 12 characters.'); return; }
+        if (pw.length < DEFAULTS.MIN_MASTER_PW_LEN) {
+          setErr(`Master password must be at least ${DEFAULTS.MIN_MASTER_PW_LEN} characters.`);
+          return;
+        }
         if (pw !== pw2) { setErr('Passwords do not match.'); return; }
         await init(pw);
       } else {
@@ -152,7 +156,7 @@ export function Unlock() {
               type="password"
               value={pw}
               autoFocus
-              placeholder={isInit ? 'At least 12 characters' : 'Enter password'}
+              placeholder={isInit ? `At least ${DEFAULTS.MIN_MASTER_PW_LEN} characters` : 'Enter password'}
               onChange={(e) => setPw(e.target.value)}
               disabled={busy}
               className="unlock-input"
