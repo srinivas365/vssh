@@ -23,17 +23,18 @@
   <rect x="0" y="0" width="1024" height="1024" rx="230" ry="230" fill="url(#bg)"/>
   <rect x="0" y="0" width="1024" height="1024" rx="230" ry="230" fill="url(#bgGlow)"/>
 
-  <!-- Play / connect triangle with rounded corners via stroke-linejoin -->
+  <!-- Lucide Terminal icon (matches in-app TerminalIcon) -->
   <g filter="url(#markShadow)">
-    <polygon
-      points="380,240 740,512 380,784"
-      fill="#ffffff"
+    <g
+      transform="translate(512 512) scale(30) translate(-12 -12)"
+      fill="none"
       stroke="#ffffff"
-      stroke-width="72"
+      stroke-width="2.2"
+      stroke-linecap="round"
       stroke-linejoin="round"
-      stroke-linecap="round"/>
+    >
+      <path d="M12 19h8"/>
+      <path d="m4 17 6-6-6-6"/>
+    </g>
   </g>
-
-  <!-- Terminal cursor underscore to evoke shell -->
-  <rect x="408" y="872" width="240" height="36" rx="12" fill="#ffffff" fill-opacity="0.92"/>
 </svg>
