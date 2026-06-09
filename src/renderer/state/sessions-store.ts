@@ -3,7 +3,7 @@ import { SessionState, ToastPayload } from '@shared/types';
 
 export interface Tab {
   sessionId: string;
-  vmId: number;
+  vmId: number | null;
   label: string;
   state: SessionState['status'];
 }

@@ -1,18 +1,28 @@
-import { SshSession } from './session';
+import { EventEmitter } from 'node:events';
+import { SessionState } from '@shared/types';
+
+export interface ManagedSession extends EventEmitter {
+  readonly id: string;
+  readonly vmId: number | null;
+  write(data: string): void;
+  resize(cols: number, rows: number): void;
+  getState(): SessionState;
+  kill(): void;
+}
 
 export class SessionManager {
-  private readonly sessions = new Map<string, SshSession>();
+  private readonly sessions = new Map<string, ManagedSession>();
 
-  register(session: SshSession): void {
+  register(session: ManagedSession): void {
     this.sessions.set(session.id, session);
     session.on('exit', () => this.sessions.delete(session.id));
   }
 
-  get(sessionId: string): SshSession | undefined {
+  get(sessionId: string): ManagedSession | undefined {
     return this.sessions.get(sessionId);
   }
 
-  list(): SshSession[] {
+  list(): ManagedSession[] {
     return Array.from(this.sessions.values());
   }
 

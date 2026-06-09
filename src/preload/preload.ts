@@ -47,6 +47,8 @@ const api = {
   session: {
     start: (vmId: number, cols: number, rows: number): Promise<string> =>
       ipcRenderer.invoke(IPC.SESSION_START, vmId, cols, rows),
+    startLocal: (cols: number, rows: number): Promise<string> =>
+      ipcRenderer.invoke(IPC.SESSION_START_LOCAL, cols, rows),
     input: (sessionId: string, data: string) => ipcRenderer.invoke(IPC.SESSION_INPUT, sessionId, data),
     resize: (sessionId: string, cols: number, rows: number) =>
       ipcRenderer.invoke(IPC.SESSION_RESIZE, sessionId, cols, rows),

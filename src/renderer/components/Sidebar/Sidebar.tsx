@@ -7,6 +7,7 @@ import {
   Search,
   Server,
   Settings,
+  Terminal as TerminalIcon,
   Trash2,
   X,
 } from 'lucide-react';
@@ -24,9 +25,10 @@ interface Props {
   onEditVm: (vm: Vm) => void;
   onCloneVm: (vm: Vm) => void;
   onOpenSettings: () => void;
+  onOpenLocalTerminal: () => void;
 }
 
-export function Sidebar({ onNewVm, onEditVm, onCloneVm, onOpenSettings }: Props) {
+export function Sidebar({ onNewVm, onEditVm, onCloneVm, onOpenSettings, onOpenLocalTerminal }: Props) {
   const { vms, folders, refresh, remove } = useVmsStore();
   const addTab = useSessionsStore((s) => s.addTab);
   const [query, setQuery] = useState('');
@@ -123,6 +125,9 @@ export function Sidebar({ onNewVm, onEditVm, onCloneVm, onOpenSettings }: Props)
 
       <div className="sidebar-footer">
         <NewWorkspaceButton />
+        <button className="sidebar-new" onClick={onOpenLocalTerminal}>
+          <TerminalIcon size={14} strokeWidth={2.2} /> Local terminal
+        </button>
         <button className="sidebar-new" onClick={onNewVm}>
           <Plus size={14} strokeWidth={2.2} /> New host
         </button>

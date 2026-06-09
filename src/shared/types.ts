@@ -77,7 +77,7 @@ export interface ToastPayload {
 
 export interface SessionState {
   sessionId: string;
-  vmId: number;
+  vmId: number | null;
   status: 'connecting' | 'connected' | 'closed' | 'error';
   latencyMs: number | null;
   startedAt: number;

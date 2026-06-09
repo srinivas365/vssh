@@ -31,6 +31,7 @@ export const IPC = {
   VMS_MOVE_TO_FOLDER: 'vms:move-to-folder',
   // sessions
   SESSION_START: 'session:start',
+  SESSION_START_LOCAL: 'session:start-local',
   SESSION_INPUT: 'session:input',
   SESSION_RESIZE: 'session:resize',
   SESSION_CLOSE: 'session:close',

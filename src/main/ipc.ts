@@ -7,6 +7,7 @@ import { Vault } from './vault/vault';
 import { VmsRepo } from './db/vms-repo';
 import { SessionManager } from './ssh/session-manager';
 import { SshSession } from './ssh/session';
+import { LocalSession } from './ssh/local-session';
 import { ClipboardService } from './clipboard';
 import { logger } from './logger';
 import { Vm, VmInput, VaultEntry, Folder, PromptType, ToastPayload } from '@shared/types';
@@ -194,6 +195,27 @@ export function registerIpc(d: Deps): void {
     return session.id;
   });
 
+  ipcMain.handle(IPC.SESSION_START_LOCAL, async (_e, cols: number, rows: number) => {
+    let session: LocalSession;
+    try {
+      session = new LocalSession(cols, rows);
+    } catch (error) {
+      const reason = error instanceof Error ? error.message : String(error);
+      logger.log('error', 'Failed to start local terminal session', { reason });
+      throw new Error(`Failed to start local terminal: ${reason}`);
+    }
+    d.sessions.register(session);
+
+    session.on('data', (chunk: string) => {
+      d.mainWindow()?.webContents.send(IPC.SESSION_OUTPUT, session.id, chunk);
+    });
+    session.on('state', (state) => {
+      d.mainWindow()?.webContents.send(IPC.SESSION_STATE, state);
+    });
+
+    return session.id;
+  });
+
   ipcMain.handle(IPC.SESSION_INPUT, (_e, sessionId: string, data: string) =>
     d.sessions.write(sessionId, data));
   ipcMain.handle(IPC.SESSION_RESIZE, (_e, sessionId: string, cols: number, rows: number) =>
@@ -203,6 +225,7 @@ export function registerIpc(d: Deps): void {
   ipcMain.handle(IPC.PASTE_PASSWORD, (_e, sessionId: string, type: PromptType) => {
     const session = d.sessions.get(sessionId);
     if (!session) return;
+    if (session.vmId === null) return;
     const vm = d.repo.getVm(session.vmId);
     if (!vm) return;
     const entry = d.vault.getSecret(vm.vaultRef);

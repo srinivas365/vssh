@@ -77,6 +77,16 @@ export function Main() {
 
   const activeTab = tabs.find((t) => t.sessionId === activeTabId);
 
+  async function openLocalTerminal() {
+    try {
+      const sessionId = await window.api.session.startLocal(80, 24);
+      addTab({ sessionId, vmId: null, label: 'Local', state: 'connected' });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      window.alert(`Failed to start local terminal.\n\n${message}`);
+    }
+  }
+
   return (
     <div className="app-shell">
       <header className="app-header">
@@ -104,12 +114,6 @@ export function Main() {
             title="Transfers">
             Transfers
           </button>
-          <button
-            className={`nav-btn ${view === 'settings' ? 'nav-btn-active' : ''}`}
-            onClick={() => setView('settings')}
-            title="Settings">
-            Settings
-          </button>
         </nav>
         <div className="app-header-meta">
           {view === 'terminal' && activeTab ? (
@@ -132,6 +136,7 @@ export function Main() {
           onEditVm={(vm) => setEditing(vm)}
           onCloneVm={(vm) => setCloning(vm)}
           onOpenSettings={() => setView('settings')}
+          onOpenLocalTerminal={() => { void openLocalTerminal(); }}
         />
         <main className="app-main">
           <div
