@@ -54,9 +54,16 @@ export interface AppSettings {
   terminalFontFamily: string;
   terminalFontSize: number;
   autoLockMinutes: number;
+  touchIdEnabled: boolean;
 }
 
 export type AppSettingsPatch = Partial<AppSettings>;
+
+export interface TouchIdStatus {
+  supported: boolean;
+  available: boolean;
+  enrolled: boolean;
+}
 
 export type PromptType = 'login' | 'sudo' | 'key-passphrase' | 'generic';
 

@@ -45,6 +45,7 @@ export class SettingsStore {
       terminalFontFamily: this.store.get('terminalFontFamily', DEFAULT_APP_SETTINGS.terminalFontFamily),
       terminalFontSize: this.store.get('terminalFontSize', DEFAULT_APP_SETTINGS.terminalFontSize),
       autoLockMinutes: this.store.get('autoLockMinutes', DEFAULT_APP_SETTINGS.autoLockMinutes),
+      touchIdEnabled: this.store.get('touchIdEnabled', DEFAULT_APP_SETTINGS.touchIdEnabled),
     });
   }
 
@@ -55,6 +56,7 @@ export class SettingsStore {
     this.store.set('terminalFontFamily', next.terminalFontFamily);
     this.store.set('terminalFontSize', next.terminalFontSize);
     this.store.set('autoLockMinutes', next.autoLockMinutes);
+    this.store.set('touchIdEnabled', next.touchIdEnabled);
     return next;
   }
 }
@@ -66,6 +68,7 @@ function sanitizeSettings(input: AppSettings): AppSettings {
     terminalFontFamily: sanitizeFontFamily(input.terminalFontFamily, DEFAULT_APP_SETTINGS.terminalFontFamily),
     terminalFontSize: sanitizeInteger(input.terminalFontSize, MIN_TERMINAL_FONT_SIZE, MAX_TERMINAL_FONT_SIZE, DEFAULT_APP_SETTINGS.terminalFontSize),
     autoLockMinutes: sanitizeInteger(input.autoLockMinutes, MIN_AUTO_LOCK_MINUTES, MAX_AUTO_LOCK_MINUTES, DEFAULT_APP_SETTINGS.autoLockMinutes),
+    touchIdEnabled: input.touchIdEnabled === true,
   };
 }
 

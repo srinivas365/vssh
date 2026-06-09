@@ -7,6 +7,10 @@ export const IPC = {
   VAULT_UNLOCK: 'vault:unlock',
   VAULT_LOCK: 'vault:lock',
   VAULT_SET_SECRET: 'vault:set-secret',
+  TOUCH_ID_STATUS: 'touch-id:status',
+  TOUCH_ID_UNLOCK: 'touch-id:unlock',
+  TOUCH_ID_ENROLL: 'touch-id:enroll',
+  TOUCH_ID_DISABLE: 'touch-id:disable',
   // vms
   VMS_LIST: 'vms:list',
   VMS_CREATE: 'vms:create',
@@ -72,4 +76,5 @@ export const DEFAULT_APP_SETTINGS: AppSettings = {
   terminalFontFamily: 'Menlo, Monaco, Consolas, "Liberation Mono", monospace',
   terminalFontSize: 13,
   autoLockMinutes: 15,
+  touchIdEnabled: false,
 };

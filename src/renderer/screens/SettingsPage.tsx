@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import type { SelectOption } from '../components/Select/Select';
 import { Select } from '../components/Select/Select';
 import { useSettingsStore } from '../state/settings-store';
-import type { ThemeName } from '@shared/types';
+import type { ThemeName, TouchIdStatus } from '@shared/types';
 import './SettingsPage.css';
 
 const THEME_OPTIONS: SelectOption<ThemeName>[] = [
@@ -90,8 +90,19 @@ export function SettingsPage() {
   const settings = useSettingsStore((s) => s.settings);
   const loaded = useSettingsStore((s) => s.loaded);
   const update = useSettingsStore((s) => s.update);
+  const enrollTouchId = useSettingsStore((s) => s.enrollTouchId);
+  const disableTouchId = useSettingsStore((s) => s.disableTouchId);
   const [terminalFontSizeDraft, setTerminalFontSizeDraft] = useState(String(settings.terminalFontSize));
   const [autoLockMinutesDraft, setAutoLockMinutesDraft] = useState(String(settings.autoLockMinutes));
+  const [touchIdStatus, setTouchIdStatus] = useState<TouchIdStatus | null>(null);
+  const [touchIdPassword, setTouchIdPassword] = useState('');
+  const [touchIdErr, setTouchIdErr] = useState<string | null>(null);
+  const [touchIdBusy, setTouchIdBusy] = useState(false);
+  const [pendingTouchIdEnable, setPendingTouchIdEnable] = useState(false);
+
+  useEffect(() => {
+    void window.api.touchId.status().then(setTouchIdStatus);
+  }, [settings.touchIdEnabled]);
 
   useEffect(() => {
     setTerminalFontSizeDraft(String(settings.terminalFontSize));
@@ -133,6 +144,42 @@ export function SettingsPage() {
       await patchSettings({ autoLockMinutes: next });
     }
   }
+
+  async function disableTouchIdUnlock() {
+    setTouchIdErr(null);
+    setTouchIdBusy(true);
+    try {
+      await disableTouchId();
+      setPendingTouchIdEnable(false);
+      setTouchIdPassword('');
+      setTouchIdStatus(await window.api.touchId.status());
+    } catch {
+      setTouchIdErr('Could not disable Touch ID.');
+    } finally {
+      setTouchIdBusy(false);
+    }
+  }
+
+  async function enrollTouchIdUnlock(e: React.FormEvent) {
+    e.preventDefault();
+    setTouchIdErr(null);
+    setTouchIdBusy(true);
+    try {
+      await enrollTouchId(touchIdPassword);
+      setPendingTouchIdEnable(false);
+      setTouchIdPassword('');
+      setTouchIdStatus(await window.api.touchId.status());
+    } catch (err) {
+      const message = err instanceof Error ? err.message : '';
+      setTouchIdErr(message.includes('incorrect-password')
+        ? 'Incorrect master password.'
+        : 'Could not enable Touch ID on this Mac.');
+    } finally {
+      setTouchIdBusy(false);
+    }
+  }
+
+  const showTouchIdSettings = touchIdStatus?.supported && touchIdStatus.available;
 
   if (!loaded) {
     return (
@@ -233,6 +280,64 @@ export function SettingsPage() {
           />
         </label>
       </section>
+
+      {showTouchIdSettings && (
+        <section className="settings-card">
+          <h2>Touch ID</h2>
+          <p className="settings-help">
+            Store your master password in the macOS Keychain, protected by Touch ID. You can still unlock with your password anytime.
+          </p>
+          <label className="settings-checkbox">
+            <input
+              type="checkbox"
+              checked={settings.touchIdEnabled}
+              disabled={touchIdBusy}
+              onChange={(e) => {
+                if (e.target.checked) {
+                  setPendingTouchIdEnable(true);
+                  setTouchIdErr(null);
+                  return;
+                }
+                void disableTouchIdUnlock();
+              }}
+            />
+            Unlock with Touch ID
+          </label>
+          {pendingTouchIdEnable && !settings.touchIdEnabled && (
+            <form className="settings-touch-id-enroll" onSubmit={(e) => { void enrollTouchIdUnlock(e); }}>
+              <label>
+                Confirm master password
+                <input
+                  type="password"
+                  value={touchIdPassword}
+                  autoFocus
+                  placeholder="Enter master password"
+                  disabled={touchIdBusy}
+                  onChange={(e) => setTouchIdPassword(e.target.value)}
+                />
+              </label>
+              <div className="settings-touch-id-actions">
+                <button type="submit" className="settings-btn" disabled={touchIdBusy || !touchIdPassword}>
+                  {touchIdBusy ? 'Enabling…' : 'Enable Touch ID'}
+                </button>
+                <button
+                  type="button"
+                  className="settings-btn settings-btn-muted"
+                  disabled={touchIdBusy}
+                  onClick={() => {
+                    setPendingTouchIdEnable(false);
+                    setTouchIdPassword('');
+                    setTouchIdErr(null);
+                  }}
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          )}
+          {touchIdErr && <div className="settings-error">{touchIdErr}</div>}
+        </section>
+      )}
     </div>
   );
 }

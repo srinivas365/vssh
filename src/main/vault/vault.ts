@@ -33,6 +33,18 @@ export class Vault {
     this.masterPassword = masterPassword;
   }
 
+  async verifyPassword(masterPassword: string): Promise<boolean> {
+    if (!existsSync(this.filePath)) return false;
+    try {
+      const blob = await fs.readFile(this.filePath);
+      const plaintext = await decryptVault(blob, masterPassword);
+      plaintext.fill(0);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
   async lock(): Promise<void> {
     this.contents = null;
     this.masterPassword = null;

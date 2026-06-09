@@ -7,6 +7,8 @@ interface SettingsStore {
   loaded: boolean;
   hydrate: () => Promise<void>;
   update: (patch: AppSettingsPatch) => Promise<void>;
+  enrollTouchId: (password: string) => Promise<void>;
+  disableTouchId: () => Promise<void>;
 }
 
 let settingsListenerRegistered = false;
@@ -40,6 +42,14 @@ export const useSettingsStore = create<SettingsStore>((set) => ({
   },
   update: async (patch) => {
     const settings = await window.api.settings.update(patch);
+    set(mergeSettings(settings));
+  },
+  enrollTouchId: async (password) => {
+    const settings = await window.api.touchId.enroll(password);
+    set(mergeSettings(settings));
+  },
+  disableTouchId: async () => {
+    const settings = await window.api.touchId.disable();
     set(mergeSettings(settings));
   },
 }));

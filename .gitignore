@@ -11,5 +11,6 @@ test/e2e/.tmp/
 test-results/
 playwright-report/
 build/icon.iconset/
+native/macos-keychain/vssh-keychain
 .worktrees/
 session.txt

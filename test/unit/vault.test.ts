@@ -26,6 +26,14 @@ describe('Vault', () => {
     expect(v2.state()).toBe('unlocked');
   });
 
+  it('verifyPassword returns true only for the correct master password', async () => {
+    const file = path.join(dir, 'vault.enc');
+    const v = new Vault(file);
+    await v.init('right-master-pw');
+    await expect(v.verifyPassword('wrong')).resolves.toBe(false);
+    await expect(v.verifyPassword('right-master-pw')).resolves.toBe(true);
+  });
+
   it('stores and retrieves secrets per vault_ref', async () => {
     const v = new Vault(path.join(dir, 'vault.enc'));
     await v.init('master-pw-12345');

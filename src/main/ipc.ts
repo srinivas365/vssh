@@ -26,6 +26,12 @@ import {
 } from './export/hosts-transfer';
 import { MIN_EXPORT_KEY_LEN, type HostsExportResult, type HostsImportResult, type HostsExportRequest } from '@shared/hosts-export';
 import { countExportHosts } from '@shared/hosts-export-selection';
+import {
+  clearTouchIdPassword,
+  getTouchIdStatus,
+  loadTouchIdPassword,
+  saveTouchIdPassword,
+} from './vault/touch-id';
 
 interface Deps {
   db: Database.Database;
@@ -49,6 +55,21 @@ export function registerIpc(d: Deps): void {
     const vm = d.repo.getVm(vmId);
     if (!vm) throw new Error('vm not found');
     await d.vault.setSecret(vm.vaultRef, entry);
+  });
+  ipcMain.handle(IPC.TOUCH_ID_STATUS, () => getTouchIdStatus());
+  ipcMain.handle(IPC.TOUCH_ID_UNLOCK, async () => {
+    const password = await loadTouchIdPassword();
+    await d.vault.unlock(password);
+  });
+  ipcMain.handle(IPC.TOUCH_ID_ENROLL, async (_e, password: string) => {
+    if (d.vault.state() !== 'unlocked') throw new Error('vault-locked');
+    if (!(await d.vault.verifyPassword(password))) throw new Error('incorrect-password');
+    await saveTouchIdPassword(password);
+    return d.settings.update({ touchIdEnabled: true });
+  });
+  ipcMain.handle(IPC.TOUCH_ID_DISABLE, async () => {
+    await clearTouchIdPassword();
+    return d.settings.update({ touchIdEnabled: false });
   });
   ipcMain.handle(IPC.SETTINGS_GET, () => d.settings.get());
   ipcMain.handle(IPC.SETTINGS_UPDATE, (_e, patch: AppSettingsPatch) => {

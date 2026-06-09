@@ -124,6 +124,10 @@ jobs:
         if: runner.os == 'macOS'
         run: npm run build:icon
 
+      - name: Build Touch ID keychain helper
+        if: runner.os == 'macOS'
+        run: npm run build:macos-keychain
+
       - name: Build (main + preload + renderer)
         run: npm run build
 

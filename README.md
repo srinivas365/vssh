@@ -4,7 +4,7 @@
 
 # vssh
 
-A Termius-alternative SSH client for macOS, Linux, and Windows that remembers your hosts and quietly hands you the password when SSH asks for it.
+A Termius alternative SSH client for Mac, Linux, and Windows that remembers your hosts and handles password prompts when SSH asks—auto-submit or copy to clipboard.
 
 [![CI](https://github.com/srinivas365/vssh/actions/workflows/ci.yml/badge.svg)](https://github.com/srinivas365/vssh/actions/workflows/ci.yml)
 [![Release](https://github.com/srinivas365/vssh/actions/workflows/release.yml/badge.svg)](https://github.com/srinivas365/vssh/actions/workflows/release.yml)
@@ -49,6 +49,7 @@ Working across a fleet of VMs means typing — or worse, pasting — the same pa
 ### Security
 - **Encrypted vault** — AES-256-GCM blob with an Argon2id-derived key (m=64 MiB, t=3, p=1).
 - **Master password on first launch** — no recovery; vault is yours alone.
+- **Touch ID unlock (macOS)** — optionally store your master password in the Keychain, protected by Touch ID. Master password unlock always remains available.
 - **Auto-lock** — configurable idle timeout (default 15 min), plus lock on system sleep, lock-screen, or `⌘L` / `Ctrl+L`. The vault is wiped from memory; existing sessions keep running but new secret access requires re-unlock.
 - **Renderer never sees plaintext secrets** — they flow main process → clipboard via a typed IPC surface.
 - **Sandboxed renderer** — `contextIsolation: true`, `nodeIntegration: false`, `sandbox: true`, strict CSP, preload bundled with `esbuild` so there are no runtime `require()` calls.
@@ -335,7 +336,6 @@ Concrete measures: AES-256-GCM + Argon2id, master-password min 12 chars, vault f
 
 Deferred from v1, candidates for v1.x:
 - Auto-update via `electron-updater` reading the GitHub Releases this CI already produces
-- Touch ID unlock (store the Argon2 key in Keychain, secured by biometric)
 - SFTP and port forwarding (file transfer via rsync/SFTP exists; interactive SFTP sessions do not)
 - Cloud sync (E2E encrypted, BYO-storage)
 - Versioned vault format + SQLite migration framework (currently `CREATE TABLE IF NOT EXISTS` only)

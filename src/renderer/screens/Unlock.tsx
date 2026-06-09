@@ -1,22 +1,61 @@
-import React, { useState } from 'react';
-import { KeyRound, Lock, Terminal as TerminalIcon, Zap } from 'lucide-react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { Fingerprint, KeyRound, Lock, Terminal as TerminalIcon, Zap } from 'lucide-react';
+import type { TouchIdStatus } from '@shared/types';
 import { useVaultStore } from '../state/vault-store';
 
 export function Unlock() {
   const state = useVaultStore((s) => s.state);
   const init = useVaultStore((s) => s.init);
   const unlock = useVaultStore((s) => s.unlock);
+  const unlockWithTouchId = useVaultStore((s) => s.unlockWithTouchId);
   const [pw, setPw] = useState('');
   const [pw2, setPw2] = useState('');
   const [err, setErr] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [touchId, setTouchId] = useState<TouchIdStatus | null>(null);
+  const [enableTouchIdAfterUnlock, setEnableTouchIdAfterUnlock] = useState(false);
+  const autoPrompted = useRef(false);
 
   const isInit = state === 'empty';
+  const [touchIdEnabled, setTouchIdEnabled] = useState(false);
+  const showTouchId = !isInit && touchIdEnabled && touchId?.supported && touchId.available && touchId.enrolled;
+  const canEnrollTouchId = touchId?.supported && touchId.available && !touchId.enrolled;
+
+  const tryTouchId = useCallback(async (silent = false) => {
+    setErr(null);
+    setBusy(true);
+    try {
+      await unlockWithTouchId();
+    } catch (e) {
+      const message = e instanceof Error ? e.message : '';
+      if (message.includes('touch-id-cancelled')) return;
+      if (!silent) {
+        setErr(message.includes('touch-id-not-enrolled')
+          ? 'Touch ID is not set up. Unlock with your master password or enable Touch ID in Settings.'
+          : 'Touch ID unlock failed. Use your master password instead.');
+      }
+    } finally {
+      setBusy(false);
+    }
+  }, [unlockWithTouchId]);
+
+  useEffect(() => {
+    void window.api.touchId.status().then(setTouchId);
+    if (isInit) return;
+    void window.api.settings.get().then((settings) => setTouchIdEnabled(settings.touchIdEnabled));
+  }, [isInit]);
+
+  useEffect(() => {
+    if (!showTouchId || autoPrompted.current || busy) return;
+    autoPrompted.current = true;
+    void tryTouchId(true);
+  }, [showTouchId, busy, tryTouchId]);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setErr(null);
     setBusy(true);
+    const shouldEnrollTouchId = enableTouchIdAfterUnlock && canEnrollTouchId;
     try {
       if (isInit) {
         if (pw.length < 12) { setErr('Master password must be at least 12 characters.'); return; }
@@ -28,6 +67,14 @@ export function Unlock() {
         } catch {
           setErr('Incorrect password.');
           await new Promise((r) => setTimeout(r, 1000));
+          return;
+        }
+      }
+      if (shouldEnrollTouchId) {
+        try {
+          await window.api.touchId.enroll(pw);
+        } catch {
+          setErr('Vault unlocked, but Touch ID setup failed. Enable it in Settings → Touch ID.');
         }
       }
     } finally {
@@ -91,7 +138,11 @@ export function Unlock() {
             <p className="unlock-sub">
               {isInit
                 ? 'This single password encrypts every saved host credential. There is no recovery — if you lose it, the vault is gone.'
-                : 'Enter your master password to access saved hosts.'}
+                : showTouchId
+                  ? 'Use Touch ID or enter your master password.'
+                  : canEnrollTouchId
+                    ? 'Enter your master password to unlock. You can enable Touch ID below or in Settings after unlock.'
+                    : 'Enter your master password to access saved hosts.'}
             </p>
           </div>
 
@@ -122,7 +173,34 @@ export function Unlock() {
             </label>
           )}
 
+          {canEnrollTouchId && (
+            <label className="unlock-touch-id-opt">
+              <input
+                type="checkbox"
+                checked={enableTouchIdAfterUnlock}
+                disabled={busy}
+                onChange={(e) => setEnableTouchIdAfterUnlock(e.target.checked)}
+              />
+              Enable Touch ID after {isInit ? 'creating vault' : 'unlock'}
+            </label>
+          )}
+
           {err && <div className="unlock-err">{err}</div>}
+
+          {showTouchId && (
+            <>
+              <button
+                type="button"
+                disabled={busy}
+                className="unlock-touch-id-btn"
+                onClick={() => { void tryTouchId(false); }}
+              >
+                <Fingerprint size={18} strokeWidth={2} />
+                Unlock with Touch ID
+              </button>
+              <div className="unlock-divider"><span>or use master password</span></div>
+            </>
+          )}
 
           <button type="submit" disabled={busy || !pw} className="unlock-btn">
             {busy ? 'Working…' : isInit ? 'Create vault' : 'Unlock'}
@@ -412,6 +490,20 @@ const UNLOCK_CSS = `
 }
 .unlock-input::placeholder { color: var(--text-faint); }
 
+.unlock-touch-id-opt {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+.unlock-touch-id-opt input {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+}
+
 .unlock-err {
   color: var(--danger);
   font-size: 12px;
@@ -438,6 +530,45 @@ const UNLOCK_CSS = `
 .unlock-btn:hover:not(:disabled) { background: var(--accent-hover); }
 .unlock-btn:active:not(:disabled) { transform: translateY(1px); }
 .unlock-btn:disabled { opacity: 0.5; cursor: not-allowed; box-shadow: none; }
+
+.unlock-touch-id-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px;
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.1s, border-color 0.1s;
+}
+.unlock-touch-id-btn:hover:not(:disabled) {
+  background: var(--bg-hover);
+  border-color: var(--accent);
+}
+.unlock-touch-id-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.unlock-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--text-faint);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.unlock-divider::before,
+.unlock-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
 
 /* ── narrow window: stack ───────────────────────────────── */
 @media (max-width: 920px) {

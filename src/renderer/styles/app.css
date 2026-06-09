@@ -274,6 +274,11 @@
   background: var(--bg-panel);
   min-height: 0;
 }
+.app-view-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+}
 
 /* ---------- empty state ---------- */
 .empty-state {

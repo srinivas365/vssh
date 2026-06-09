@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Lock, Terminal as TerminalIcon } from 'lucide-react';
 import { Sidebar } from '../components/Sidebar/Sidebar';
 import { TabBar } from '../components/TabBar/TabBar';
@@ -38,14 +38,12 @@ export function Main() {
     if (tabs.length === 0 && view === 'terminal') setView('hosts');
   }, [tabs.length, view]);
 
-  // Subscribe to new-tab events from anywhere (sidebar, quick-connect, hosts page).
+  // Jump to terminal when a new session tab is opened — not on every render.
+  const prevTabCount = useRef(tabs.length);
   useEffect(() => {
-    const prev = addTab;
-    // We can't intercept; instead, watch activeTabId — when it changes to a new value, jump to terminal view.
-  }, [addTab]);
-  useEffect(() => {
-    if (activeTabId) setView('terminal');
-  }, [activeTabId]);
+    if (tabs.length > prevTabCount.current) setView('terminal');
+    prevTabCount.current = tabs.length;
+  }, [tabs.length]);
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -106,6 +104,12 @@ export function Main() {
             title="Transfers">
             Transfers
           </button>
+          <button
+            className={`nav-btn ${view === 'settings' ? 'nav-btn-active' : ''}`}
+            onClick={() => setView('settings')}
+            title="Settings">
+            Settings
+          </button>
         </nav>
         <div className="app-header-meta">
           {view === 'terminal' && activeTab ? (
@@ -159,7 +163,7 @@ export function Main() {
             <div style={{ display: view === 'transfers' ? 'block' : 'none' }}>
               <TransfersPage />
             </div>
-            <div style={{ display: view === 'settings' ? 'block' : 'none' }}>
+            <div className="app-view-layer" style={{ display: view === 'settings' ? 'block' : 'none' }}>
               <SettingsPage />
             </div>
           </div>

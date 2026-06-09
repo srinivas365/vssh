@@ -1,6 +1,6 @@
 import { contextBridge, ipcRenderer } from 'electron';
 import { IPC } from '@shared/constants';
-import { Vm, VmInput, Folder, VaultEntry, SessionState, ToastPayload, PromptType, LocalSelection, RemoteEntry, TransferStartRequest, TransferRecord, TransferProgressEvent, TransferLogEvent, TransferToastPayload, VmConnectionTestResult, AppSettings, AppSettingsPatch } from '@shared/types';
+import { Vm, VmInput, Folder, VaultEntry, SessionState, ToastPayload, PromptType, LocalSelection, RemoteEntry, TransferStartRequest, TransferRecord, TransferProgressEvent, TransferLogEvent, TransferToastPayload, VmConnectionTestResult, AppSettings, AppSettingsPatch, TouchIdStatus } from '@shared/types';
 import type { HostsExportResult, HostsImportResult, HostsExportRequest } from '@shared/hosts-export';
 
 const api = {
@@ -12,6 +12,12 @@ const api = {
     setSecret: (vmId: number, entry: VaultEntry) => ipcRenderer.invoke(IPC.VAULT_SET_SECRET, vmId, entry),
     onStateChanged: (cb: (state: 'empty' | 'locked' | 'unlocked') => void) =>
       ipcRenderer.on(IPC.VAULT_STATE_CHANGED, (_e, s) => cb(s)),
+  },
+  touchId: {
+    status: (): Promise<TouchIdStatus> => ipcRenderer.invoke(IPC.TOUCH_ID_STATUS),
+    unlock: (): Promise<void> => ipcRenderer.invoke(IPC.TOUCH_ID_UNLOCK),
+    enroll: (password: string): Promise<AppSettings> => ipcRenderer.invoke(IPC.TOUCH_ID_ENROLL, password),
+    disable: (): Promise<AppSettings> => ipcRenderer.invoke(IPC.TOUCH_ID_DISABLE),
   },
   settings: {
     get: (): Promise<AppSettings> => ipcRenderer.invoke(IPC.SETTINGS_GET),

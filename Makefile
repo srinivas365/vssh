@@ -14,6 +14,7 @@ RELEASE_DIR    := release
 DIST_DIR       := dist
 ICON_SRC       := build/icon.svg
 ICON_OUT       := build/icon.icns build/icon.png
+MACOS_KEYCHAIN := native/macos-keychain/vssh-keychain
 
 # ── self-documenting help ──────────────────────────────────────────────────
 .PHONY: help
@@ -47,6 +48,14 @@ icon: $(ICON_OUT) ## Rebuild app icon from build/icon.svg
 
 $(ICON_OUT): $(ICON_SRC) scripts/build-icon.sh
 	bash scripts/build-icon.sh
+
+# ── macOS Touch ID helper ──────────────────────────────────────────────────
+.PHONY: macos-keychain
+macos-keychain: $(MACOS_KEYCHAIN) ## Build Touch ID keychain helper (macOS only)
+	@echo "✓ Touch ID helper ready: $(MACOS_KEYCHAIN)"
+
+$(MACOS_KEYCHAIN): native/macos-keychain/main.swift scripts/build-macos-keychain.sh
+	bash scripts/build-macos-keychain.sh
 
 # ── tests ──────────────────────────────────────────────────────────────────
 .PHONY: test
@@ -91,11 +100,11 @@ rebuild-electron: ## Rebuild native modules for Electron (needed before launchin
 
 # ── run / package ──────────────────────────────────────────────────────────
 .PHONY: run
-run: build rebuild-electron ## Build everything and launch Electron
+run: build rebuild-electron macos-keychain ## Build everything and launch Electron
 	npx electron .
 
 .PHONY: dmg
-dmg: build rebuild-electron icon ## Build a .dmg installer at release/
+dmg: build rebuild-electron icon macos-keychain ## Build a .dmg installer at release/
 	$(NPM) run dist
 	@printf "\nDMG written to:\n"
 	@ls -lh $(RELEASE_DIR)/*.dmg 2>/dev/null || true

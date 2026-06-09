@@ -7,6 +7,7 @@ interface VaultStore {
   refresh: () => Promise<void>;
   init: (pw: string) => Promise<void>;
   unlock: (pw: string) => Promise<void>;
+  unlockWithTouchId: () => Promise<void>;
   lock: () => Promise<void>;
 }
 
@@ -15,5 +16,6 @@ export const useVaultStore = create<VaultStore>((set) => ({
   refresh: async () => set({ state: await window.api.vault.state() }),
   init: async (pw) => { await window.api.vault.init(pw); set({ state: 'unlocked' }); },
   unlock: async (pw) => { await window.api.vault.unlock(pw); set({ state: 'unlocked' }); },
+  unlockWithTouchId: async () => { await window.api.touchId.unlock(); set({ state: 'unlocked' }); },
   lock: async () => { await window.api.vault.lock(); set({ state: 'locked' }); },
 }));

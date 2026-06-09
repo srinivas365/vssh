@@ -10,6 +10,9 @@ mac:
   category: public.app-category.developer-tools
   target: dmg
   icon: build/icon.icns
+  extraResources:
+    - from: native/macos-keychain/vssh-keychain
+      to: vssh-keychain
   # Ad-hoc signing: tells electron-builder to `codesign --sign -` the app
   # so macOS doesn't refuse to open it as "damaged". With this, an unsigned
   # build only shows the milder "unidentified developer" prompt on first
