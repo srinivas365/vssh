@@ -3,12 +3,33 @@ import { Fingerprint, KeyRound, Lock, Terminal as TerminalIcon, Zap } from 'luci
 import type { TouchIdStatus } from '@shared/types';
 import { DEFAULTS } from '@shared/constants';
 import { useVaultStore } from '../state/vault-store';
+import { useSettingsStore } from '../state/settings-store';
+
+type VaultState = 'empty' | 'locked' | 'unlocked' | 'unknown';
+
+interface UnlockTouchIdInput {
+  vaultState: VaultState;
+  touchIdEnabled: boolean;
+  touchId: TouchIdStatus | null;
+}
+
+export function getUnlockTouchIdState({ vaultState, touchIdEnabled, touchId }: UnlockTouchIdInput) {
+  const isInit = vaultState === 'empty';
+  const touchIdAvailable = touchId?.supported === true && touchId.available === true;
+
+  return {
+    isInit,
+    showTouchId: !isInit && touchIdEnabled && touchIdAvailable && touchId.enrolled === true,
+    canEnrollTouchId: touchIdAvailable && touchId.enrolled !== true,
+  };
+}
 
 export function Unlock() {
   const state = useVaultStore((s) => s.state);
   const init = useVaultStore((s) => s.init);
   const unlock = useVaultStore((s) => s.unlock);
   const unlockWithTouchId = useVaultStore((s) => s.unlockWithTouchId);
+  const touchIdEnabled = useSettingsStore((s) => s.settings.touchIdEnabled);
   const [pw, setPw] = useState('');
   const [pw2, setPw2] = useState('');
   const [err, setErr] = useState<string | null>(null);
@@ -16,11 +37,11 @@ export function Unlock() {
   const [touchId, setTouchId] = useState<TouchIdStatus | null>(null);
   const [enableTouchIdAfterUnlock, setEnableTouchIdAfterUnlock] = useState(false);
   const autoPrompted = useRef(false);
-
-  const isInit = state === 'empty';
-  const [touchIdEnabled, setTouchIdEnabled] = useState(false);
-  const showTouchId = !isInit && touchIdEnabled && touchId?.supported && touchId.available && touchId.enrolled;
-  const canEnrollTouchId = touchId?.supported && touchId.available && !touchId.enrolled;
+  const { isInit, showTouchId, canEnrollTouchId } = getUnlockTouchIdState({
+    vaultState: state,
+    touchIdEnabled,
+    touchId,
+  });
 
   const tryTouchId = useCallback(async (silent = false) => {
     setErr(null);
@@ -42,9 +63,7 @@ export function Unlock() {
 
   useEffect(() => {
     void window.api.touchId.status().then(setTouchId);
-    if (isInit) return;
-    void window.api.settings.get().then((settings) => setTouchIdEnabled(settings.touchIdEnabled));
-  }, [isInit]);
+  }, []);
 
   useEffect(() => {
     if (!showTouchId || autoPrompted.current || busy) return;
