@@ -16,6 +16,7 @@ import { hasLocalRsync, hasRemoteRsync } from './transfer/rsync-availability';
 import { SftpTransferEngine } from './transfer/sftp-engine';
 import { RsyncTransferEngine } from './transfer/rsync-engine';
 import { SettingsStore } from './settings/store';
+import { shouldIdleAutoLock } from './auto-lock';
 
 let mainWindow: BrowserWindow | null = null;
 
@@ -102,7 +103,14 @@ app.whenReady().then(async () => {
     sessions.closeAll();
     mainWindow?.webContents.send(IPC.VAULT_STATE_CHANGED, vault.state());
   };
-  powerMonitor.on('lock-screen', () => { void lockAll(); });
+  const shouldLockForIdle = () =>
+    shouldIdleAutoLock(powerMonitor.getSystemIdleTime(), settings.get().autoLockMinutes);
+
+  // Respect the configured idle timeout — macOS often locks the display sooner (e.g. 15 min).
+  powerMonitor.on('lock-screen', () => {
+    if (vault.state() !== 'unlocked') return;
+    if (shouldLockForIdle()) void lockAll();
+  });
   powerMonitor.on('suspend', () => { void lockAll(); });
 
   // ⌘L global shortcut (only when our window is focused)
@@ -110,11 +118,10 @@ app.whenReady().then(async () => {
     if (BrowserWindow.getFocusedWindow() === mainWindow) void lockAll();
   });
 
-  // idle auto-lock — poll every 30s, lock if idleSeconds > AUTO_LOCK_MS / 1000
+  // idle auto-lock — poll every 30s
   setInterval(() => {
     if (vault.state() !== 'unlocked') return;
-    const autoLockMs = settings.get().autoLockMinutes * 60_000;
-    if (powerMonitor.getSystemIdleTime() * 1000 > autoLockMs) void lockAll();
+    if (shouldLockForIdle()) void lockAll();
   }, 30_000);
 });
 

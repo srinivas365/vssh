@@ -168,11 +168,36 @@
 
 .app-header button { -webkit-app-region: no-drag; }
 
+.app-header-start {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding-left: 60px; /* leave room for macOS traffic lights */
+}
+.app-header--sidebar-collapsed .app-header-start {
+  padding-left: 14px;
+}
+.app-header-menu {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  padding: 4px 6px;
+  cursor: pointer;
+  color: var(--text-muted);
+}
+.app-header-menu:hover {
+  background: var(--bg-muted);
+  border-color: var(--border);
+  color: var(--text);
+}
+
 .app-brand {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding-left: 60px; /* leave room for macOS traffic lights */
 }
 .app-brand-mark {
   display: inline-flex;
@@ -258,9 +283,26 @@
   font-size: 14px;
 }
 .app-header-lock:hover { background: var(--bg-muted); border-color: var(--border); }
+.app-header-reconnect {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 3px 8px;
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--text);
+}
+.app-header-reconnect:hover:not(:disabled) { background: var(--bg-muted); }
+.app-header-reconnect:disabled { opacity: 0.6; cursor: default; }
+.app-header-reconnect .spin { animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
 
 /* ---------- body layout ---------- */
-.app-body { flex: 1; display: flex; min-height: 0; }
+.app-body { flex: 1; display: flex; min-height: 0; position: relative; }
+
 .app-main {
   flex: 1;
   display: flex;

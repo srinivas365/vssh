@@ -6,6 +6,7 @@ import {
   Plus,
   Search,
   Server,
+  PanelLeftClose,
   Settings,
   Terminal as TerminalIcon,
   Trash2,
@@ -36,6 +37,7 @@ export function Sidebar({ onNewVm, onEditVm, onCloneVm, onOpenSettings, onOpenLo
   useEffect(() => { refresh(); }, [refresh]);
 
   const forgetFolders = useUiStore((s) => s.forgetFolders);
+  const toggleSidebarCollapsed = useUiStore((s) => s.toggleSidebarCollapsed);
   useEffect(() => {
     forgetFolders(folders.map((f) => f.id));
   }, [folders, forgetFolders]);
@@ -71,7 +73,17 @@ export function Sidebar({ onNewVm, onEditVm, onCloneVm, onOpenSettings, onOpenLo
 
   return (
     <aside className="sidebar">
-      <div className="sidebar-section-label">Workspaces</div>
+      <div className="sidebar-header">
+        <div className="sidebar-section-label">Workspaces</div>
+        <button
+          type="button"
+          className="sidebar-toggle"
+          onClick={toggleSidebarCollapsed}
+          title="Hide sidebar"
+          aria-label="Hide sidebar">
+          <PanelLeftClose size={14} strokeWidth={2} />
+        </button>
+      </div>
       <div className="sidebar-search-wrap">
         <span className="sidebar-search-icon"><Search size={14} strokeWidth={2} /></span>
         <input

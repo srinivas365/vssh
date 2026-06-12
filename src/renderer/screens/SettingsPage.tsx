@@ -3,6 +3,7 @@ import type { SelectOption } from '../components/Select/Select';
 import { Select } from '../components/Select/Select';
 import { useSettingsStore } from '../state/settings-store';
 import type { ThemeName, TouchIdStatus } from '@shared/types';
+import { APP_VERSION } from '@shared/version';
 import './SettingsPage.css';
 
 const THEME_OPTIONS: SelectOption<ThemeName>[] = [
@@ -261,7 +262,9 @@ export function SettingsPage() {
 
       <section className="settings-card">
         <h2>Auto-lock timeout</h2>
-        <p className="settings-help">Lock the vault after this many minutes of system inactivity.</p>
+        <p className="settings-help">
+          Lock the vault after this many minutes without keyboard or mouse input. macOS may turn off the display sooner; the vault follows this timer. Use ⌘L to lock immediately.
+        </p>
         <label>
           Minutes
           <input
@@ -338,6 +341,11 @@ export function SettingsPage() {
           {touchIdErr && <div className="settings-error">{touchIdErr}</div>}
         </section>
       )}
+
+      <footer className="settings-about">
+        <span className="settings-about-name">vssh</span>
+        <span className="settings-about-version">v{APP_VERSION}</span>
+      </footer>
     </div>
   );
 }

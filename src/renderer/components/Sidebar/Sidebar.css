@@ -7,6 +7,24 @@
   background: var(--bg);
   border-right: 1px solid var(--border);
   font-family: inherit;
+  overflow: hidden;
+  transition: width 0.2s ease, flex-basis 0.2s ease, padding 0.2s ease, border-color 0.2s ease;
+}
+
+.app-body-sidebar-collapsed .sidebar {
+  width: 0;
+  flex-basis: 0;
+  padding-left: 0;
+  padding-right: 0;
+  border-right-color: transparent;
+}
+
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 0 2px 8px 6px;
 }
 
 .sidebar-section-label {
@@ -14,8 +32,28 @@
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: var(--text-faint);
-  padding: 0 6px 8px 6px;
   font-weight: 600;
+}
+
+.sidebar-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-faint);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.1s, border-color 0.1s, color 0.1s;
+}
+.sidebar-toggle:hover {
+  background: var(--bg-muted);
+  border-color: var(--border);
+  color: var(--text-muted);
 }
 
 .sidebar-search-wrap {

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Lock, Terminal as TerminalIcon } from 'lucide-react';
+import { Lock, Menu, RefreshCw, Terminal as TerminalIcon } from 'lucide-react';
 import { Sidebar } from '../components/Sidebar/Sidebar';
 import { TabBar } from '../components/TabBar/TabBar';
 import { Terminal } from '../components/Terminal/Terminal';
@@ -12,14 +12,17 @@ import { SettingsPage } from './SettingsPage';
 import { TransferWizard } from '../components/Transfers/TransferWizard';
 import type { TransferDirection } from '@shared/types';
 import { useSessionsStore } from '../state/sessions-store';
+import { useUiStore } from '../state/ui-store';
 import { useVaultStore } from '../state/vault-store';
 import { useTransfersStore } from '../state/transfers-store';
+import { reconnectTab } from '../connect-vm';
 import { Vm } from '@shared/types';
 
 type View = 'hosts' | 'terminal' | 'transfers' | 'settings';
 
 export function Main() {
-  const { tabs, activeTabId, updateState, pushToast, removeTab, addTab } = useSessionsStore();
+  const { tabs, activeTabId, updateState, pushToast, removeTab, addTab, replaceTabSession } = useSessionsStore();
+  const [reconnecting, setReconnecting] = useState(false);
   const lock = useVaultStore((s) => s.lock);
   const [editing, setEditing] = useState<Vm | null | undefined>(undefined);
   const [cloning, setCloning] = useState<Vm | null>(null);
@@ -67,6 +70,8 @@ export function Main() {
   }, [lock, activeTabId, removeTab, tabs.length]);
 
   const transfersStore = useTransfersStore();
+  const sidebarCollapsed = useUiStore((s) => s.sidebarCollapsed);
+  const toggleSidebarCollapsed = useUiStore((s) => s.toggleSidebarCollapsed);
 
   useEffect(() => {
     window.api.transfer.onState((record) => transfersStore.upsert(record));
@@ -76,6 +81,17 @@ export function Main() {
   }, [transfersStore]);
 
   const activeTab = tabs.find((t) => t.sessionId === activeTabId);
+  const canReconnect = activeTab?.state === 'closed' || activeTab?.state === 'error';
+
+  async function handleReconnect() {
+    if (!activeTab || reconnecting) return;
+    setReconnecting(true);
+    try {
+      await reconnectTab(activeTab, replaceTabSession);
+    } finally {
+      setReconnecting(false);
+    }
+  }
 
   async function openLocalTerminal() {
     try {
@@ -89,10 +105,22 @@ export function Main() {
 
   return (
     <div className="app-shell">
-      <header className="app-header">
-        <div className="app-brand">
-          <span className="app-brand-mark"><TerminalIcon size={13} strokeWidth={2.2} /></span>
-          <span className="app-brand-name">vssh</span>
+      <header className={`app-header${sidebarCollapsed ? ' app-header--sidebar-collapsed' : ''}`}>
+        <div className="app-header-start">
+          {sidebarCollapsed && (
+            <button
+              type="button"
+              className="app-header-menu"
+              onClick={toggleSidebarCollapsed}
+              title="Show sidebar"
+              aria-label="Show sidebar">
+              <Menu size={16} strokeWidth={2} />
+            </button>
+          )}
+          <div className="app-brand">
+            <span className="app-brand-mark"><TerminalIcon size={13} strokeWidth={2.2} /></span>
+            <span className="app-brand-name">vssh</span>
+          </div>
         </div>
         <nav className="app-nav">
           <button
@@ -117,10 +145,23 @@ export function Main() {
         </nav>
         <div className="app-header-meta">
           {view === 'terminal' && activeTab ? (
-            <span className="app-header-status">
-              <span className={`app-header-dot dot-${activeTab.state}`} />
-              {activeTab.label} · {activeTab.state}
-            </span>
+            <>
+              <span className="app-header-status">
+                <span className={`app-header-dot dot-${activeTab.state}`} />
+                {activeTab.label} · {activeTab.state}
+              </span>
+              {canReconnect && (
+                <button
+                  type="button"
+                  className="app-header-reconnect"
+                  onClick={() => void handleReconnect()}
+                  disabled={reconnecting}
+                  title="Reconnect session">
+                  <RefreshCw size={12} strokeWidth={2.2} className={reconnecting ? 'spin' : undefined} />
+                  {reconnecting ? 'Reconnecting…' : 'Reconnect'}
+                </button>
+              )}
+            </>
           ) : (
             <span className="app-header-hint">⌘K to quick-connect · ⌘L to lock</span>
           )}
@@ -130,7 +171,7 @@ export function Main() {
         </div>
       </header>
 
-      <div className="app-body">
+      <div className={`app-body${sidebarCollapsed ? ' app-body-sidebar-collapsed' : ''}`}>
         <Sidebar
           onNewVm={() => setEditing(null)}
           onEditVm={(vm) => setEditing(vm)}

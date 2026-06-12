@@ -85,8 +85,9 @@ function sanitizeFontFamily(value: string, fallback: string): string {
 }
 
 function sanitizeInteger(value: number, min: number, max: number, fallback: number): number {
-  if (!Number.isFinite(value)) return fallback;
-  const rounded = Math.round(value);
+  const parsed = typeof value === 'string' ? Number(value) : value;
+  if (!Number.isFinite(parsed)) return fallback;
+  const rounded = Math.round(parsed);
   if (rounded < min) return min;
   if (rounded > max) return max;
   return rounded;

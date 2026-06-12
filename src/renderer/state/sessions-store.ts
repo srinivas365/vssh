@@ -14,6 +14,7 @@ interface SessionsStore {
   toasts: ToastPayload[];
   addTab: (tab: Tab) => void;
   removeTab: (sessionId: string) => void;
+  replaceTabSession: (oldSessionId: string, newSessionId: string, state?: SessionState['status']) => void;
   setActive: (sessionId: string) => void;
   updateState: (state: SessionState) => void;
   pushToast: (t: ToastPayload) => void;
@@ -28,6 +29,11 @@ export const useSessionsStore = create<SessionsStore>((set) => ({
   removeTab: (id) => set((s) => ({
     tabs: s.tabs.filter((t) => t.sessionId !== id),
     activeTabId: s.activeTabId === id ? s.tabs.find((t) => t.sessionId !== id)?.sessionId ?? null : s.activeTabId,
+  })),
+  replaceTabSession: (oldSessionId, newSessionId, state = 'connecting') => set((s) => ({
+    tabs: s.tabs.map((t) =>
+      t.sessionId === oldSessionId ? { ...t, sessionId: newSessionId, state } : t),
+    activeTabId: s.activeTabId === oldSessionId ? newSessionId : s.activeTabId,
   })),
   setActive: (id) => set({ activeTabId: id }),
   updateState: (state) => set((s) => ({

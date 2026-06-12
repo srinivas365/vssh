@@ -1,6 +1,23 @@
 import { create } from 'zustand';
 
 const STORAGE_KEY = 'vssh.collapsedWorkspaces';
+const SIDEBAR_STORAGE_KEY = 'vssh.sidebarCollapsed';
+
+function loadSidebarCollapsed(): boolean {
+  try {
+    return localStorage.getItem(SIDEBAR_STORAGE_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
+
+function saveSidebarCollapsed(collapsed: boolean): void {
+  try {
+    localStorage.setItem(SIDEBAR_STORAGE_KEY, collapsed ? '1' : '0');
+  } catch {
+    // ignore storage errors
+  }
+}
 
 function load(): Set<number> {
   try {
@@ -27,6 +44,8 @@ interface UiStore {
   toggleFolderCollapsed: (id: number) => void;
   isFolderCollapsed: (id: number) => boolean;
   forgetFolders: (keepIds: number[]) => void;
+  sidebarCollapsed: boolean;
+  toggleSidebarCollapsed: () => void;
 }
 
 export const useUiStore = create<UiStore>((set, get) => ({
@@ -52,5 +71,11 @@ export const useUiStore = create<UiStore>((set, get) => ({
       save(next);
       set({ collapsedFolders: next });
     }
+  },
+  sidebarCollapsed: loadSidebarCollapsed(),
+  toggleSidebarCollapsed: () => {
+    const next = !get().sidebarCollapsed;
+    saveSidebarCollapsed(next);
+    set({ sidebarCollapsed: next });
   },
 }));
