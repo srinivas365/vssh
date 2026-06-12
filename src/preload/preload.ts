@@ -1,6 +1,6 @@
 import { contextBridge, ipcRenderer } from 'electron';
 import { IPC } from '@shared/constants';
-import { Vm, VmInput, Folder, VaultEntry, SessionState, ToastPayload, PromptType, LocalSelection, RemoteEntry, TransferStartRequest, TransferRecord, TransferProgressEvent, TransferLogEvent, TransferToastPayload, VmConnectionTestResult, AppSettings, AppSettingsPatch, TouchIdStatus } from '@shared/types';
+import { Vm, VmInput, Folder, VaultEntry, SessionState, ToastPayload, PromptType, LocalSelection, RemoteEntry, TransferStartRequest, TransferRecord, TransferProgressEvent, TransferLogEvent, TransferToastPayload, VmConnectionTestResult, AppSettings, AppSettingsPatch, TouchIdStatus, UpdateCheckResult } from '@shared/types';
 import type { HostsExportResult, HostsImportResult, HostsExportRequest } from '@shared/hosts-export';
 
 const api = {
@@ -85,6 +85,13 @@ const api = {
     export: (request: HostsExportRequest): Promise<HostsExportResult> =>
       ipcRenderer.invoke(IPC.HOSTS_EXPORT, request),
     import: (exportKey: string): Promise<HostsImportResult> => ipcRenderer.invoke(IPC.HOSTS_IMPORT, exportKey),
+  },
+  updates: {
+    check: (force?: boolean): Promise<UpdateCheckResult> =>
+      ipcRenderer.invoke(IPC.UPDATES_CHECK, force ?? false),
+  },
+  shell: {
+    openExternal: (url: string): Promise<void> => ipcRenderer.invoke(IPC.SHELL_OPEN_EXTERNAL, url),
   },
 };
 

@@ -1,0 +1,74 @@
+.update-modal {
+  background: var(--bg-panel);
+  color: var(--text);
+  padding: 22px;
+  border-radius: var(--radius-lg);
+  min-width: 420px;
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--border);
+}
+
+.update-modal h2 {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.update-modal-sub {
+  margin: 0;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.update-modal-notes {
+  margin: 0;
+  max-height: 200px;
+  overflow-y: auto;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg);
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-muted);
+  white-space: pre-wrap;
+}
+
+.update-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.update-modal-actions button {
+  padding: 8px 12px;
+  border-radius: var(--radius);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.update-modal-later {
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border-strong);
+}
+
+.update-modal-later:hover {
+  background: var(--bg-muted);
+}
+
+.update-modal-download {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+}
+
+.update-modal-download:hover {
+  background: var(--accent-hover);
+}

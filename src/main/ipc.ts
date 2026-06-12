@@ -1,4 +1,4 @@
-import { ipcMain, BrowserWindow, clipboard, dialog } from 'electron';
+import { app, ipcMain, BrowserWindow, clipboard, dialog, shell } from 'electron';
 import fs from 'node:fs/promises';
 import fsSync from 'node:fs';
 import type Database from 'better-sqlite3';
@@ -33,6 +33,7 @@ import {
   loadTouchIdPassword,
   saveTouchIdPassword,
 } from './vault/touch-id';
+import { checkForUpdates } from './updates/github-releases';
 
 interface Deps {
   db: Database.Database;
@@ -320,6 +321,24 @@ export function registerIpc(d: Deps): void {
     }
     const summary = await importHostsPayload(d.repo, d.vault, payload);
     return { importedHosts: summary.importedHosts, createdFolders: summary.createdFolders };
+  });
+
+  ipcMain.handle(IPC.UPDATES_CHECK, async (_e, force = false) => {
+    if (!app.isPackaged && !force) return { status: 'skipped' as const };
+    return checkForUpdates(app.getVersion());
+  });
+
+  ipcMain.handle(IPC.SHELL_OPEN_EXTERNAL, async (_e, url: string) => {
+    let parsed: URL;
+    try {
+      parsed = new URL(url);
+    } catch {
+      throw new Error('invalid-url');
+    }
+    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+      throw new Error('invalid-url');
+    }
+    await shell.openExternal(parsed.toString());
   });
 
   d.transfers.on('state', (record) => d.mainWindow()?.webContents.send(IPC.TRANSFER_STATE, record));

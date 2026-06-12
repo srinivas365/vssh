@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import type { SelectOption } from '../components/Select/Select';
 import { Select } from '../components/Select/Select';
 import { useSettingsStore } from '../state/settings-store';
+import { useUpdatesStore } from '../state/updates-store';
+import { clearDismissedUpdate } from '../updates-dismiss';
 import type { ThemeName, TouchIdStatus } from '@shared/types';
 import { APP_VERSION } from '@shared/version';
 import './SettingsPage.css';
@@ -93,6 +95,11 @@ export function SettingsPage() {
   const update = useSettingsStore((s) => s.update);
   const enrollTouchId = useSettingsStore((s) => s.enrollTouchId);
   const disableTouchId = useSettingsStore((s) => s.disableTouchId);
+  const updateChecking = useUpdatesStore((s) => s.checking);
+  const manualFeedback = useUpdatesStore((s) => s.manualFeedback);
+  const setUpdateChecking = useUpdatesStore((s) => s.setChecking);
+  const setManualFeedback = useUpdatesStore((s) => s.setManualFeedback);
+  const showAvailableUpdate = useUpdatesStore((s) => s.showAvailable);
   const [terminalFontSizeDraft, setTerminalFontSizeDraft] = useState(String(settings.terminalFontSize));
   const [autoLockMinutesDraft, setAutoLockMinutesDraft] = useState(String(settings.autoLockMinutes));
   const [touchIdStatus, setTouchIdStatus] = useState<TouchIdStatus | null>(null);
@@ -143,6 +150,24 @@ export function SettingsPage() {
     setAutoLockMinutesDraft(String(next));
     if (next !== settings.autoLockMinutes) {
       await patchSettings({ autoLockMinutes: next });
+    }
+  }
+
+  async function checkForUpdates() {
+    setUpdateChecking(true);
+    setManualFeedback(null);
+    try {
+      const result = await window.api.updates.check(true);
+      if (result.status === 'available') {
+        clearDismissedUpdate();
+        showAvailableUpdate(result);
+      } else if (result.status === 'current') {
+        setManualFeedback(`You're on the latest version (v${result.currentVersion}).`);
+      } else if (result.status === 'error') {
+        setManualFeedback(result.message);
+      }
+    } finally {
+      setUpdateChecking(false);
     }
   }
 
@@ -342,10 +367,20 @@ export function SettingsPage() {
         </section>
       )}
 
-      <footer className="settings-about">
-        <span className="settings-about-name">vssh</span>
-        <span className="settings-about-version">v{APP_VERSION}</span>
-      </footer>
+      <section className="settings-card">
+        <h2>About</h2>
+        <p className="settings-help">vssh v{APP_VERSION}</p>
+        <div className="settings-about-actions">
+          <button
+            type="button"
+            className="settings-btn"
+            disabled={updateChecking}
+            onClick={() => { void checkForUpdates(); }}>
+            {updateChecking ? 'Checking…' : 'Check for updates'}
+          </button>
+        </div>
+        {manualFeedback && <p className="settings-about-feedback">{manualFeedback}</p>}
+      </section>
     </div>
   );
 }

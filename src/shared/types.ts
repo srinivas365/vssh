@@ -59,6 +59,12 @@ export interface AppSettings {
 
 export type AppSettingsPatch = Partial<AppSettings>;
 
+export type UpdateCheckResult =
+  | { status: 'current'; currentVersion: string }
+  | { status: 'available'; currentVersion: string; latestVersion: string; releaseNotes: string; releaseUrl: string }
+  | { status: 'skipped' }
+  | { status: 'error'; message: string };
+
 export interface TouchIdStatus {
   supported: boolean;
   available: boolean;

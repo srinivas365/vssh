@@ -59,6 +59,8 @@ export const IPC = {
   CLIPBOARD_WRITE_TEXT: 'clipboard:write-text',
   HOSTS_EXPORT: 'hosts:export',
   HOSTS_IMPORT: 'hosts:import',
+  UPDATES_CHECK: 'updates:check',
+  SHELL_OPEN_EXTERNAL: 'shell:open-external',
 } as const;
 
 export const DEFAULTS = {
