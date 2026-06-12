@@ -7,6 +7,7 @@ import { ToastOverlay, TransferToastOverlay } from '../components/Toast/Toast';
 import { VmEditForm } from '../components/VmEditForm/VmEditForm';
 import { QuickConnect } from '../components/QuickConnect/QuickConnect';
 import { HostsPage } from './HostsPage';
+import { IdentitiesPage } from './IdentitiesPage';
 import { TransfersPage } from './TransfersPage';
 import { SettingsPage } from './SettingsPage';
 import { TransferWizard } from '../components/Transfers/TransferWizard';
@@ -18,7 +19,7 @@ import { useTransfersStore } from '../state/transfers-store';
 import { reconnectTab } from '../connect-vm';
 import { Vm } from '@shared/types';
 
-type View = 'hosts' | 'terminal' | 'transfers' | 'settings';
+type View = 'hosts' | 'identities' | 'terminal' | 'transfers' | 'settings';
 
 export function Main() {
   const { tabs, activeTabId, updateState, pushToast, removeTab, addTab, replaceTabSession } = useSessionsStore();
@@ -130,6 +131,12 @@ export function Main() {
             Hosts
           </button>
           <button
+            className={`nav-btn ${view === 'identities' ? 'nav-btn-active' : ''}`}
+            onClick={() => setView('identities')}
+            title="Identities">
+            Identities
+          </button>
+          <button
             className={`nav-btn ${view === 'terminal' ? 'nav-btn-active' : ''}`}
             onClick={() => setView('terminal')}
             disabled={tabs.length === 0}
@@ -205,6 +212,9 @@ export function Main() {
                 onUploadVm={(vm) => setTransferWizard({ vm, direction: 'upload' })}
                 onDownloadVm={(vm) => setTransferWizard({ vm, direction: 'download' })}
               />
+            </div>
+            <div style={{ display: view === 'identities' ? 'block' : 'none' }}>
+              <IdentitiesPage />
             </div>
             <div style={{ display: view === 'transfers' ? 'block' : 'none' }}>
               <TransfersPage />

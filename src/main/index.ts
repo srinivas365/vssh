@@ -4,6 +4,7 @@ import Database from 'better-sqlite3';
 import { migrate } from './db/migrations';
 import { ensureDefaultWorkspace } from './startup-hygiene';
 import { VmsRepo } from './db/vms-repo';
+import { IdentitiesRepo } from './db/identities-repo';
 import { Vault } from './vault/vault';
 import { SessionManager } from './ssh/session-manager';
 import { ClipboardService } from './clipboard';
@@ -42,6 +43,7 @@ app.whenReady().then(async () => {
   const db = new Database(path.join(userData, 'vms.db'));
   migrate(db);
   const repo = new VmsRepo(db);
+  const identitiesRepo = new IdentitiesRepo(db);
   ensureDefaultWorkspace(db, repo);
   const vault = new Vault(path.join(userData, 'vault.enc'));
   const settings = await SettingsStore.create();
@@ -90,7 +92,7 @@ app.whenReady().then(async () => {
   });
   const remoteBrowser = new RemoteBrowserService();
 
-  registerIpc({ db, repo, vault, sessions, clip, mainWindow: () => mainWindow, transfers, remoteBrowser, settings });
+  registerIpc({ db, repo, identitiesRepo, vault, sessions, clip, mainWindow: () => mainWindow, transfers, remoteBrowser, settings });
 
   transfers.on('engine-stop', (id: string) => { rsyncEngine.stop(id); sftpEngine.abort(id); });
   transfers.on('engine-pause', (id: string) => { rsyncEngine.stop(id); sftpEngine.abort(id); });

@@ -23,3 +23,11 @@ CREATE TABLE IF NOT EXISTS vms (
 
 CREATE INDEX IF NOT EXISTS idx_vms_folder ON vms(folder_id);
 CREATE INDEX IF NOT EXISTS idx_vms_last_used ON vms(last_used_at DESC);
+
+CREATE TABLE IF NOT EXISTS identities (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  label       TEXT NOT NULL,
+  username    TEXT NOT NULL,
+  vault_ref   TEXT NOT NULL UNIQUE,
+  created_at  INTEGER NOT NULL
+);

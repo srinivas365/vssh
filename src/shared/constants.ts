@@ -29,6 +29,12 @@ export const IPC = {
   FOLDERS_DELETE: 'folders:delete',
   FOLDERS_RENAME: 'folders:rename',
   VMS_MOVE_TO_FOLDER: 'vms:move-to-folder',
+  // identities
+  IDENTITIES_LIST: 'identities:list',
+  IDENTITIES_CREATE: 'identities:create',
+  IDENTITIES_UPDATE: 'identities:update',
+  IDENTITIES_DELETE: 'identities:delete',
+  IDENTITIES_GET_CREDENTIALS: 'identities:get-credentials',
   // sessions
   SESSION_START: 'session:start',
   SESSION_START_LOCAL: 'session:start-local',

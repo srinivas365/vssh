@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Vm, VmInput, VaultEntry, AuthMethod, VmConnectionTestResult } from '@shared/types';
 import { buildCloneInput } from '@shared/vm-clone';
 import { useVmsStore } from '../../state/vms-store';
+import { useIdentitiesStore } from '../../state/identities-store';
 import { Select, SelectOption } from '../Select/Select';
 import './VmEditForm.css';
 
@@ -19,8 +20,11 @@ interface Props {
   onClose: () => void;
 }
 
+const NO_IDENTITY = '';
+
 export function VmEditForm({ initial, cloneFrom, onClose }: Props) {
   const { create, clone, update, folders, createFolder } = useVmsStore();
+  const { identities, refresh: refreshIdentities } = useIdentitiesStore();
   const draft = cloneFrom ? buildCloneInput(cloneFrom) : null;
   const defaultFolderId =
     draft?.folderId ?? initial?.folderId ?? folders.find((f) => f.name === 'Default')?.id ?? folders[0]?.id ?? null;
@@ -43,6 +47,31 @@ export function VmEditForm({ initial, cloneFrom, onClose }: Props) {
   );
   const [isTestingConnection, setIsTestingConnection] = useState(false);
   const [connectionTestResult, setConnectionTestResult] = useState<VmConnectionTestResult | null>(null);
+  const [selectedIdentityId, setSelectedIdentityId] = useState(NO_IDENTITY);
+
+  useEffect(() => {
+    void refreshIdentities();
+  }, [refreshIdentities]);
+
+  const identityOptions: SelectOption<string>[] = [
+    { value: NO_IDENTITY, label: 'None', description: 'Enter credentials manually' },
+    ...identities.map((i) => ({
+      value: String(i.id),
+      label: i.label,
+      description: i.username,
+    })),
+  ];
+
+  async function onIdentityChange(id: string) {
+    setSelectedIdentityId(id);
+    if (!id) return;
+    const creds = await window.api.identities.getCredentials(Number(id));
+    setUsername(creds.username);
+    if (authMethod !== 'key') {
+      setPassword(creds.password);
+    }
+    setSudoPassword(creds.sudoPassword || creds.password);
+  }
 
   const workspaceOptions: SelectOption<string>[] = [
     ...folders.map((f) => ({ value: String(f.id), label: f.name })),
@@ -152,6 +181,16 @@ export function VmEditForm({ initial, cloneFrom, onClose }: Props) {
         <label>Label <input value={label} onChange={(e) => setLabel(e.target.value)} required /></label>
         <label>Host  <input value={host} onChange={(e) => setHost(e.target.value)} required /></label>
         <label>Port  <input type="number" value={port} onChange={(e) => setPort(Number(e.target.value))} /></label>
+        {!cloneFrom && identities.length > 0 && (
+          <label>
+            Fill from identity
+            <Select<string>
+              value={selectedIdentityId}
+              options={identityOptions}
+              onChange={(v) => { void onIdentityChange(v); }}
+            />
+          </label>
+        )}
         <label>User  <input value={username} onChange={(e) => setUsername(e.target.value)} required /></label>
         <label>
           Auth

@@ -34,6 +34,36 @@ export interface VmInput {
   autoSubmitEnabled: boolean;
 }
 
+export interface Identity {
+  id: number;
+  label: string;
+  username: string;
+  vaultRef: string;
+  createdAt: number;
+}
+
+export interface IdentityInput {
+  label: string;
+  username: string;
+}
+
+export interface IdentitySecrets {
+  password: string;
+  sudoPassword?: string;
+}
+
+export interface IdentitySecretsPatch {
+  password?: string;
+  sudoPassword?: string;
+  sudoSameAsPassword?: boolean;
+}
+
+export interface IdentityCredentials {
+  username: string;
+  password: string;
+  sudoPassword: string;
+}
+
 export interface VaultEntry {
   password?: string;
   sudoPassword?: string;

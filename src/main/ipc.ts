@@ -5,12 +5,13 @@ import type Database from 'better-sqlite3';
 import { IPC } from '@shared/constants';
 import { Vault } from './vault/vault';
 import { VmsRepo } from './db/vms-repo';
+import { IdentitiesRepo } from './db/identities-repo';
 import { SessionManager } from './ssh/session-manager';
 import { SshSession } from './ssh/session';
 import { LocalSession } from './ssh/local-session';
 import { ClipboardService } from './clipboard';
 import { logger } from './logger';
-import { Vm, VmInput, VaultEntry, Folder, PromptType, ToastPayload } from '@shared/types';
+import { Vm, VmInput, VaultEntry, Folder, PromptType, ToastPayload, Identity, IdentityInput, IdentityCredentials, IdentitySecrets, IdentitySecretsPatch } from '@shared/types';
 import { decidePromptAction, pickSecretByPrompt } from './ssh/prompt-action';
 import type { TransferManager } from './transfer/transfer-manager';
 import { RemoteBrowserService } from './transfer/remote-browser-service';
@@ -38,6 +39,7 @@ import { checkForUpdates } from './updates/github-releases';
 interface Deps {
   db: Database.Database;
   repo: VmsRepo;
+  identitiesRepo: IdentitiesRepo;
   vault: Vault;
   sessions: SessionManager;
   clip: ClipboardService;
@@ -110,6 +112,49 @@ export function registerIpc(d: Deps): void {
   ipcMain.handle(IPC.VMS_TOUCH_USED, (_e, id: number) => d.repo.touchUsed(id));
   ipcMain.handle(IPC.VMS_TEST_CONNECTION, async (_e, input: VmInput, secret: VaultEntry) =>
     testVmConnection(input, secret));
+
+  // identities
+  ipcMain.handle(IPC.IDENTITIES_LIST, (): Identity[] => d.identitiesRepo.listIdentities());
+  ipcMain.handle(IPC.IDENTITIES_CREATE, async (_e, input: IdentityInput, secrets: IdentitySecrets): Promise<Identity> => {
+    const identity = d.identitiesRepo.createIdentity(input);
+    await d.vault.setSecret(identity.vaultRef, {
+      password: secrets.password,
+      sudoPassword: secrets.sudoPassword || undefined,
+    });
+    return identity;
+  });
+  ipcMain.handle(IPC.IDENTITIES_UPDATE, async (_e, id: number, input: IdentityInput, secrets?: IdentitySecretsPatch) => {
+    const identity = d.identitiesRepo.getIdentity(id);
+    if (!identity) throw new Error('identity not found');
+    d.identitiesRepo.updateIdentity(id, input);
+    if (secrets?.password || secrets?.sudoPassword || secrets?.sudoSameAsPassword) {
+      const existing = d.vault.getSecret(identity.vaultRef);
+      const next: VaultEntry = { ...existing };
+      if (secrets.password) next.password = secrets.password;
+      if (secrets.sudoSameAsPassword) {
+        delete next.sudoPassword;
+      } else if (secrets.sudoPassword) {
+        next.sudoPassword = secrets.sudoPassword;
+      }
+      await d.vault.setSecret(identity.vaultRef, next);
+    }
+  });
+  ipcMain.handle(IPC.IDENTITIES_DELETE, async (_e, id: number) => {
+    const identity = d.identitiesRepo.getIdentity(id);
+    if (!identity) return;
+    await d.vault.deleteSecret(identity.vaultRef);
+    d.identitiesRepo.deleteIdentity(id);
+  });
+  ipcMain.handle(IPC.IDENTITIES_GET_CREDENTIALS, (_e, id: number): IdentityCredentials => {
+    const identity = d.identitiesRepo.getIdentity(id);
+    if (!identity) throw new Error('identity not found');
+    const secret = d.vault.getSecret(identity.vaultRef);
+    return {
+      username: identity.username,
+      password: secret.password ?? '',
+      sudoPassword: secret.sudoPassword ?? '',
+    };
+  });
 
   // folders
   ipcMain.handle(IPC.FOLDERS_LIST, () => d.repo.listFolders());

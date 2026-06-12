@@ -1,6 +1,6 @@
 import { contextBridge, ipcRenderer } from 'electron';
 import { IPC } from '@shared/constants';
-import { Vm, VmInput, Folder, VaultEntry, SessionState, ToastPayload, PromptType, LocalSelection, RemoteEntry, TransferStartRequest, TransferRecord, TransferProgressEvent, TransferLogEvent, TransferToastPayload, VmConnectionTestResult, AppSettings, AppSettingsPatch, TouchIdStatus, UpdateCheckResult } from '@shared/types';
+import { Vm, VmInput, Folder, VaultEntry, SessionState, ToastPayload, PromptType, LocalSelection, RemoteEntry, TransferStartRequest, TransferRecord, TransferProgressEvent, TransferLogEvent, TransferToastPayload, VmConnectionTestResult, AppSettings, AppSettingsPatch, TouchIdStatus, UpdateCheckResult, Identity, IdentityInput, IdentityCredentials, IdentitySecrets, IdentitySecretsPatch } from '@shared/types';
 import type { HostsExportResult, HostsImportResult, HostsExportRequest } from '@shared/hosts-export';
 
 const api = {
@@ -37,6 +37,16 @@ const api = {
       ipcRenderer.invoke(IPC.VMS_TEST_CONNECTION, input, secret),
     moveToFolder: (vmId: number, folderId: number) =>
       ipcRenderer.invoke(IPC.VMS_MOVE_TO_FOLDER, vmId, folderId),
+  },
+  identities: {
+    list: (): Promise<Identity[]> => ipcRenderer.invoke(IPC.IDENTITIES_LIST),
+    create: (input: IdentityInput, secrets: IdentitySecrets): Promise<Identity> =>
+      ipcRenderer.invoke(IPC.IDENTITIES_CREATE, input, secrets),
+    update: (id: number, input: IdentityInput, secrets?: IdentitySecretsPatch): Promise<void> =>
+      ipcRenderer.invoke(IPC.IDENTITIES_UPDATE, id, input, secrets),
+    delete: (id: number): Promise<void> => ipcRenderer.invoke(IPC.IDENTITIES_DELETE, id),
+    getCredentials: (id: number): Promise<IdentityCredentials> =>
+      ipcRenderer.invoke(IPC.IDENTITIES_GET_CREDENTIALS, id),
   },
   folders: {
     list: (): Promise<Folder[]> => ipcRenderer.invoke(IPC.FOLDERS_LIST),
