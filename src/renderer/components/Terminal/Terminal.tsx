@@ -207,7 +207,6 @@ export function Terminal({ sessionId, active }: Props) {
 
   return (
     <div
-      ref={ref}
       style={{
         position: 'absolute',
         inset: 0,
@@ -215,6 +214,9 @@ export function Terminal({ sessionId, active }: Props) {
         background: resolveTerminalTheme(settings.theme).background,
         display: active ? 'block' : 'none',
       }}
-    />
+    >
+      {/* FitAddon measures the mount element's client size; padding must live on a parent. */}
+      <div ref={ref} style={{ width: '100%', height: '100%' }} />
+    </div>
   );
 }
