@@ -62,12 +62,13 @@ jobs:
             artifact_paths: |
               release/*.dmg
               release/*.blockmap
-          - name: Linux (x64 AppImage)
+          - name: Linux (x64 deb + rpm)
             os: ubuntu-latest
-            electron_args: --linux AppImage --x64
-            artifact_name: vssh-linux-x64-appimage
+            electron_args: --linux deb rpm --x64
+            artifact_name: vssh-linux-x64-packages
             artifact_paths: |
-              release/*.AppImage
+              release/*.deb
+              release/*.rpm
               release/*.blockmap
           - name: Windows (x64 NSIS)
             # Pin to VS 2022 — windows-latest ships VS 2026 (v18) which @electron/rebuild
@@ -100,7 +101,7 @@ jobs:
 
       - name: Install build tools (Linux)
         if: runner.os == 'Linux'
-        run: sudo apt-get update && sudo apt-get install -y build-essential python3
+        run: sudo apt-get update && sudo apt-get install -y build-essential python3 rpm
 
       - name: Install librsvg (for icon build)
         if: runner.os == 'macOS'
@@ -234,10 +235,13 @@ jobs:
             ## Install
 
             - **macOS (Apple Silicon)**: download the `.dmg`, open it, then drag **vssh** to Applications.
-            - **Linux (x64)**: download the `.AppImage`, then:
+            - **Linux (x64, Debian/Ubuntu)**: download the `.deb`, then:
               ```bash
-              chmod +x vssh-*.AppImage
-              ./vssh-*.AppImage
+              sudo apt install ./vssh_*_amd64.deb
+              ```
+            - **Linux (x64, Fedora/RHEL)**: download the `.rpm`, then:
+              ```bash
+              sudo dnf install ./vssh-*.x86_64.rpm
               ```
             - **Windows (x64)**: download and run the `.exe` installer.
 

@@ -22,8 +22,16 @@ mac:
   identity: null
   gatekeeperAssess: false
 linux:
-  target: AppImage
+  target:
+    - deb
+    - rpm
   icon: build/icon.png
+  category: Development
+  maintainer: Srinivas Mannem
+  synopsis: SSH client with encrypted credential vault
+  description: Termius-alternative SSH client with encrypted credential vault and automatic password-prompt detection
+  desktop:
+    StartupWMClass: vssh
 win:
   target: nsis
   # Keep a single source icon; electron-builder can derive Windows resources
