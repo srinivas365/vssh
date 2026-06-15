@@ -17,6 +17,7 @@ import { useUiStore } from '../state/ui-store';
 import { useVaultStore } from '../state/vault-store';
 import { useTransfersStore } from '../state/transfers-store';
 import { reconnectTab } from '../connect-vm';
+import { getPreferredPtySize } from '../components/Terminal/terminal-fit';
 import { Vm } from '@shared/types';
 
 type View = 'hosts' | 'identities' | 'terminal' | 'transfers' | 'settings';
@@ -96,7 +97,8 @@ export function Main() {
 
   async function openLocalTerminal() {
     try {
-      const sessionId = await window.api.session.startLocal(80, 24);
+      const { cols, rows } = getPreferredPtySize();
+      const sessionId = await window.api.session.startLocal(cols, rows);
       addTab({ sessionId, vmId: null, label: 'Local', state: 'connected' });
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
@@ -200,7 +202,8 @@ export function Main() {
               <Terminal
                 key={t.sessionId}
                 sessionId={t.sessionId}
-                active={view === 'terminal' && t.sessionId === activeTabId}
+                isActiveTab={t.sessionId === activeTabId}
+                terminalViewVisible={view === 'terminal'}
               />
             ))}
             {/* Hosts page overlays the terminal stack when active. */}

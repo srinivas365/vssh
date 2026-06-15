@@ -76,7 +76,8 @@ Working across a fleet of VMs means typing — or worse, pasting — the same pa
 Grab the latest asset for your OS from the [Releases page](https://github.com/srinivas365/vssh/releases/latest):
 
 - **macOS (Apple Silicon):** `vssh-<version>-arm64.dmg`
-- **Linux (x64):** `vssh-<version>.AppImage`
+- **Linux (x64, Debian/Ubuntu):** `vssh_<version>_amd64.deb`
+- **Linux (x64, Fedora/RHEL):** `vssh-<version>.x86_64.rpm`
 - **Windows (x64):** `vssh*Setup*.exe`
 
 Install:
@@ -86,11 +87,15 @@ Install:
      ```bash
      sudo xattr -cr /Applications/vssh.app
      ```
-2. **Linux** — mark the AppImage executable and run it:
+2. **Linux** — install the package for your distro:
    ```bash
-   chmod +x vssh-*.AppImage
-   ./vssh-*.AppImage
+   # Debian/Ubuntu
+   sudo apt install ./vssh_*_amd64.deb
+
+   # Fedora/RHEL
+   sudo dnf install ./vssh-*.x86_64.rpm
    ```
+   Then launch **vssh** from your applications menu or run `vssh` in a terminal.
 3. **Windows** — run the `.exe` installer.
 
 > **macOS note:** Gatekeeper may block unsigned apps downloaded from the internet with _"vssh is damaged and can't be opened"_. The `xattr` command above removes the quarantine marker.
@@ -190,7 +195,7 @@ The renderer never receives plaintext secrets. When a prompt is detected, the ma
 | Build | Vite (renderer), tsc + tsc-alias (main), esbuild (preload) |
 | Native | better-sqlite3, argon2, node-pty |
 | Tests | Vitest (unit), Playwright (E2E driving Electron) |
-| Packaging | electron-builder → DMG (macOS), AppImage (Linux), NSIS `.exe` (Windows) |
+| Packaging | electron-builder → DMG (macOS), `.deb` / `.rpm` (Linux), NSIS `.exe` (Windows) |
 | CI | GitHub Actions on Ubuntu (test + E2E) + release builds on macOS, Linux, and Windows |
 
 ## Development
@@ -280,7 +285,7 @@ git push origin v0.2.2
 
 GitHub Actions:
 1. Builds a macOS Apple Silicon DMG (`*.dmg`) on `macos-14`
-2. Builds a Linux x64 AppImage (`*.AppImage`) on `ubuntu-latest`
+2. Builds Linux x64 `.deb` and `.rpm` packages on `ubuntu-latest`
 3. Builds a Windows x64 NSIS installer (`*.exe`) on `windows-latest`
 4. Creates a GitHub Release at `/releases/tag/v0.2.2` with those assets attached and auto-generated notes
 

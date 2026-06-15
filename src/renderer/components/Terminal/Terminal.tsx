@@ -5,10 +5,21 @@ import '@xterm/xterm/css/xterm.css';
 import type { ThemeName } from '@shared/types';
 import { useSettingsStore } from '../../state/settings-store';
 import { attachTerminalClipboard } from './terminal-clipboard';
+import {
+  clearPtySync,
+  debounce,
+  fitAndSyncPty,
+  scheduleFitUntilReady,
+  syncPtySize,
+} from './terminal-fit';
+import { createTerminalOutputWriter } from './terminal-output';
 
 interface Props {
   sessionId: string;
-  active: boolean;
+  /** Whether this tab is the selected terminal tab. */
+  isActiveTab: boolean;
+  /** Whether the terminal view layer is visible (not hosts/settings/etc.). */
+  terminalViewVisible: boolean;
 }
 
 const TERMINAL_THEMES: Record<ThemeName, ITheme> = {
@@ -156,67 +167,101 @@ function resolveTerminalTheme(theme: ThemeName): ITheme {
   return TERMINAL_THEMES[theme] ?? TERMINAL_THEMES.light;
 }
 
-export function Terminal({ sessionId, active }: Props) {
-  const ref = useRef<HTMLDivElement>(null);
+export function Terminal({ sessionId, isActiveTab, terminalViewVisible }: Props) {
+  const shellRef = useRef<HTMLDivElement>(null);
+  const mountRef = useRef<HTMLDivElement>(null);
   const xtermRef = useRef<XTerm | null>(null);
   const fitRef = useRef<FitAddon | null>(null);
+  const focusedRef = useRef(isActiveTab && terminalViewVisible);
   const settings = useSettingsStore((s) => s.settings);
+  const focused = isActiveTab && terminalViewVisible;
 
   useEffect(() => {
-    if (!ref.current) return;
+    focusedRef.current = focused;
+  }, [focused]);
+
+  useEffect(() => {
+    if (!mountRef.current || !shellRef.current) return;
     const term = new XTerm({
       fontFamily: settings.terminalFontFamily,
       fontSize: settings.terminalFontSize,
       theme: resolveTerminalTheme(settings.theme),
+      scrollback: 5000,
     });
     const fit = new FitAddon();
     term.loadAddon(fit);
-    term.open(ref.current);
-    fit.fit();
+    term.open(mountRef.current);
     attachTerminalClipboard(term);
     xtermRef.current = term;
     fitRef.current = fit;
 
     term.onData((data) => { void window.api.session.input(sessionId, data); });
-    term.onResize(({ cols, rows }) => { void window.api.session.resize(sessionId, cols, rows); });
-
-    window.api.session.onOutput((sid, chunk) => {
-      if (sid === sessionId) term.write(chunk);
+    term.onResize(({ cols, rows }) => {
+      syncPtySize(term, sessionId);
+      term.refresh(0, rows - 1);
     });
 
-    const ro = new ResizeObserver(() => fit.fit());
-    ro.observe(ref.current);
+    const writeOutput = createTerminalOutputWriter(term);
+    const unsubscribeOutput = window.api.session.onOutput((sid, chunk) => {
+      if (sid === sessionId) writeOutput(chunk);
+    });
 
-    return () => { ro.disconnect(); term.dispose(); xtermRef.current = null; };
+    const fitTerminal = (force = false) => fitAndSyncPty(term, fit, sessionId, { force });
+    const cancelInitialFit = scheduleFitUntilReady(term, fit, sessionId);
+
+    const debouncedFit = debounce(() => fitTerminal(false), 50);
+    const ro = new ResizeObserver(() => debouncedFit());
+    ro.observe(shellRef.current);
+
+    const onWindowResize = debounce(() => fitTerminal(false), 100);
+    window.addEventListener('resize', onWindowResize);
+
+    return () => {
+      cancelInitialFit();
+      ro.disconnect();
+      window.removeEventListener('resize', onWindowResize);
+      unsubscribeOutput();
+      writeOutput.dispose();
+      clearPtySync(sessionId);
+      term.dispose();
+      xtermRef.current = null;
+      fitRef.current = null;
+    };
   }, [sessionId]);
 
   useEffect(() => {
-    if (!xtermRef.current) return;
+    if (!xtermRef.current || !fitRef.current) return;
     xtermRef.current.options.fontFamily = settings.terminalFontFamily;
     xtermRef.current.options.fontSize = settings.terminalFontSize;
     xtermRef.current.options.theme = resolveTerminalTheme(settings.theme);
-    fitRef.current?.fit();
-  }, [settings]);
+    fitAndSyncPty(xtermRef.current, fitRef.current, sessionId, { force: true });
+  }, [settings, sessionId]);
 
   useEffect(() => {
-    if (active && fitRef.current) {
-      requestAnimationFrame(() => fitRef.current?.fit());
-      xtermRef.current?.focus();
-    }
-  }, [active]);
+    if (!focused || !fitRef.current || !xtermRef.current) return;
+    requestAnimationFrame(() => {
+      if (!fitRef.current || !xtermRef.current) return;
+      fitAndSyncPty(xtermRef.current, fitRef.current, sessionId, { force: true });
+      xtermRef.current.focus();
+    });
+  }, [focused, sessionId]);
 
   return (
     <div
+      ref={shellRef}
       style={{
         position: 'absolute',
         inset: 0,
         padding: 8,
         background: resolveTerminalTheme(settings.theme).background,
-        display: active ? 'block' : 'none',
+        // Keep layout size when hidden so fit/PTY stay aligned across tab/view switches.
+        visibility: focused ? 'visible' : 'hidden',
+        pointerEvents: focused ? 'auto' : 'none',
+        zIndex: isActiveTab ? 1 : 0,
       }}
     >
       {/* FitAddon measures the mount element's client size; padding must live on a parent. */}
-      <div ref={ref} style={{ width: '100%', height: '100%' }} />
+      <div ref={mountRef} style={{ width: '100%', height: '100%' }} />
     </div>
   );
 }

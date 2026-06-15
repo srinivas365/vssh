@@ -1,12 +1,14 @@
 import { Vm } from '@shared/types';
 import type { Tab } from './state/sessions-store';
+import { getPreferredPtySize } from './components/Terminal/terminal-fit';
 
 type AddTab = (tab: Tab) => void;
 type ReplaceTabSession = (oldSessionId: string, newSessionId: string) => void;
 
 export async function connectVm(vm: Vm, addTab: AddTab, onSuccess?: () => void): Promise<void> {
   try {
-    const sessionId = await window.api.session.start(vm.id, 80, 24);
+    const { cols, rows } = getPreferredPtySize();
+    const sessionId = await window.api.session.start(vm.id, cols, rows);
     addTab({ sessionId, vmId: vm.id, label: vm.label, state: 'connecting' });
     onSuccess?.();
   } catch (error) {
@@ -19,9 +21,10 @@ export async function connectVm(vm: Vm, addTab: AddTab, onSuccess?: () => void):
 
 export async function reconnectTab(tab: Tab, replaceTabSession: ReplaceTabSession): Promise<void> {
   try {
+    const { cols, rows } = getPreferredPtySize();
     const sessionId = tab.vmId !== null
-      ? await window.api.session.start(tab.vmId, 80, 24)
-      : await window.api.session.startLocal(80, 24);
+      ? await window.api.session.start(tab.vmId, cols, rows)
+      : await window.api.session.startLocal(cols, rows);
     replaceTabSession(tab.sessionId, sessionId);
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);

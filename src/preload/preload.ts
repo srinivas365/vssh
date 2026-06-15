@@ -65,8 +65,11 @@ const api = {
     close: (sessionId: string) => ipcRenderer.invoke(IPC.SESSION_CLOSE, sessionId),
     pastePassword: (sessionId: string, type: PromptType) =>
       ipcRenderer.invoke(IPC.PASTE_PASSWORD, sessionId, type),
-    onOutput: (cb: (sessionId: string, chunk: string) => void) =>
-      ipcRenderer.on(IPC.SESSION_OUTPUT, (_e, sid, c) => cb(sid, c)),
+    onOutput: (cb: (sessionId: string, chunk: string) => void) => {
+      const handler = (_e: Electron.IpcRendererEvent, sid: string, c: string) => cb(sid, c);
+      ipcRenderer.on(IPC.SESSION_OUTPUT, handler);
+      return () => ipcRenderer.removeListener(IPC.SESSION_OUTPUT, handler);
+    },
     onState: (cb: (state: SessionState) => void) =>
       ipcRenderer.on(IPC.SESSION_STATE, (_e, s) => cb(s)),
     onToast: (cb: (toast: ToastPayload) => void) =>
