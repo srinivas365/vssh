@@ -18,7 +18,8 @@ import { useVaultStore } from '../state/vault-store';
 import { useTransfersStore } from '../state/transfers-store';
 import { reconnectTab } from '../connect-vm';
 import { getPreferredPtySize } from '../components/Terminal/terminal-fit';
-import { Vm } from '@shared/types';
+import { Vm, SshSuggestion } from '@shared/types';
+import { sshSuggestionKey } from '@shared/parse-ssh-command';
 
 type View = 'hosts' | 'identities' | 'terminal' | 'transfers' | 'settings';
 
@@ -31,11 +32,18 @@ export function Main() {
   const [quickOpen, setQuickOpen] = useState(false);
   const [view, setView] = useState<View>('hosts');
   const [transferWizard, setTransferWizard] = useState<{ vm: Vm; direction: TransferDirection } | null>(null);
+  const [sshSuggestion, setSshSuggestion] = useState<SshSuggestion | null>(null);
 
   useEffect(() => {
     window.api.session.onState((s) => updateState(s));
     window.api.session.onToast((t) => pushToast(t));
   }, [updateState, pushToast]);
+
+  useEffect(() => {
+    return window.api.session.onSshSuggest((suggestion) => {
+      setSshSuggestion(suggestion);
+    });
+  }, []);
 
   // Auto-switch to terminal view when a new session is started, and back to
   // hosts when the last terminal closes.
@@ -104,6 +112,21 @@ export function Main() {
       const message = error instanceof Error ? error.message : String(error);
       window.alert(`Failed to start local terminal.\n\n${message}`);
     }
+  }
+
+  function dismissSshSuggestion() {
+    setSshSuggestion(null);
+  }
+
+  function sshSuggestionPrefill(suggestion: SshSuggestion) {
+    return {
+      label: suggestion.host,
+      host: suggestion.host,
+      port: suggestion.port,
+      username: suggestion.username,
+      keyPath: suggestion.keyPath,
+      authMethod: suggestion.keyPath ? 'key' as const : 'password' as const,
+    };
   }
 
   return (
@@ -227,9 +250,23 @@ export function Main() {
             </div>
           </div>
         </main>
+        {sshSuggestion && (
+          <VmEditForm
+            key={sshSuggestionKey(sshSuggestion)}
+            initial={null}
+            embedded
+            prefill={sshSuggestionPrefill(sshSuggestion)}
+            onClose={dismissSshSuggestion}
+          />
+        )}
       </div>
 
-      {editing !== undefined && !cloning && <VmEditForm initial={editing} onClose={() => setEditing(undefined)} />}
+      {editing !== undefined && !cloning && (
+        <VmEditForm
+          initial={editing}
+          onClose={() => setEditing(undefined)}
+        />
+      )}
       {cloning && <VmEditForm initial={null} cloneFrom={cloning} onClose={() => setCloning(null)} />}
       {quickOpen && <QuickConnect onClose={() => setQuickOpen(false)} />}
       {transferWizard && (

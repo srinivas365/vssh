@@ -119,6 +119,23 @@ export interface SessionState {
   startedAt: number;
 }
 
+export interface SshSuggestion {
+  sessionId: string;
+  username: string;
+  host: string;
+  port: number;
+  keyPath: string | null;
+}
+
+export interface VmPrefill {
+  label: string;
+  host: string;
+  port: number;
+  username: string;
+  keyPath: string | null;
+  authMethod: AuthMethod;
+}
+
 export type TransferDirection = 'upload' | 'download';
 export type TransferEngineName = 'rsync' | 'sftp';
 export type TransferStatus = 'preparing' | 'running' | 'paused' | 'stopped' | 'succeeded' | 'failed';

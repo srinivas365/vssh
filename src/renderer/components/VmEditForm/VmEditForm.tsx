@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Vm, VmInput, VaultEntry, AuthMethod, VmConnectionTestResult } from '@shared/types';
+import { X } from 'lucide-react';
+import { Vm, VmInput, VaultEntry, AuthMethod, VmConnectionTestResult, VmPrefill } from '@shared/types';
 import { buildCloneInput } from '@shared/vm-clone';
 import { useVmsStore } from '../../state/vms-store';
 import { useIdentitiesStore } from '../../state/identities-store';
@@ -17,12 +18,14 @@ const NEW_FOLDER_VALUE = '__new__';
 interface Props {
   initial: Vm | null;
   cloneFrom?: Vm;
+  prefill?: VmPrefill;
+  embedded?: boolean;
   onClose: () => void;
 }
 
 const NO_IDENTITY = '';
 
-export function VmEditForm({ initial, cloneFrom, onClose }: Props) {
+export function VmEditForm({ initial, cloneFrom, prefill, embedded = false, onClose }: Props) {
   const { create, clone, update, folders, createFolder } = useVmsStore();
   const { identities, refresh: refreshIdentities } = useIdentitiesStore();
   const draft = cloneFrom ? buildCloneInput(cloneFrom) : null;
@@ -33,12 +36,14 @@ export function VmEditForm({ initial, cloneFrom, onClose }: Props) {
   const [creatingFolder, setCreatingFolder] = useState(false);
   const [newFolderName, setNewFolderName] = useState('');
 
-  const [label, setLabel] = useState(draft?.label ?? initial?.label ?? '');
-  const [host, setHost] = useState(draft?.host ?? initial?.host ?? '');
-  const [port, setPort] = useState(draft?.port ?? initial?.port ?? 22);
-  const [username, setUsername] = useState(draft?.username ?? initial?.username ?? '');
-  const [authMethod, setAuthMethod] = useState<AuthMethod>(draft?.authMethod ?? initial?.authMethod ?? 'password');
-  const [keyPath, setKeyPath] = useState(draft?.keyPath ?? initial?.keyPath ?? '');
+  const [label, setLabel] = useState(draft?.label ?? initial?.label ?? prefill?.label ?? '');
+  const [host, setHost] = useState(draft?.host ?? initial?.host ?? prefill?.host ?? '');
+  const [port, setPort] = useState(draft?.port ?? initial?.port ?? prefill?.port ?? 22);
+  const [username, setUsername] = useState(draft?.username ?? initial?.username ?? prefill?.username ?? '');
+  const [authMethod, setAuthMethod] = useState<AuthMethod>(
+    draft?.authMethod ?? initial?.authMethod ?? prefill?.authMethod ?? 'password',
+  );
+  const [keyPath, setKeyPath] = useState(draft?.keyPath ?? initial?.keyPath ?? prefill?.keyPath ?? '');
   const [password, setPassword] = useState('');
   const [sudoPassword, setSudoPassword] = useState('');
   const [keyPassphrase, setKeyPassphrase] = useState('');
@@ -150,13 +155,20 @@ export function VmEditForm({ initial, cloneFrom, onClose }: Props) {
     }
   }
 
-  return (
-    <div className="modal-backdrop" onClick={onClose}>
-      <form className="vm-form" onClick={(e) => e.stopPropagation()} onSubmit={submit}>
-        <h2>{cloneFrom ? 'Clone host' : initial ? 'Edit VM' : 'New VM'}</h2>
-        {cloneFrom && (
-          <p className="vm-form-hint">Credentials are copied from {cloneFrom.label}. Adjust the host if needed.</p>
-        )}
+  const title = cloneFrom ? 'Clone host' : initial ? 'Edit VM' : embedded ? 'New host' : 'New VM';
+
+  const form = (
+    <form
+      className={`vm-form${embedded ? ' vm-form-embedded' : ''}`}
+      onClick={(e) => e.stopPropagation()}
+      onSubmit={submit}>
+      {!embedded && <h2>{title}</h2>}
+      {cloneFrom && (
+        <p className="vm-form-hint">Credentials are copied from {cloneFrom.label}. Adjust the host if needed.</p>
+      )}
+      {embedded && (
+        <p className="vm-form-hint">Detected from your local terminal SSH command. Edit and save below.</p>
+      )}
         <label>
           Workspace
           <Select<string>
@@ -240,11 +252,35 @@ export function VmEditForm({ initial, cloneFrom, onClose }: Props) {
             </p>
           )}
         </div>
-        <div className="form-actions">
-          <button type="button" onClick={onClose}>Cancel</button>
+        <div className={`form-actions${embedded ? ' form-actions-stacked' : ''}`}>
+          <button type="button" onClick={onClose}>{embedded ? 'Dismiss' : 'Cancel'}</button>
           <button type="submit">{cloneFrom ? 'Clone' : initial ? 'Save' : 'Create'}</button>
         </div>
       </form>
+  );
+
+  if (embedded) {
+    return (
+      <aside className="vm-form-panel" role="complementary" aria-labelledby="vm-form-panel-title">
+        <div className="vm-form-panel-header">
+          <h2 id="vm-form-panel-title">{title}</h2>
+          <button
+            type="button"
+            className="vm-form-panel-close"
+            onClick={onClose}
+            title="Dismiss"
+            aria-label="Dismiss">
+            <X size={14} strokeWidth={2.2} />
+          </button>
+        </div>
+        <div className="vm-form-panel-body">{form}</div>
+      </aside>
+    );
+  }
+
+  return (
+    <div className="modal-backdrop" onClick={onClose}>
+      {form}
     </div>
   );
 }

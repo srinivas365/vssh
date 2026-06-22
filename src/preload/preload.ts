@@ -1,6 +1,6 @@
 import { contextBridge, ipcRenderer } from 'electron';
 import { IPC } from '@shared/constants';
-import { Vm, VmInput, Folder, VaultEntry, SessionState, ToastPayload, PromptType, LocalSelection, RemoteEntry, TransferStartRequest, TransferRecord, TransferProgressEvent, TransferLogEvent, TransferToastPayload, VmConnectionTestResult, AppSettings, AppSettingsPatch, TouchIdStatus, UpdateCheckResult, Identity, IdentityInput, IdentityCredentials, IdentitySecrets, IdentitySecretsPatch } from '@shared/types';
+import { Vm, VmInput, Folder, VaultEntry, SessionState, ToastPayload, PromptType, LocalSelection, RemoteEntry, TransferStartRequest, TransferRecord, TransferProgressEvent, TransferLogEvent, TransferToastPayload, VmConnectionTestResult, AppSettings, AppSettingsPatch, TouchIdStatus, UpdateCheckResult, Identity, IdentityInput, IdentityCredentials, IdentitySecrets, IdentitySecretsPatch, SshSuggestion } from '@shared/types';
 import type { HostsExportResult, HostsImportResult, HostsExportRequest } from '@shared/hosts-export';
 
 const api = {
@@ -74,6 +74,11 @@ const api = {
       ipcRenderer.on(IPC.SESSION_STATE, (_e, s) => cb(s)),
     onToast: (cb: (toast: ToastPayload) => void) =>
       ipcRenderer.on(IPC.SESSION_TOAST, (_e, t) => cb(t)),
+    onSshSuggest: (cb: (suggestion: SshSuggestion) => void) => {
+      const handler = (_e: Electron.IpcRendererEvent, suggestion: SshSuggestion) => cb(suggestion);
+      ipcRenderer.on(IPC.SESSION_SSH_SUGGEST, handler);
+      return () => { ipcRenderer.removeListener(IPC.SESSION_SSH_SUGGEST, handler); };
+    },
   },
   transfer: {
     pickUploadSource: (): Promise<LocalSelection | null> => ipcRenderer.invoke(IPC.TRANSFER_PICK_UPLOAD_SOURCE),

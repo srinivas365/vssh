@@ -9,10 +9,12 @@ import { IdentitiesRepo } from './db/identities-repo';
 import { SessionManager } from './ssh/session-manager';
 import { SshSession } from './ssh/session';
 import { LocalSession } from './ssh/local-session';
+import { LocalSshOutputDetector } from './ssh/local-ssh-detector';
 import { ClipboardService } from './clipboard';
 import { logger } from './logger';
-import { Vm, VmInput, VaultEntry, Folder, PromptType, ToastPayload, Identity, IdentityInput, IdentityCredentials, IdentitySecrets, IdentitySecretsPatch } from '@shared/types';
+import { Vm, VmInput, VaultEntry, Folder, PromptType, ToastPayload, Identity, IdentityInput, IdentityCredentials, IdentitySecrets, IdentitySecretsPatch, SshSuggestion } from '@shared/types';
 import { decidePromptAction, pickSecretByPrompt } from './ssh/prompt-action';
+import { SshInputTracker, vmMatchesSshCommand, ParsedSshCommand } from '@shared/parse-ssh-command';
 import type { TransferManager } from './transfer/transfer-manager';
 import { RemoteBrowserService } from './transfer/remote-browser-service';
 import { basenameForPath } from './transfer/path-utils';
@@ -50,6 +52,43 @@ interface Deps {
 }
 
 export function registerIpc(d: Deps): void {
+  const localSshTrackers = new Map<string, SshInputTracker>();
+  const localSshOutputDetectors = new Map<string, LocalSshOutputDetector>();
+
+  function maybeSuggestSsh(sessionId: string, parsed: ParsedSshCommand): void {
+    const alreadySaved = d.repo.listVms().some((vm) => vmMatchesSshCommand(vm, parsed));
+    if (alreadySaved) return;
+
+    const suggestion: SshSuggestion = { sessionId, ...parsed };
+    d.mainWindow()?.webContents.send(IPC.SESSION_SSH_SUGGEST, suggestion);
+  }
+
+  function trackLocalSshInput(sessionId: string, data: string): void {
+    const tracker = localSshTrackers.get(sessionId);
+    if (!tracker) return;
+
+    if (/\r|\n/.test(data)) {
+      localSshOutputDetectors.get(sessionId)?.resetForNewCommand();
+    }
+
+    const parsed = tracker.feed(data);
+    if (!parsed) return;
+    maybeSuggestSsh(sessionId, parsed);
+  }
+
+  function registerLocalSession(session: LocalSession): void {
+    const defaultUsername = process.env.USER || process.env.USERNAME || '';
+    localSshTrackers.set(session.id, new SshInputTracker(defaultUsername));
+    localSshOutputDetectors.set(
+      session.id,
+      new LocalSshOutputDetector((parsed) => maybeSuggestSsh(session.id, parsed)),
+    );
+    session.on('exit', () => {
+      localSshTrackers.delete(session.id);
+      localSshOutputDetectors.delete(session.id);
+    });
+  }
+
   // vault
   ipcMain.handle(IPC.VAULT_STATE, () => d.vault.state());
   ipcMain.handle(IPC.VAULT_INIT, async (_e, pw: string) => { await d.vault.init(pw); });
@@ -251,8 +290,10 @@ export function registerIpc(d: Deps): void {
       throw new Error(`Failed to start local terminal: ${reason}`);
     }
     d.sessions.register(session);
+    registerLocalSession(session);
 
     session.on('data', (chunk: string) => {
+      localSshOutputDetectors.get(session.id)?.feed(chunk);
       d.mainWindow()?.webContents.send(IPC.SESSION_OUTPUT, session.id, chunk);
     });
     session.on('state', (state) => {
@@ -262,8 +303,10 @@ export function registerIpc(d: Deps): void {
     return session.id;
   });
 
-  ipcMain.handle(IPC.SESSION_INPUT, (_e, sessionId: string, data: string) =>
-    d.sessions.write(sessionId, data));
+  ipcMain.handle(IPC.SESSION_INPUT, (_e, sessionId: string, data: string) => {
+    d.sessions.write(sessionId, data);
+    trackLocalSshInput(sessionId, data);
+  });
   ipcMain.handle(IPC.SESSION_RESIZE, (_e, sessionId: string, cols: number, rows: number) =>
     d.sessions.resize(sessionId, cols, rows));
   ipcMain.handle(IPC.SESSION_CLOSE, (_e, sessionId: string) => d.sessions.close(sessionId));

@@ -44,6 +44,7 @@ export const IPC = {
   SESSION_OUTPUT: 'session:output',           // main → renderer
   SESSION_STATE: 'session:state',             // main → renderer
   SESSION_TOAST: 'session:toast',             // main → renderer
+  SESSION_SSH_SUGGEST: 'session:ssh-suggest', // main → renderer
   // transfers
   TRANSFER_PICK_UPLOAD_SOURCE: 'transfer:pick-upload-source',
   TRANSFER_PICK_DOWNLOAD_DESTINATION: 'transfer:pick-download-destination',
