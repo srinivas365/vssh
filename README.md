@@ -364,3 +364,14 @@ All commits use [Conventional Commits](https://www.conventionalcommits.org/) (`f
 ## Design and planning
 
 This project was built from a [design spec](docs/superpowers/specs/2026-06-01-termius-alternative-design.md) and [implementation plan](docs/superpowers/plans/2026-06-01-termius-alternative.md) under the [superpowers](https://github.com/anthropics/claude-code) workflow — both committed alongside the code for the curious.
+
+
+## Star History
+
+<a href="https://www.star-history.com/?repos=srinivas365%2Fvssh&type=date&legend=top-left">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=srinivas365/vssh&type=date&theme=dark&legend=top-left" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=srinivas365/vssh&type=date&legend=top-left" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=srinivas365/vssh&type=date&legend=top-left" />
+ </picture>
+</a>
