@@ -2,6 +2,7 @@ import { test, expect, _electron as electron, ElectronApplication, Page } from '
 import path from 'node:path';
 import fs from 'node:fs';
 import os from 'node:os';
+import { electronLaunchArgs } from './electron-args';
 
 const REPO_ROOT = path.resolve(__dirname, '..', '..');
 
@@ -12,7 +13,7 @@ let userDataDir: string;
 test.beforeAll(async () => {
   userDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'vssh-ws-e2e-'));
   app = await electron.launch({
-    args: ['.', `--user-data-dir=${userDataDir}`],
+    args: electronLaunchArgs(['.', `--user-data-dir=${userDataDir}`]),
     cwd: REPO_ROOT,
     env: { ...process.env, NODE_ENV: 'test' },
   });
