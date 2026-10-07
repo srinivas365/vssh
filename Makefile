@@ -99,9 +99,13 @@ rebuild-electron: ## Rebuild native modules for Electron (needed before launchin
 	$(NPM) run rebuild:electron
 
 # ── run / package ──────────────────────────────────────────────────────────
+.PHONY: fix-linux-sandbox
+fix-linux-sandbox: ## Linux dev: setuid on node_modules/electron chrome-sandbox (sudo)
+	bash scripts/fix-linux-electron-sandbox.sh
+
 .PHONY: run
 run: build rebuild-electron macos-keychain ## Build everything and launch Electron
-	npx electron .
+	bash scripts/run-electron.sh .
 
 .PHONY: dmg
 dmg: build rebuild-electron icon macos-keychain ## Build a .dmg installer at release/

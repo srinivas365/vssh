@@ -11,7 +11,7 @@
   "homepage": "https://github.com/srinivas365/vssh",
   "main": "dist/main/index.js",
   "scripts": {
-    "dev": "concurrently -k \"vite\" \"tsc -p tsconfig.main.json -w\" \"esbuild src/preload/preload.ts --bundle --platform=node --target=node20 --format=cjs --external:electron --outfile=dist/preload/preload.js --watch\" \"wait-on tcp:5173 dist/main/index.js dist/preload/preload.js && electron .\"",
+    "dev": "concurrently -k \"vite\" \"tsc -p tsconfig.main.json -w\" \"esbuild src/preload/preload.ts --bundle --platform=node --target=node20 --format=cjs --external:electron --outfile=dist/preload/preload.js --watch\" \"wait-on tcp:5173 dist/main/index.js dist/preload/preload.js && bash scripts/run-electron.sh .\"",
     "build:main": "tsc -p tsconfig.main.json && tsc-alias -p tsconfig.main.json && node scripts/copy-schema.js",
     "build:preload": "esbuild src/preload/preload.ts --bundle --platform=node --target=node20 --format=cjs --external:electron --outfile=dist/preload/preload.js",
     "build:renderer": "vite build",

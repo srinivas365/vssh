@@ -62,7 +62,7 @@ Working across a fleet of VMs means typing — or worse, pasting — the same pa
 ### Terminal
 - **xterm.js sessions** — full scrollback, multiple tabs, per-tab connection status.
 - **Scrollback preserved** — switching between Hosts and Terminal views keeps every session's buffer alive; only visibility toggles.
-- **Windows clipboard** — `Ctrl+C` copies selected text; `Ctrl+V` pastes (terminal-to-terminal or from other apps). Also supports `Ctrl+Shift+C/V` and `Shift+Insert`.
+- **Linux & Windows clipboard** — `Ctrl+C` copies selected text (without selection it sends interrupt to the remote shell); `Ctrl+V` pastes. Also `Ctrl+Shift+C/V`, `Ctrl+Insert` (copy selection), and `Shift+Insert` (paste).
 - **macOS clipboard** — standard `⌘C` / `⌘V` with selection.
 
 ### Productivity
@@ -96,6 +96,15 @@ Install:
    sudo dnf install ./vssh-*.x86_64.rpm
    ```
    Then launch **vssh** from your applications menu or run `vssh` in a terminal.
+
+   **Ubuntu / Debian — app won't start (`chrome-sandbox` error):** Electron needs a setuid sandbox helper. If you see _"The SUID sandbox helper binary was found, but is not configured correctly"_ and a path like `/opt/vssh/chrome-sandbox`, fix permissions (adjust the path if your install prefix differs):
+   ```bash
+   sudo chown root:root /opt/vssh/chrome-sandbox
+   sudo chmod 4755 /opt/vssh/chrome-sandbox
+   ```
+   Reinstalling the `.deb` with `sudo apt install --reinstall ./vssh_*_amd64.deb` usually runs the same setup via the package post-install script; re-check permissions if launch still fails.
+
+   For a one-off test only (weaker sandbox): `vssh --no-sandbox`.
 3. **Windows** — run the `.exe` installer.
 
 > **macOS note:** Gatekeeper may block unsigned apps downloaded from the internet with _"vssh is damaged and can't be opened"_. The `xattr` command above removes the quarantine marker.
@@ -114,7 +123,16 @@ Or just run it without packaging:
 
 ```bash
 make run                # build + launch Electron
+make dev                # hot reload (Vite + watchers)
 ```
+
+On **Linux**, local Electron lives under `node_modules/electron/dist/chrome-sandbox`. If it is not setuid, `make run` / `make dev` automatically pass **`--no-sandbox`** (dev-only). To use the setuid helper instead (closer to a packaged install):
+
+```bash
+make fix-linux-sandbox    # sudo chown/chmod on node_modules chrome-sandbox
+```
+
+Re-run after `npm install` or upgrading Electron if the crash returns.
 
 ## Screenshots
 

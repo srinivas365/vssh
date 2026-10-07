@@ -10,6 +10,16 @@ function isWindows(): boolean {
     || navigator.userAgent.toLowerCase().includes('windows');
 }
 
+function isLinux(): boolean {
+  return navigator.platform.toLowerCase().includes('linux')
+    || navigator.userAgent.toLowerCase().includes('linux');
+}
+
+/** Ctrl-based copy/paste (Windows + Linux). macOS uses ⌘C/⌘V via the system default. */
+export function shouldAttachTerminalClipboardHandler(): boolean {
+  return isWindows() || isLinux();
+}
+
 export function shouldHandleTerminalCopy(
   event: Pick<KeyboardEvent, 'ctrlKey' | 'metaKey' | 'shiftKey' | 'key'>,
   hasSelection: boolean,
@@ -44,7 +54,7 @@ export function attachTerminalClipboard(
   term: Terminal,
   clipboard: TerminalClipboardApi = window.api.clipboard,
 ): void {
-  if (!isWindows()) return;
+  if (!shouldAttachTerminalClipboardHandler()) return;
 
   term.attachCustomKeyEventHandler((event) => {
     if (event.type !== 'keydown') return true;
